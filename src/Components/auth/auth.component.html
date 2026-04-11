@@ -1,0 +1,405 @@
+<!-- auth.component.html -->
+<div class="auth-page">
+
+  <!-- Background layers -->
+  <div class="bg-orb bg-orb--1"></div>
+  <div class="bg-orb bg-orb--2"></div>
+  <div class="bg-grid"></div>
+
+  <div class="card-wrapper">
+
+    <!-- ══════════════════════════════════
+         LEFT PANEL
+    ═══════════════════════════════════ -->
+    <aside class="panel-left">
+      <div class="logo">
+        <div class="logo-icon">🏥</div>
+        <div>
+          <div class="logo-name">MediCare</div>
+          <div class="logo-sub">Health Portal</div>
+        </div>
+      </div>
+
+      <div class="panel-hero">
+        <h1>Your Health,<br>Our Priority</h1>
+        <p>A secure portal connecting doctors and patients for seamless, modern healthcare.</p>
+        <div class="role-pills">
+          <div class="role-pill">
+            <span class="dot dot--doctor"></span> Doctor Access
+          </div>
+          <div class="role-pill">
+            <span class="dot dot--patient"></span> Patient Access
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-num">12k+</div>
+          <div class="stat-label">Doctors</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">180k</div>
+          <div class="stat-label">Patients</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">98%</div>
+          <div class="stat-label">Satisfaction</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══════════════════════════════════
+         RIGHT PANEL
+    ═══════════════════════════════════ -->
+    <section class="panel-right">
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn" [class.active]="activeTab === 'login'"
+          (click)="switchTab('login')">Sign In</button>
+        <button class="tab-btn" [class.active]="activeTab === 'register'"
+          (click)="switchTab('register')">Create Account</button>
+      </div>
+
+      <div class="form-wrap">
+
+        <!-- ───────────────────────────
+             LOGIN
+        ─────────────────────────────── -->
+        <div class="form-section" [class.active]="activeTab === 'login'">
+
+          <h2 class="section-title">Welcome back</h2>
+          <p class="section-sub">Sign in to your healthcare account</p>
+
+          <!-- Role Selector -->
+          <div class="role-selector">
+            <div class="role-card role-card--doctor"
+              [class.selected]="loginRole === 'doctor'"
+              (click)="setLoginRole('doctor')">
+              <span class="role-check" *ngIf="loginRole === 'doctor'">✓</span>
+              <span class="role-icon">👨‍⚕️</span>
+              <span class="role-label">Doctor</span>
+              <span class="role-desc">Medical professional</span>
+            </div>
+            <div class="role-card role-card--patient"
+              [class.selected]="loginRole === 'patient'"
+              (click)="setLoginRole('patient')">
+              <span class="role-check" *ngIf="loginRole === 'patient'">✓</span>
+              <span class="role-icon">🧑‍💼</span>
+              <span class="role-label">Patient</span>
+              <span class="role-desc">Healthcare recipient</span>
+            </div>
+          </div>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
+
+            <!-- Email -->
+            <div class="field" [class.has-error]="isInvalid(loginForm, 'email')">
+              <label>Email Address</label>
+              <div class="field-inner">
+                <span class="field-icon">✉️</span>
+                <input type="email" formControlName="email"
+                  placeholder="you@example.com" autocomplete="email" />
+              </div>
+              <span class="err-msg" *ngIf="isInvalid(loginForm, 'email')">
+                {{ getError(loginForm, 'email') }}
+              </span>
+            </div>
+
+            <!-- Password -->
+            <div class="field" [class.has-error]="isInvalid(loginForm, 'password')">
+              <label>Password</label>
+              <div class="field-inner">
+                <span class="field-icon">🔒</span>
+                <input [type]="showLoginPw ? 'text' : 'password'"
+                  formControlName="password" placeholder="••••••••"
+                  autocomplete="current-password" />
+                <button type="button" class="toggle-pw" (click)="toggleLoginPw()">
+                  {{ showLoginPw ? '🙈' : '👁' }}
+                </button>
+              </div>
+              <span class="err-msg" *ngIf="isInvalid(loginForm, 'password')">
+                {{ getError(loginForm, 'password') }}
+              </span>
+            </div>
+
+            <div class="forgot-row">
+              <a href="#" class="forgot-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn-submit"
+              [class.btn-submit--doctor]="loginRole === 'doctor'"
+              [class.loading]="loginLoading"
+              [disabled]="loginLoading">
+              {{ loginLoading ? 'Signing in…' : 'Sign In' }}
+            </button>
+
+          </form>
+
+          <div class="divider">or continue with</div>
+          <div class="social-row">
+            <button type="button" class="btn-social">
+              <span class="social-icon">🌐</span> Google
+            </button>
+            <button type="button" class="btn-social">
+              <span class="social-icon">📱</span> Apple
+            </button>
+          </div>
+        </div>
+
+        <!-- ───────────────────────────
+             REGISTER
+        ─────────────────────────────── -->
+        <div class="form-section" [class.active]="activeTab === 'register'">
+
+          <h2 class="section-title">Create account</h2>
+          <p class="section-sub">Choose your role to get started</p>
+
+          <!-- Role Selector -->
+          <div class="role-selector">
+            <div class="role-card role-card--doctor"
+              [class.selected]="registerRole === 'doctor'"
+              (click)="setRegisterRole('doctor')">
+              <span class="role-check" *ngIf="registerRole === 'doctor'">✓</span>
+              <span class="role-icon">👨‍⚕️</span>
+              <span class="role-label">Doctor</span>
+              <span class="role-desc">Medical professional</span>
+            </div>
+            <div class="role-card role-card--patient"
+              [class.selected]="registerRole === 'patient'"
+              (click)="setRegisterRole('patient')">
+              <span class="role-check" *ngIf="registerRole === 'patient'">✓</span>
+              <span class="role-icon">🧑‍💼</span>
+              <span class="role-label">Patient</span>
+              <span class="role-desc">Healthcare recipient</span>
+            </div>
+          </div>
+
+          <form [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate>
+
+            <!-- Name row -->
+            <div class="field-row">
+              <div class="field" [class.has-error]="isInvalid(registerForm, 'firstName')">
+                <label>First Name</label>
+                <div class="field-inner">
+                  <span class="field-icon">👤</span>
+                  <input type="text" formControlName="firstName" placeholder="First name" />
+                </div>
+                <span class="err-msg" *ngIf="isInvalid(registerForm, 'firstName')">
+                  {{ getError(registerForm, 'firstName') }}
+                </span>
+              </div>
+              <div class="field" [class.has-error]="isInvalid(registerForm, 'lastName')">
+                <label>Last Name</label>
+                <div class="field-inner">
+                  <span class="field-icon">👤</span>
+                  <input type="text" formControlName="lastName" placeholder="Last name" />
+                </div>
+                <span class="err-msg" *ngIf="isInvalid(registerForm, 'lastName')">
+                  {{ getError(registerForm, 'lastName') }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="field" [class.has-error]="isInvalid(registerForm, 'email')">
+              <label>Email Address</label>
+              <div class="field-inner">
+                <span class="field-icon">✉️</span>
+                <input type="email" formControlName="email" placeholder="you@example.com" />
+              </div>
+              <span class="err-msg" *ngIf="isInvalid(registerForm, 'email')">
+                {{ getError(registerForm, 'email') }}
+              </span>
+            </div>
+
+            <!-- Phone -->
+            <div class="field" [class.has-error]="isInvalid(registerForm, 'phone')">
+              <label>Phone Number</label>
+              <div class="field-inner">
+                <span class="field-icon">📞</span>
+                <input type="tel" formControlName="phone" placeholder="+20 100 000 0000" />
+              </div>
+              <span class="err-msg" *ngIf="isInvalid(registerForm, 'phone')">
+                {{ getError(registerForm, 'phone') }}
+              </span>
+            </div>
+
+            <!-- ── DOCTOR FIELDS ── -->
+            @if (registerRole === 'doctor') {
+              <div class="field-row">
+                <div class="field" [class.has-error]="isInvalid(registerForm, 'specialty')">
+                  <label>Specialty</label>
+                  <div class="field-inner field-inner--no-icon">
+                    <select formControlName="specialty">
+                      <option value="">Select specialty</option>
+                      @for (s of specialties; track s) {
+                        <option [value]="s">{{ s }}</option>
+                      }
+                    </select>
+                  </div>
+                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'specialty')">
+                    {{ getError(registerForm, 'specialty') }}
+                  </span>
+                </div>
+                <div class="field" [class.has-error]="isInvalid(registerForm, 'licenseNumber')">
+                  <label>License Number</label>
+                  <div class="field-inner">
+                    <span class="field-icon">🪪</span>
+                    <input type="text" formControlName="licenseNumber" placeholder="e.g. EG-12345" />
+                  </div>
+                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'licenseNumber')">
+                    {{ getError(registerForm, 'licenseNumber') }}
+                  </span>
+                </div>
+              </div>
+            }
+
+            <!-- ── PATIENT FIELDS ── -->
+            @if (registerRole === 'patient') {
+              <div class="field-row">
+                <div class="field" [class.has-error]="isInvalid(registerForm, 'dateOfBirth')">
+                  <label>Date of Birth</label>
+                  <div class="field-inner">
+                    <span class="field-icon">📅</span>
+                    <input type="date" formControlName="dateOfBirth" />
+                  </div>
+                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'dateOfBirth')">
+                    {{ getError(registerForm, 'dateOfBirth') }}
+                  </span>
+                </div>
+                <div class="field" [class.has-error]="isInvalid(registerForm, 'gender')">
+                  <label>Gender</label>
+                  <div class="field-inner field-inner--no-icon">
+                    <select formControlName="gender">
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Prefer not to say</option>
+                    </select>
+                  </div>
+                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'gender')">
+                    {{ getError(registerForm, 'gender') }}
+                  </span>
+                </div>
+                <!-- Address Fields -->
+
+  <!-- Street -->
+  <div class="field" [class.has-error]="isInvalid(registerForm, 'street')">
+    <label>Street</label>
+    <div class="field-inner">
+      <span class="field-icon">🏠</span>
+      <input type="text" formControlName="street" placeholder="123 Nile Street" />
+    </div>
+    <span class="err-msg" *ngIf="isInvalid(registerForm, 'street')">
+      {{ getError(registerForm, 'street') }}
+    </span>
+  </div>
+
+  <!-- City -->
+  <div class="field" [class.has-error]="isInvalid(registerForm, 'city')">
+    <label>City</label>
+    <div class="field-inner">
+      <span class="field-icon">🏙️</span>
+      <input type="text" formControlName="city" placeholder="Cairo" />
+    </div>
+    <span class="err-msg" *ngIf="isInvalid(registerForm, 'city')">
+      {{ getError(registerForm, 'city') }}
+    </span>
+  </div>
+</div>
+
+<!-- Country -->
+<div class="field" [class.has-error]="isInvalid(registerForm, 'country')">
+  <label>Country</label>
+  <div class="field-inner">
+    <span class="field-icon">🌍</span>
+    <input type="text" formControlName="country" placeholder="Egypt" />
+  </div>
+  <span class="err-msg" *ngIf="isInvalid(registerForm, 'country')">
+    {{ getError(registerForm, 'country') }}
+  </span>
+</div>
+              
+            }
+
+            <!-- Password -->
+            <div class="field" [class.has-error]="isInvalid(registerForm, 'password')">
+              <label>Password</label>
+              <div class="field-inner">
+                <span class="field-icon">🔒</span>
+                <input [type]="showRegisterPw ? 'text' : 'password'"
+                  formControlName="password" placeholder="Create a password" />
+                <button type="button" class="toggle-pw" (click)="toggleRegisterPw()">
+                  {{ showRegisterPw ? '🙈' : '👁' }}
+                </button>
+              </div>
+              @if (registerForm.get('password')?.value) {
+                <div class="pw-strength">
+                  <div class="pw-bars">
+                    <div class="pw-bar" [ngClass]="getPwBarClass(1)"></div>
+                    <div class="pw-bar" [ngClass]="getPwBarClass(2)"></div>
+                    <div class="pw-bar" [ngClass]="getPwBarClass(3)"></div>
+                    <div class="pw-bar" [ngClass]="getPwBarClass(4)"></div>
+                  </div>
+                  <span class="pw-strength-label" [ngClass]="'label-' + pwStrengthClass">
+                    {{ pwStrengthLabel }}
+                  </span>
+                </div>
+              }
+              <span class="err-msg" *ngIf="isInvalid(registerForm, 'password')">
+                {{ getError(registerForm, 'password') }}
+              </span>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="field" [class.has-error]="isInvalid(registerForm, 'confirmPassword')">
+              <label>Confirm Password</label>
+              <div class="field-inner">
+                <span class="field-icon">🔒</span>
+                <input [type]="showConfirmPw ? 'text' : 'password'"
+                  formControlName="confirmPassword" placeholder="Repeat your password" />
+                <button type="button" class="toggle-pw" (click)="toggleConfirmPw()">
+                  {{ showConfirmPw ? '🙈' : '👁' }}
+                </button>
+              </div>
+              <span class="err-msg" *ngIf="isInvalid(registerForm, 'confirmPassword')">
+                {{ getError(registerForm, 'confirmPassword') }}
+              </span>
+            </div>
+
+            <!-- Terms -->
+            <div class="checkbox-row" [class.has-error]="isInvalid(registerForm, 'terms')">
+              <input type="checkbox" id="reg-terms" formControlName="terms" />
+              <label for="reg-terms">
+                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+              </label>
+            </div>
+
+            <button type="submit" class="btn-submit"
+              [class.btn-submit--doctor]="registerRole === 'doctor'"
+              [class.loading]="registerLoading"
+              [disabled]="registerLoading">
+              {{ registerLoading ? 'Creating account…' : 'Create Account' }}
+            </button>
+
+          </form>
+        </div>
+        <!-- /register -->
+
+      </div><!-- /form-wrap -->
+    </section>
+
+  </div><!-- /card-wrapper -->
+
+  <!-- Toast -->
+  <div class="toast"
+    [class.show]="toast.visible"
+    [class.toast--success]="toast.type === 'success'"
+    [class.toast--error]="toast.type === 'error'">
+    <span class="toast-icon">{{ toast.type === 'success' ? '✅' : '⚠️' }}</span>
+    {{ toast.message }}
+  </div>
+
+</div><!-- /auth-page -->
