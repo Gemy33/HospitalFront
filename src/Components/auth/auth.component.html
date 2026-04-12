@@ -1,3 +1,5 @@
+
+
 <!-- auth.component.html -->
 <div class="auth-page">
 
@@ -178,7 +180,7 @@
 
           <form [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate>
 
-            <!-- Name row -->
+            <!-- ── Common: Name Row ── -->
             <div class="field-row">
               <div class="field" [class.has-error]="isInvalid(registerForm, 'firstName')">
                 <label>First Name</label>
@@ -202,7 +204,7 @@
               </div>
             </div>
 
-            <!-- Email -->
+            <!-- ── Common: Email ── -->
             <div class="field" [class.has-error]="isInvalid(registerForm, 'email')">
               <label>Email Address</label>
               <div class="field-inner">
@@ -214,7 +216,7 @@
               </span>
             </div>
 
-            <!-- Phone -->
+            <!-- ── Common: Phone ── -->
             <div class="field" [class.has-error]="isInvalid(registerForm, 'phone')">
               <label>Phone Number</label>
               <div class="field-inner">
@@ -226,16 +228,22 @@
               </span>
             </div>
 
-            <!-- ── DOCTOR FIELDS ── -->
+            <!-- ══════════════════════
+                 DOCTOR-ONLY FIELDS
+            ═══════════════════════ -->
             @if (registerRole === 'doctor') {
+
+              <!-- Specialty + Years of Experience -->
               <div class="field-row">
+
                 <div class="field" [class.has-error]="isInvalid(registerForm, 'specialty')">
                   <label>Specialty</label>
                   <div class="field-inner field-inner--no-icon">
+                    <!-- ✅ value = s.name so mapSpecialityId(name) works correctly -->
                     <select formControlName="specialty">
                       <option value="">Select specialty</option>
-                      @for (s of specialties; track s) {
-                        <option [value]="s">{{ s }}</option>
+                      @for (s of specialties; track s.id) {
+                        <option [value]="s.name">{{ s.name }}</option>
                       }
                     </select>
                   </div>
@@ -243,22 +251,43 @@
                     {{ getError(registerForm, 'specialty') }}
                   </span>
                 </div>
-                <div class="field" [class.has-error]="isInvalid(registerForm, 'licenseNumber')">
-                  <label>License Number</label>
+
+                <!-- ✅ formControlName matches TS: yearsOfExperience (camelCase) -->
+                <div class="field" [class.has-error]="isInvalid(registerForm, 'yearsOfExperience')">
+                  <label>Years of Experience</label>
                   <div class="field-inner">
-                    <span class="field-icon">🪪</span>
-                    <input type="text" formControlName="licenseNumber" placeholder="e.g. EG-12345" />
+                    <span class="field-icon">🏅</span>
+                    <input type="number" formControlName="yearsOfExperience"
+                      placeholder="e.g. 5" min="0" max="60" />
                   </div>
-                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'licenseNumber')">
-                    {{ getError(registerForm, 'licenseNumber') }}
+                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'yearsOfExperience')">
+                    {{ getError(registerForm, 'yearsOfExperience') }}
                   </span>
                 </div>
+
               </div>
+
+              <!-- Bio — full width, outside field-row -->
+              <div class="field" [class.has-error]="isInvalid(registerForm, 'bio')">
+                <label>Bio</label>   <!-- ✅ fixed label (was "Years Of Experience") -->
+                <div class="field-inner">
+                  <textarea formControlName="bio" rows="3" placeholder="Tell patients about yourself, your experience and approach…"></textarea>
+                </div>
+                <span class="err-msg" *ngIf="isInvalid(registerForm, 'bio')">
+                  {{ getError(registerForm, 'bio') }}
+                </span>
+              </div>
+
             }
 
-            <!-- ── PATIENT FIELDS ── -->
+            <!-- ══════════════════════
+                 PATIENT-ONLY FIELDS
+            ═══════════════════════ -->
             @if (registerRole === 'patient') {
+
+              <!-- Date of Birth + Street -->
               <div class="field-row">
+
                 <div class="field" [class.has-error]="isInvalid(registerForm, 'dateOfBirth')">
                   <label>Date of Birth</label>
                   <div class="field-inner">
@@ -269,62 +298,66 @@
                     {{ getError(registerForm, 'dateOfBirth') }}
                   </span>
                 </div>
-                <div class="field" [class.has-error]="isInvalid(registerForm, 'gender')">
-                  <label>Gender</label>
-                  <div class="field-inner field-inner--no-icon">
-                    <select formControlName="gender">
-                      <option value="">Select gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Prefer not to say</option>
-                    </select>
+
+                <div class="field" [class.has-error]="isInvalid(registerForm, 'street')">
+                  <label>Street</label>
+                  <div class="field-inner">
+                    <span class="field-icon">🏠</span>
+                    <input type="text" formControlName="street" placeholder="123 Nile Street" />
                   </div>
-                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'gender')">
-                    {{ getError(registerForm, 'gender') }}
+                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'street')">
+                    {{ getError(registerForm, 'street') }}
                   </span>
                 </div>
-                <!-- Address Fields -->
 
-  <!-- Street -->
-  <div class="field" [class.has-error]="isInvalid(registerForm, 'street')">
-    <label>Street</label>
-    <div class="field-inner">
-      <span class="field-icon">🏠</span>
-      <input type="text" formControlName="street" placeholder="123 Nile Street" />
-    </div>
-    <span class="err-msg" *ngIf="isInvalid(registerForm, 'street')">
-      {{ getError(registerForm, 'street') }}
-    </span>
-  </div>
+              </div>
 
-  <!-- City -->
-  <div class="field" [class.has-error]="isInvalid(registerForm, 'city')">
-    <label>City</label>
-    <div class="field-inner">
-      <span class="field-icon">🏙️</span>
-      <input type="text" formControlName="city" placeholder="Cairo" />
-    </div>
-    <span class="err-msg" *ngIf="isInvalid(registerForm, 'city')">
-      {{ getError(registerForm, 'city') }}
-    </span>
-  </div>
-</div>
+              <!-- City + Country -->
+              <div class="field-row">
 
-<!-- Country -->
-<div class="field" [class.has-error]="isInvalid(registerForm, 'country')">
-  <label>Country</label>
-  <div class="field-inner">
-    <span class="field-icon">🌍</span>
-    <input type="text" formControlName="country" placeholder="Egypt" />
-  </div>
-  <span class="err-msg" *ngIf="isInvalid(registerForm, 'country')">
-    {{ getError(registerForm, 'country') }}
-  </span>
-</div>
-              
+                <div class="field" [class.has-error]="isInvalid(registerForm, 'city')">
+                  <label>City</label>
+                  <div class="field-inner">
+                    <span class="field-icon">🏙️</span>
+                    <input type="text" formControlName="city" placeholder="Cairo" />
+                  </div>
+                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'city')">
+                    {{ getError(registerForm, 'city') }}
+                  </span>
+                </div>
+
+                <div class="field" [class.has-error]="isInvalid(registerForm, 'country')">
+                  <label>Country</label>
+                  <div class="field-inner">
+                    <span class="field-icon">🌍</span>
+                    <input type="text" formControlName="country" placeholder="Egypt" />
+                  </div>
+                  <span class="err-msg" *ngIf="isInvalid(registerForm, 'country')">
+                    {{ getError(registerForm, 'country') }}
+                  </span>
+                </div>
+
+              </div>
+
             }
 
-            <!-- Password -->
+            <!-- ── Common: Gender ── -->
+            <div class="field" [class.has-error]="isInvalid(registerForm, 'gender')">
+              <label>Gender</label>
+              <div class="field-inner field-inner--no-icon">
+                <select formControlName="gender">
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Prefer not to say</option>
+                </select>
+              </div>
+              <span class="err-msg" *ngIf="isInvalid(registerForm, 'gender')">
+                {{ getError(registerForm, 'gender') }}
+              </span>
+            </div>
+
+            <!-- ── Common: Password ── -->
             <div class="field" [class.has-error]="isInvalid(registerForm, 'password')">
               <label>Password</label>
               <div class="field-inner">
@@ -353,7 +386,7 @@
               </span>
             </div>
 
-            <!-- Confirm Password -->
+            <!-- ── Common: Confirm Password ── -->
             <div class="field" [class.has-error]="isInvalid(registerForm, 'confirmPassword')">
               <label>Confirm Password</label>
               <div class="field-inner">
@@ -369,7 +402,7 @@
               </span>
             </div>
 
-            <!-- Terms -->
+            <!-- ── Terms ── -->
             <div class="checkbox-row" [class.has-error]="isInvalid(registerForm, 'terms')">
               <input type="checkbox" id="reg-terms" formControlName="terms" />
               <label for="reg-terms">

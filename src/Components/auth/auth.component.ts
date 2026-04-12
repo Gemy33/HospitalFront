@@ -1,8 +1,8 @@
-
 // auth.component.ts
 
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../Core/auth.service';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -11,28 +11,25 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { log } from 'console';
-import { AuthService } from '../../Core/auth.service';
 
 export type UserRole = 'doctor' | 'patient';
 export type AuthTab  = 'login' | 'register';
 
-
 @Component({
   selector: 'app-auth',
-  standalone: true,                              // ← standalone flag
-  imports: [CommonModule, ReactiveFormsModule],  // ← imports here, not in a module
- templateUrl: './auth.component.html',
-
-  styleUrl: './auth.component.css'
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './auth.component.html',
+  styleUrl: './auth.component.css',
 })
 export class AuthComponent implements OnInit {
 
-  _authservice= inject(AuthService);
+  private _authService = inject(AuthService);
+  private fb           = inject(FormBuilder);
 
   // ── State ──────────────────────────────────────────────────────
-  activeTab: AuthTab   = 'login';
-  loginRole: UserRole  = 'doctor';
+  activeTab: AuthTab     = 'login';
+  loginRole: UserRole    = 'doctor';
   registerRole: UserRole = 'doctor';
 
   showLoginPw    = false;
@@ -53,22 +50,16 @@ export class AuthComponent implements OnInit {
   pwStrengthClass = '';
 
   specialties = [
-    'Cardiology',
-    'Dermatology',
-    'General Practice',
-    'Neurology',
-    'Orthopedics',
-    'Pediatrics',
-    'Psychiatry',
-    'Surgery',
-    'Other',
+    { id: 1, name: 'Cardiology' },
+    { id: 2, name: 'Dermatology' },
+    { id: 3, name: 'Neurology' },
+    { id: 4, name: 'Pediatrics' },
+    { id: 5, name: 'Orthopedics' },
   ];
 
   // ── Forms ──────────────────────────────────────────────────────
   loginForm!: FormGroup;
   registerForm!: FormGroup;
-
-  constructor(private fb: FormBuilder,private _authService: AuthService) {}
 
   ngOnInit(): void {
     this.buildLoginForm();
@@ -92,35 +83,33 @@ export class AuthComponent implements OnInit {
   }
 
   private buildRegisterForm(): void {
-   this.registerForm = this.fb.group(
-{
-  role: ['doctor'],
-  firstName: ['', Validators.required],
-  lastName: ['', Validators.required],
-  email: ['', [Validators.required, Validators.email]],
-  phone: ['', Validators.required],
+    this.registerForm = this.fb.group(
+      {
+        role:              ['doctor'],
+        firstName:         ['', Validators.required],
+        lastName:          ['', Validators.required],
+        email:             ['', [Validators.required, Validators.email]],
+        phone:             ['', Validators.required],
+        gender:            ['', Validators.required],   // shared by both roles
 
-  // NEW
-  street: [''],
-  city: [''],
-  country: ['Egypt'],
-  yearsOfExperience: [''],
-  bio: [''],
+        // Address (patient only — optional for doctor)
+        street:            [''],
+        city:              [''],
+        country:           ['Egypt'],
+        dateOfBirth:       [''],                        // required only for patient
 
-  // Doctor
-  specialty: [''],
-  licenseNumber: [''],
+        // Doctor-specific
+        specialty:         [''],                        // required only for doctor
+        yearsOfExperience: [''],
+        bio:               [''],
 
-  // Patient
-  dateOfBirth: [''],
-  gender: [''],
-
-  password: ['', Validators.required],
-  confirmPassword: ['', Validators.required],
-  terms: [false, Validators.requiredTrue],
-},
-{ validators: this.passwordMatchValidator }
-);
+        // Passwords
+        password:        ['', Validators.required],
+        confirmPassword: ['', Validators.required],
+        terms:           [false, Validators.requiredTrue],
+      },
+      { validators: this.passwordMatchValidator }
+    );
 
     this.updateRoleValidators();
   }
@@ -129,34 +118,39 @@ export class AuthComponent implements OnInit {
   private passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
     const pw      = group.get('password')?.value;
     const confirm = group.get('confirmPassword')?.value;
+
+    const confirmCtrl = group.get('confirmPassword');
+
     if (pw && confirm && pw !== confirm) {
-      group.get('confirmPassword')?.setErrors({ mismatch: true });
+      confirmCtrl?.setErrors({ mismatch: true });
       return { mismatch: true };
     }
+
+    // Clear only the mismatch error if passwords now match
+    if (confirmCtrl?.errors?.['mismatch']) {
+      const { mismatch, ...rest } = confirmCtrl.errors;
+      confirmCtrl.setErrors(Object.keys(rest).length ? rest : null);
+    }
+
     return null;
   }
 
   private updateRoleValidators(): void {
-    const role = this.registerForm.get('role')?.value as UserRole;
-
+    const role      = this.registerForm.get('role')?.value as UserRole;
     const specialty = this.registerForm.get('specialty');
-    const license   = this.registerForm.get('licenseNumber');
     const dob       = this.registerForm.get('dateOfBirth');
-    const gender    = this.registerForm.get('gender');
 
     if (role === 'doctor') {
       specialty?.setValidators(Validators.required);
-      license?.setValidators(Validators.required);
       dob?.clearValidators();
-      gender?.clearValidators();
+      dob?.reset('');
     } else {
       specialty?.clearValidators();
-      license?.clearValidators();
+      specialty?.reset('');
       dob?.setValidators(Validators.required);
-      gender?.setValidators(Validators.required);
     }
 
-    [specialty, license, dob, gender].forEach(c => c?.updateValueAndValidity());
+    [specialty, dob].forEach(c => c?.updateValueAndValidity());
   }
 
   // ── Tab & Role ─────────────────────────────────────────────────
@@ -181,20 +175,20 @@ export class AuthComponent implements OnInit {
   // ── Password Strength ──────────────────────────────────────────
   private updatePwStrength(value: string): void {
     if (!value) {
-      this.pwStrength = 0;
+      this.pwStrength      = 0;
       this.pwStrengthLabel = 'Enter a password';
       this.pwStrengthClass = '';
       return;
     }
     let score = 0;
-    if (value.length >= 8)           score++;
-    if (/[A-Z]/.test(value))         score++;
-    if (/[0-9]/.test(value))         score++;
-    if (/[^A-Za-z0-9]/.test(value))  score++;
+    if (value.length >= 8)          score++;
+    if (/[A-Z]/.test(value))        score++;
+    if (/[0-9]/.test(value))        score++;
+    if (/[^A-Za-z0-9]/.test(value)) score++;
 
-    this.pwStrength = score;
-    const labels  = ['Too weak', 'Fair', 'Good', 'Strong'];
-    const classes = ['weak', 'fair', 'good', 'strong'];
+    this.pwStrength      = score;
+    const labels         = ['Too weak', 'Fair', 'Good', 'Strong'];
+    const classes        = ['weak', 'fair', 'good', 'strong'];
     this.pwStrengthLabel = labels[score - 1]  || 'Too weak';
     this.pwStrengthClass = classes[score - 1] || 'weak';
   }
@@ -214,123 +208,104 @@ export class AuthComponent implements OnInit {
   getError(form: FormGroup, field: string): string {
     const ctrl = form.get(field);
     if (!ctrl?.errors) return '';
-    if (ctrl.errors['required'])   return 'This field is required.';
-    if (ctrl.errors['email'])      return 'Enter a valid email address.';
-    if (ctrl.errors['minlength'])  return `Minimum ${ctrl.errors['minlength'].requiredLength} characters.`;
-    if (ctrl.errors['pattern'])    return 'Invalid format.';
-    if (ctrl.errors['mismatch'])   return 'Passwords do not match.';
+    if (ctrl.errors['required'])  return 'This field is required.';
+    if (ctrl.errors['email'])     return 'Enter a valid email address.';
+    if (ctrl.errors['minlength']) return `Minimum ${ctrl.errors['minlength'].requiredLength} characters.`;
+    if (ctrl.errors['pattern'])   return 'Invalid format.';
+    if (ctrl.errors['mismatch'])  return 'Passwords do not match.';
     return 'Invalid value.';
   }
 
-  // ── Submit Handlers ────────────────────────────────────────────
+  // ── Mappers ────────────────────────────────────────────────────
+  private mapGender(gender: string): number {
+    switch (gender) {
+      case 'male':   return 1;
+      case 'female': return 2;
+      default:       return 0;
+    }
+  }
+
+  private mapSpecialityId(name: string): number {
+    const found = this.specialties.find(s => s.name === name);
+    return found ? found.id : 0;
+  }
+
+  // ── Submit: Login ──────────────────────────────────────────────
   onLogin(): void {
     this.loginForm.markAllAsTouched();
-  if (this.loginForm.invalid) return;
+    if (this.loginForm.invalid) return;
 
-  this.loginLoading = true;
+    this.loginLoading = true;
 
-  const formData = this.loginForm.value;
- console.log('start call login');
-  this._authService.Login(formData, this.loginRole).subscribe({
-    next: (res) => {
-      this.loginLoading = false;
-       console.log('inside the next');
-      const label = this.loginRole === 'doctor' ? 'Doctor' : 'Patient';
-      this.showToast('success', `✅ Welcome back, ${label}!`);
+    this._authService.Login(this.loginForm.value, this.loginRole).subscribe({
+      next: (res) => {
+        this.loginLoading = false;
+        const label = this.loginRole === 'doctor' ? 'Doctor' : 'Patient';
+        this.showToast('success', `✅ Welcome back, ${label}!`);
+        console.log('Login response:', res);
+        // TODO: this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.loginLoading = false;
+        console.error('Login error:', err);
+        this.showToast('error', '❌ Login failed. Check your email or password.');
+      },
+    });
+  }
 
-      console.log('Response:', res);
+  // ── Submit: Register ───────────────────────────────────────────
+  onRegister(): void {
+    this.registerForm.markAllAsTouched();
+    if (this.registerForm.invalid) return;
 
-      // ✅ navigate after success
-      // this.router.navigate(['/dashboard']);
-    },
+    const form     = this.registerForm.value;
+    const fullName = `${form.firstName}${form.lastName}`;  // ← space between names
+    let payload: any;
 
-    error: (err) => {
-      this.loginLoading = false;
-
-      console.error('Error:', err);
-
-      this.showToast('error', '❌ Login failed. Check your email or password');
+    if (this.registerRole === 'patient') {
+      payload = {
+        name:        fullName,
+        gender:      this.mapGender(form.gender),
+        email:       form.email,
+        password:    form.password,
+        phone:       form.phone,
+        street:      form.street  || '',
+        city:        form.city    || '',
+        country:     form.country || 'Egypt',
+        dateOfBirth: form.dateOfBirth,
+      };
     }
-  });
-  }
-  private mapGender(gender: string): number {
-  switch (gender) {
-    case 'male': return 1;
-    case 'female': return 2;
-    default: return 0;
-  }
-}
 
-private mapSpeciality(name: string): number {
-  const map: any = {
-    Cardiology: 1,
-    Dermatology: 2,
-    'General Practice': 3,
-    Neurology: 4,
-    Orthopedics: 5,
-    Pediatrics: 6,
-    Psychiatry: 7,
-    Surgery: 8,
-  };
-
-  return map[name] || 0;
-}
-
-onRegister(): void {
-  console.log('Register Form Value:', this.registerForm.value); // Debug log
-  this.registerForm.markAllAsTouched();
-  if (this.registerForm.invalid) return;
-
-  const form = this.registerForm.value;
-
-  // 🔹 Common fields
-  const fullName = `${form.firstName}${form.lastName}`;
-
-  let payload: any;
-
-  if (this.registerRole === 'patient') {
-    payload = {
-      name: fullName,
-      gender: this.mapGender(form.gender),
-      email: form.email,
-      password: form.password,
-      phone: form.phone,
-      street: form.street || '',
-      city: form.city || '',
-      country: form.country || 'Egypt',
-      dateOfBirth: form.dateOfBirth,
-    };
-  }
-
-  if (this.registerRole === 'doctor') {
-    payload = {
-      name: fullName,
-      email: form.email,
-      password: form.password,
-      specialityId: this.mapSpeciality(form.specialty),
-      YearsOfExperience: form.yearsOfExperience || 0,
-      bio: form.bio || '',
-      gender: this.mapGender(form.gender),
-      Phone: form.phone,
-    };
-  }
-
-  this._authservice.Register(payload,this.registerRole).subscribe({
-    next: (response) => {
-      console.log('API Response:', response);
-      this.showToast('success', '✅ Registration successful! Redirecting…');
-    },
-    error: (error) => {
-      console.error('API Error:', error);
-      this.showToast('error', '❌ Registration failed. Please try again.');
+    if (this.registerRole === 'doctor') {
+      payload = {
+        name:              fullName,
+        email:             form.email,
+        password:          form.password,
+        specialityId:      this.mapSpecialityId(form.specialty),
+        YearsOfExperience: Number(form.yearsOfExperience) || 0,
+        bio:               form.bio || '',
+        gender:            this.mapGender(form.gender),
+        Phone:             form.phone,
+      };
     }
-  });
 
-  console.log('Final Payload:', payload);
+    console.log('Register payload:', payload);
+    this.registerLoading = true;
 
-  // 🔥 Call API here
-  // this.authService.register(payload).subscribe(...)
-}
+    this._authService.Register(payload, this.registerRole).subscribe({
+      next: (response) => {
+        this.registerLoading = false;
+        console.log('Register response:', response);
+        this.showToast('success', '✅ Registration successful!');
+        // TODO: this.router.navigate(['/login']);
+      },
+      error: (error) => {
+        this.registerLoading = false;
+        console.error('Register error:', error);
+        this.showToast('error', '❌ Registration failed. Please try again.');
+      },
+    });
+  }
 
   // ── Toast ──────────────────────────────────────────────────────
   private showToast(type: 'success' | 'error', message: string): void {
