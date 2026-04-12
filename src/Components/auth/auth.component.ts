@@ -17,6 +17,7 @@ import { AuthService } from '../../Core/auth.service';
 export type UserRole = 'doctor' | 'patient';
 export type AuthTab  = 'login' | 'register';
 
+
 @Component({
   selector: 'app-auth',
   standalone: true,                              // ← standalone flag
@@ -67,7 +68,7 @@ export class AuthComponent implements OnInit {
   loginForm!: FormGroup;
   registerForm!: FormGroup;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder,private _authService: AuthService) {}
 
   ngOnInit(): void {
     this.buildLoginForm();
@@ -224,15 +225,33 @@ export class AuthComponent implements OnInit {
   // ── Submit Handlers ────────────────────────────────────────────
   onLogin(): void {
     this.loginForm.markAllAsTouched();
-    if (this.loginForm.invalid) return;
+  if (this.loginForm.invalid) return;
 
-    this.loginLoading = true;
-    setTimeout(() => {
+  this.loginLoading = true;
+
+  const formData = this.loginForm.value;
+ console.log('start call login');
+  this._authService.Login(formData, this.loginRole).subscribe({
+    next: (res) => {
       this.loginLoading = false;
+       console.log('inside the next');
       const label = this.loginRole === 'doctor' ? 'Doctor' : 'Patient';
-      this.showToast('success', `✅ Welcome back, ${label}! Redirecting…`);
-      // TODO: inject Router → this.router.navigate(['/dashboard'])
-    }, 1800);
+      this.showToast('success', `✅ Welcome back, ${label}!`);
+
+      console.log('Response:', res);
+
+      // ✅ navigate after success
+      // this.router.navigate(['/dashboard']);
+    },
+
+    error: (err) => {
+      this.loginLoading = false;
+
+      console.error('Error:', err);
+
+      this.showToast('error', '❌ Login failed. Check your email or password');
+    }
+  });
   }
   private mapGender(gender: string): number {
   switch (gender) {
@@ -296,7 +315,7 @@ onRegister(): void {
     };
   }
 
-  this._authservice.Register(payload).subscribe({
+  this._authservice.Register(payload,this.registerRole).subscribe({
     next: (response) => {
       console.log('API Response:', response);
       this.showToast('success', '✅ Registration successful! Redirecting…');
