@@ -1,0 +1,67 @@
+<div class="container py-5">
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white border-bottom p-4">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <h4 class="text-primary fw-bold mb-0">
+            <i class="bi bi-file-earmark-medical me-2"></i>Medical Prescription
+          </h4>
+          <small class="text-muted">Prescription ID: #RX-{{ prescriptionData.id }}</small>
+        </div>
+        <button class="btn btn-outline-primary btn-sm rounded-pill mt-2 mt-md-0" onclick="window.print()">
+          <i class="bi bi-printer me-2"></i>Print PDF
+        </button>
+      </div>
+    </div>
+
+    <div class="card-body p-4">
+      <div class="row g-4">
+        <div class="col-md-4 border-end-md">
+          <div class="p-3 bg-light rounded-3 h-100">
+            <h6 class="text-uppercase text-muted fw-bold small mb-3">Prescribing Doctor</h6>
+            <div class="d-flex align-items-center mb-3">
+              <img src="https://ui-avatars.com/api/?name=Dr+{{prescriptionData.doctor.name}}&background=0d6efd&color=fff" 
+                   class="rounded-circle me-3" width="50" alt="Doctor">
+              <div>
+                <h6 class="mb-0 fw-bold">Dr. {{ prescriptionData.doctor.name }}</h6>
+                <small class="text-primary">{{ prescriptionData.doctor.speciality }}</small>
+              </div>
+            </div>
+            <p class="small text-muted mb-3">{{ prescriptionData.doctor.bio }}</p>
+            <div class="small">
+              <div class="mb-1"><i class="bi bi-telephone me-2 text-primary"></i>{{ prescriptionData.doctor.phone }}</div>
+              <div><i class="bi bi-award me-2 text-primary"></i>{{ prescriptionData.doctor.yearsOfExperience }} Years Exp.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-8">
+          <h6 class="text-uppercase text-muted fw-bold small mb-3">Medications & Treatments</h6>
+          
+          <div class="list-group list-group-flush">
+            <div *ngFor="let item of prescriptionData.treatments" class="list-group-item px-0 py-3 border-bottom">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1 fw-bold text-dark">
+                  <i class="bi bi-capsule me-2 text-danger"></i>{{ item.medicationName }}
+                </h5>
+                <small class="text-muted">{{ item.createdAt | date:'mediumDate' }}</small>
+              </div>
+              <p class="mb-1 text-secondary bg-warning-subtle d-inline-block px-2 py-1 rounded small mt-2">
+                <i class="bi bi-info-circle me-1"></i> {{ item.notes }}
+              </p>
+            </div>
+          </div>
+
+          <div *ngIf="prescriptionData.treatments.length === 0" class="text-center py-5 text-muted">
+            <i class="bi bi-clipboard2-x display-4"></i>
+            <p class="mt-2">No medications listed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer bg-light p-3 text-center">
+      <small class="text-muted">Please follow the instructions carefully. Consult your doctor if symptoms persist.</small>
+    </div>
+  </div>
+</div>

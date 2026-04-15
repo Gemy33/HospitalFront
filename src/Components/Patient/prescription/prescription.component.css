@@ -1,0 +1,34 @@
+/* Custom spacing for the sidebar border on desktop only */
+@media (min-width: 768px) {
+  .border-end-md {
+    border-right: 1px solid #dee2e6 !important;
+  }
+}
+
+.list-group-item {
+  background: transparent;
+  &:last-child {
+    border-bottom: none !important;
+  }
+}
+
+.bg-warning-subtle {
+  background-color: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  color: #664d03;
+}
+
+.card {
+  border-radius: 1.25rem;
+}
+
+/* Print optimization */
+@media print {
+  .btn, .card-footer {
+    display: none !important;
+  }
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #eee !important;
+  }
+}

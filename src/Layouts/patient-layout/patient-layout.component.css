@@ -1,0 +1,27 @@
+.app-layout {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar fixed width */
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+/* When collapsed */
+.sidebar.collapsed {
+  width: 80px;
+  min-width: 80px;
+}
+
+/* Main content takes remaining space */
+.main-content {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  background: #f5f7fb;
+}

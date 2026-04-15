@@ -1,0 +1,92 @@
+<aside class="sidebar d-flex flex-column" [class.collapsed]="isCollapsed">
+
+  <!-- Brand -->
+  <div class="sidebar-brand d-flex align-items-center gap-3">
+    <div class="brand-icon d-flex align-items-center justify-content-center">
+      <svg viewBox="0 0 24 24" fill="white" width="20" height="20">
+        <path d="M11 7h2v2h2v2h-2v2h-2v-2H9V9h2V7zm1-5C6.48 2 2 6.48 2 12s4.48 10 10 10
+                 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+      </svg>
+    </div>
+    <div class="brand-content" *ngIf="!isCollapsed">
+      <span class="brand-name">MediCare</span>
+      <span class="brand-sub">Patient Portal</span>
+    </div>
+    <button class="toggle-btn ms-auto" (click)="toggleSidebar()" [attr.aria-label]="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+        <path *ngIf="!isCollapsed" d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/>
+        <path *ngIf="isCollapsed"  d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Profile Card -->
+  <div class="profile-card mx-3 my-3 d-flex align-items-center gap-3" *ngIf="!isCollapsed">
+    <div class="avatar-circle">{{ getInitials(patientName) }}</div>
+    <div class="profile-info flex-grow-1 overflow-hidden">
+      <div class="profile-name text-truncate">{{ patientName }}</div>
+      <div class="profile-id">ID: #{{ patientId }}</div>
+    </div>
+    <span class="status-dot" [class.online]="isOnline"></span>
+  </div>
+  <div class="avatar-circle mx-auto my-3" *ngIf="isCollapsed"
+       [title]="patientName">{{ getInitials(patientName) }}</div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav flex-grow-1 px-2">
+
+    <p class="nav-label" *ngIf="!isCollapsed">Main Menu</p>
+
+    <a *ngFor="let item of navItems"
+       [routerLink]="item.route"
+       routerLinkActive="active"
+       class="nav-item d-flex align-items-center gap-3"
+       [class.collapsed]="isCollapsed"
+       [title]="isCollapsed ? item.label : ''">
+
+      <span class="nav-icon d-flex align-items-center justify-content-center"
+            [ngClass]="item.iconClass"
+            [innerHTML]="item.icon">
+      </span>
+
+      <span class="nav-text flex-grow-1" *ngIf="!isCollapsed">
+        <span class="nav-title d-block">{{ item.label }}</span>
+        <span class="nav-sub d-block">{{ item.subtitle }}</span>
+      </span>
+
+      <span class="nav-badge" *ngIf="item.badge && !isCollapsed"
+            [ngClass]="item.badgeClass">{{ item.badge }}</span>
+    </a>
+
+    <hr class="sidebar-divider" />
+
+    <a routerLink="/help" routerLinkActive="active"
+       class="nav-item d-flex align-items-center gap-3"
+       [class.collapsed]="isCollapsed"
+       title="Help Center">
+      <span class="nav-icon icon-help d-flex align-items-center justify-content-center">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="17" height="17">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10
+                   10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9
+                   13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41
+                   0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+        </svg>
+      </span>
+      <span class="nav-text flex-grow-1" *ngIf="!isCollapsed">
+        <span class="nav-title muted d-block">Help Center</span>
+      </span>
+    </a>
+  </nav>
+
+  <!-- Logout -->
+  <div class="sidebar-footer px-3 pb-3">
+    <button class="logout-btn d-flex align-items-center gap-2 w-100" (click)="logout()">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1
+                 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+      </svg>
+      <span *ngIf="!isCollapsed">Sign Out</span>
+    </button>
+  </div>
+
+</aside>
