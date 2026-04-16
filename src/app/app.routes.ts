@@ -7,6 +7,9 @@ import { PrescriptionComponent } from '../Components/Patient/prescription/prescr
 import { AppointmentComponent } from '../Components/Patient/appointment/appointment.component';
 import { find } from 'rxjs';
 import { FindDoctorComponent } from '../Components/Patient/find-doctor/find-doctor.component';
+import { DoctorProfileComponent } from '../Components/Doctor/doctor-profile/doctor-profile.component';
+import { AvailabiltyComponent } from '../Components/Doctor/availabilty/availabilty.component';
+import { BookingComponent } from '../Components/Doctor/booking/booking.component';
 
 export const routes: Routes = [
     {path: '', redirectTo: 'auth', pathMatch: 'full'},
@@ -19,6 +22,13 @@ export const routes: Routes = [
             {path:'find-doctors', component:FindDoctorComponent },
         ]
     },
-    {path:'doctor',component:DoctorLayoutComponent},
+    {path:'doctor',component:DoctorLayoutComponent,children:[
+        {path:'',redirectTo:'profile',pathMatch:'full'},
+        {path:'profile',component:DoctorProfileComponent,title:'Doctor'},
+        {path:'Availabilty',component:AvailabiltyComponent,title:'availabilty'},
+        {path:'prescription',component:PrescriptionComponent,title:'prescription'},
+        {path:'booking',component:BookingComponent,title:'booking'},
+        {path:'**',redirectTo:"profile",pathMatch:'full'}
+    ]},
 
 ];
