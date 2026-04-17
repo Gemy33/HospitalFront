@@ -1,0 +1,2 @@
+export interface IPrescriptionTreatment {
+}
