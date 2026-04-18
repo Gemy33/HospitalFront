@@ -10,6 +10,7 @@ import { FindDoctorComponent } from '../Components/Patient/find-doctor/find-doct
 import { DoctorProfileComponent } from '../Components/Doctor/doctor-profile/doctor-profile.component';
 import { AvailabiltyComponent } from '../Components/Doctor/availabilty/availabilty.component';
 import { BookingComponent } from '../Components/Doctor/booking/booking.component';
+import { PatientDashboardComponent } from '../Components/Patient/patient-dashboard/patient-dashboard.component';
 
 export const routes: Routes = [
     {path: '', redirectTo: 'auth', pathMatch: 'full'},
@@ -20,6 +21,9 @@ export const routes: Routes = [
             {path:'prescriptions', component:PrescriptionComponent },
             {path:'appointments', component:AppointmentComponent },
             {path:'find-doctors', component:FindDoctorComponent },
+            {path:'dashboard', component:PatientDashboardComponent },
+
+
         ]
     },
     {path:'doctor',component:DoctorLayoutComponent,children:[

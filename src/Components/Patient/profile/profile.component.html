@@ -1,82 +1,171 @@
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="bg-primary p-5 text-center text-white">
-          <div class="position-relative d-inline-block">
-            <img src="https://ui-avatars.com/api/?name={{patientData.name}}&background=random&size=128" 
-                 class="rounded-circle border border-4 border-white shadow" 
-                 alt="Profile Picture">
+<div class="pp-root">
+
+  <!-- Background decoration -->
+  <div class="pp-bg-orb pp-bg-orb--1"></div>
+  <div class="pp-bg-orb pp-bg-orb--2"></div>
+
+  <!-- Loading -->
+  <div class="pp-loading" *ngIf="isLoading()">
+    <div class="pp-spinner"><span></span><span></span><span></span></div>
+    <p>Loading your profile…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="pp-error" *ngIf="error() && !isLoading()">
+    <span class="pp-error-icon">⚠</span>
+    <p>{{ error() }}</p>
+    <button class="pp-retry-btn" (click)="loadProfile()">Retry</button>
+  </div>
+
+  <!-- Profile Content -->
+  <div class="pp-content" *ngIf="profile() && !isLoading() && !error()">
+
+    <!-- ── Hero Card ───────────────────────────────────────── -->
+    <div class="pp-hero-card">
+
+      <div class="pp-hero-top">
+        <!-- Avatar -->
+        <div class="pp-avatar-wrap">
+          <div class="pp-avatar">
+            <span class="pp-avatar-initials">{{ getInitials(profile()!.name) }}</span>
           </div>
-          <h2 class="mt-3 mb-1 fw-bold">{{ patientData.name }}</h2>
-          <span class="badge bg-light text-primary px-3 py-2 rounded-pill">Patient ID: #00{{ patientData.id }}</span>
+          <span class="pp-gender-badge" [class.female]="profile()!.gender == '1'">
+            {{ (profile()!.gender) }}
+          </span>
         </div>
 
-        <div class="card-body p-4 p-md-5">
-          <h5 class="mb-4 text-secondary fw-bold">Personal Information</h5>
-          
-          <div class="row g-4">
-            <div class="col-md-6">
-              <div class="d-flex align-items-center">
-                <div class="icon-box bg-blue-light text-primary rounded-3 p-3 me-3">
-                  <i class="bi bi-person"></i>
-                </div>
-                <div>
-                  <small class="text-muted d-block">Full Name</small>
-                  <span class="fw-semibold">{{ patientData.name }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="d-flex align-items-center">
-                <div class="icon-box bg-blue-light text-primary rounded-3 p-3 me-3">
-                  <i class="bi bi-gender-ambiguous"></i>
-                </div>
-                <div>
-                  <small class="text-muted d-block">Gender</small>
-                  <span class="fw-semibold">{{ getGender(patientData.gender) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="d-flex align-items-center">
-                <div class="icon-box bg-blue-light text-primary rounded-3 p-3 me-3">
-                  <i class="bi bi-envelope"></i>
-                </div>
-                <div>
-                  <small class="text-muted d-block">Email Address</small>
-                  <span class="fw-semibold">{{ patientData.email }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-6">
-              <div class="d-flex align-items-center">
-                <div class="icon-box bg-blue-light text-primary rounded-3 p-3 me-3">
-                  <i class="bi bi-telephone"></i>
-                </div>
-                <div>
-                  <small class="text-muted d-block">Phone Number</small>
-                  <span class="fw-semibold">{{ patientData.phone }}</span>
-                </div>
-              </div>
-            </div>
+        <!-- Name & meta -->
+        <div class="pp-hero-info">
+          <h1 class="pp-name">{{ formatName(profile()!.name) }}</h1>
+          <div class="pp-meta-row">
+            <span class="pp-meta-chip">
+              <span class="pp-meta-icon">◉</span> Patient
+            </span>
+            <span class="pp-meta-chip">
+              <span class="pp-meta-icon">{{ (profile()!.gender) }}</span>
+              {{ (profile()!.gender) }}
+            </span>
+            <span class="pp-meta-chip pp-id-chip">
+              <span class="pp-meta-icon">#</span> {{ profile()!.id }}
+            </span>
           </div>
+        </div>
 
-          <hr class="my-5 opacity-10">
+        <!-- Edit toggle -->
+        <button
+          class="pp-edit-btn"
+          (click)="enterEdit()"
+          *ngIf="!isEditing()"
+          title="Edit profile"
+        >
+          <span class="pp-edit-icon">✎</span>
+          <span>Edit</span>
+        </button>
+      </div>
 
-          <div class="d-flex gap-2">
-            <button class="btn btn-primary px-4 py-2 rounded-3">
-              <i class="bi bi-pencil-square me-2"></i>Edit Profile
-            </button>
-            <button class="btn btn-outline-secondary px-4 py-2 rounded-3">
-              View Appointments
-            </button>
-          </div>
+      <!-- Divider -->
+      <div class="pp-divider"></div>
+
+      <!-- ── VIEW MODE ─────────────────────────────────────── -->
+      <div class="pp-fields" *ngIf="!isEditing()">
+
+        <div class="pp-field">
+          <span class="pp-field-label">Full Name</span>
+          <span class="pp-field-value">{{ formatName(profile()!.name) }}</span>
+        </div>
+
+        <div class="pp-field">
+          <span class="pp-field-label">Email Address</span>
+          <span class="pp-field-value">
+            <a class="pp-link" href="mailto:{{ profile()!.email }}">{{ profile()!.email }}</a>
+          </span>
+        </div>
+
+        <div class="pp-field">
+          <span class="pp-field-label">Phone Number</span>
+          <span class="pp-field-value">
+            <a class="pp-link" href="tel:{{ profile()!.phone }}">{{ profile()!.phone }}</a>
+          </span>
+        </div>
+
+        <div class="pp-field">
+          <span class="pp-field-label">Gender</span>
+          <span class="pp-field-value">{{ (profile()!.gender) }}</span>
+        </div>
+
+      </div>
+
+      <!-- ── EDIT MODE ─────────────────────────────────────── -->
+      <div class="pp-edit-form" *ngIf="isEditing()">
+
+        <div class="pp-form-group">
+          <label class="pp-label" for="edit-name">Full Name</label>
+          <input
+            id="edit-name"
+            class="pp-input"
+            type="text"
+            [(ngModel)]="editForm.name"
+            placeholder="Your full name"
+          />
+        </div>
+
+        <div class="pp-form-group">
+          <label class="pp-label" for="edit-email">Email Address</label>
+          <input
+            id="edit-email"
+            class="pp-input"
+            type="email"
+            [(ngModel)]="editForm.email"
+            placeholder="your@email.com"
+          />
+        </div>
+
+        <div class="pp-form-group">
+          <label class="pp-label" for="edit-phone">Phone Number</label>
+          <input
+            id="edit-phone"
+            class="pp-input"
+            type="tel"
+            [(ngModel)]="editForm.phone"
+            placeholder="+20 xxx xxx xxxx"
+          />
+        </div>
+
+        <div class="pp-form-actions">
+          <button class="pp-cancel-btn" (click)="cancelEdit()">Cancel</button>
+          <button class="pp-save-btn" (click)="saveEdit()">
+            Save Changes <span class="pp-save-arrow">→</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ── Stats Row ──────────────────────────────────────── -->
+    <div class="pp-stats-row">
+      <div class="pp-stat-card">
+        <span class="pp-stat-icon">🗓</span>
+        <div class="pp-stat-text">
+          <span class="pp-stat-value">0</span>
+          <span class="pp-stat-label">Appointments</span>
+        </div>
+      </div>
+      <div class="pp-stat-card">
+        <span class="pp-stat-icon">💊</span>
+        <div class="pp-stat-text">
+          <span class="pp-stat-value">0</span>
+          <span class="pp-stat-label">Prescriptions</span>
+        </div>
+      </div>
+      <div class="pp-stat-card">
+        <span class="pp-stat-icon">🩺</span>
+        <div class="pp-stat-text">
+          <span class="pp-stat-value">0</span>
+          <span class="pp-stat-label">Doctors Seen</span>
         </div>
       </div>
     </div>
+
   </div>
 </div>

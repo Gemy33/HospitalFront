@@ -1,13 +1,12 @@
-<div class="app-layout d-flex">
+<!-- app.component.html or patient-layout.component.html -->
+<div class="main-layout">
+  
+  <!-- Fixed Sidebar -->
+  <app-patient-sidebar></app-patient-sidebar>
 
-  <!-- SIDEBAR -->
-  <app-patient-navbar class="sidebar"></app-patient-navbar>
-
-  <!-- MAIN CONTENT -->
-  <main class="main-content flex-grow-1">
-    <div class="container-fluid p-3">
-      <router-outlet></router-outlet>
-    </div>
-  </main>
+  <!-- Main Content Area -->
+  <div class="content-wrapper">
+    <router-outlet></router-outlet>
+  </div>
 
 </div>

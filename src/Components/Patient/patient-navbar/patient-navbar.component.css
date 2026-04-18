@@ -1,331 +1,121 @@
-/* ──────────────────────────────────────────────
-   Patient Sidebar – Angular 17 Standalone
-────────────────────────────────────────────── */
-
-/* ── Container ──────────────────────────────── */
 .sidebar {
-  width: 260px;
-  min-height: 100vh;
-  background: linear-gradient(160deg, #1a1f5e 0%, #2d3494 60%, #3b4fd4 100%);
-  position: relative;
-  overflow: hidden;
-  transition: width 0.25s ease;
-  flex-shrink: 0;
-}
-
-.sidebar.collapsed {
-  width: 72px;
-}
-
-/* Decorative circles */
-.sidebar::before,
-.sidebar::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.sidebar::before {
-  top: -60px;
-  right: -60px;
-  width: 200px;
-  height: 200px;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar::after {
-  bottom: 40px;
-  left: -80px;
-  width: 240px;
-  height: 240px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-/* ── Brand ──────────────────────────────────── */
-.sidebar-brand {
-  padding: 24px 20px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  z-index: 1;
-}
-
-.brand-icon {
-  width: 38px;
-  height: 38px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  flex-shrink: 0;
-}
-
-.brand-name {
-  display: block;
-  color: white;
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-
-.brand-sub {
-  display: block;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 11px;
-  margin-top: 1px;
-}
-
-.toggle-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  width: 28px;
-  height: 28px;
+  width: 280px;
+  height: 100vh;
+  background: #0f0f0f;
+  border-right: 1px solid #222;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: rgba(255, 255, 255, 0.7);
-  transition: background 0.25s ease;
-  padding: 0;
-}
-
-.toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-}
-
-.profile-card {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 14px;
-  padding: 14px 16px;
-  position: relative;
-  z-index: 1;
-}
-
-.avatar-circle {
-  width: 44px;
-  height: 44px;
-  background: linear-gradient(135deg, #5ce0d8, #4fc3f7);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: white;
-  font-size: 15px;
-  flex-shrink: 0;
-}
-
-.profile-name {
-  color: white;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.profile-id {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 11px;
-  margin-top: 2px;
-}
-
-.status-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #6b7280;
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  flex-shrink: 0;
-}
-
-.status-dot.online {
-  background: #4ade80;
-}
-
-/* ── Navigation ─────────────────────────────── */
-.sidebar-nav {
-  padding-top: 8px;
-  position: relative;
-  z-index: 1;
+  flex-direction: column;
+  color: #e0e0e0;
   overflow-y: auto;
-  overflow-x: hidden;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.sidebar-nav::-webkit-scrollbar {
-  width: 4px;
+/* Keep the rest of your sidebar styles the same as I gave you earlier */
+
+.sidebar-header {
+  padding: 2rem 1.5rem 1.5rem;
+  border-bottom: 1px solid #222;
 }
 
-.sidebar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.nav-label {
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 1.3px;
-  text-transform: uppercase;
-  padding: 0 14px;
-  margin-bottom: 6px;
-  margin-top: 4px;
-}
-
-.nav-item {
+.logo {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: 10px;
-  margin-bottom: 3px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.25s ease;
-  position: relative;
+  gap: 12px;
+  margin-bottom: 2rem;
 }
 
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+.logo-icon {
+  font-size: 2rem;
 }
 
-.nav-item.active {
-  background: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
 }
 
-.nav-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 60%;
-  background: #5ce0d8;
-  border-radius: 0 3px 3px 0;
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-.nav-item.collapsed {
+.avatar {
+  width: 55px;
+  height: 55px;
+  background: #1f1f1f;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 10px;
+  font-size: 1.8rem;
+  border: 2px solid #333;
 }
 
-.nav-item.collapsed .nav-icon {
+.info h3 {
+  margin: 0;
+  color: #ffffff;
+}
+
+.info p {
+  margin: 4px 0 0 0;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1.5rem 0;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
   margin: 0;
 }
 
-.nav-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  flex-shrink: 0;
-  transition: background 0.25s ease;
+.sidebar-nav li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 1.8rem;
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.05rem;
 }
 
-.nav-icon.icon-profile {
-  background: rgba(92, 224, 216, 0.15);
+.sidebar-nav li:hover {
+  background: #1a1a1a;
+  color: #fff;
 }
 
-.nav-icon.icon-profile svg {
-  fill: #5ce0d8;
+.sidebar-nav li.active {
+  background: #1e3a8a;
+  color: #fff;
+  border-left: 4px solid #3b82f6;
 }
 
-.nav-icon.icon-prescription {
-  background: rgba(129, 140, 248, 0.15);
-}
-
-.nav-icon.icon-prescription svg {
-  fill: #818cf8;
-}
-
-.nav-icon.icon-appointment {
-  background: rgba(251, 146, 60, 0.15);
-}
-
-.nav-icon.icon-appointment svg {
-  fill: #fb923c;
-}
-
-.nav-icon.icon-doctors {
-  background: rgba(74, 222, 128, 0.15);
-}
-
-.nav-icon.icon-doctors svg {
-  fill: #4ade80;
-}
-
-.nav-icon.icon-help {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.nav-icon.icon-help svg {
-  fill: rgba(255, 255, 255, 0.45);
-}
-
-.nav-title {
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-.nav-title.muted {
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.nav-sub {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 10.5px;
-  margin-top: 1px;
-}
-
-.nav-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 20px;
-  min-width: 20px;
-  text-align: center;
-  flex-shrink: 0;
-  background: #f87171;
-  color: white;
-}
-
-.nav-badge.badge-teal {
-  background: #2dd4bf;
-  color: #0f4f47;
-}
-
-.sidebar-divider {
-  border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  margin: 8px 16px;
-}
-
-/* ── Footer ─────────────────────────────────── */
 .sidebar-footer {
-  position: relative;
-  z-index: 1;
+  padding: 1.5rem;
+  border-top: 1px solid #222;
 }
 
 .logout-btn {
-  background: rgba(248, 113, 113, 0.12);
-  border: 1px solid rgba(248, 113, 113, 0.2);
-  border-radius: 10px;
-  padding: 10px 14px;
-  color: #fca5a5;
-  font-size: 13px;
-  font-weight: 500;
+  width: 100%;
+  padding: 14px;
+  background: #991b1b;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.25s ease;
-}
-
-.logout-btn svg {
-  fill: #fca5a5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .logout-btn:hover {
-  background: rgba(248, 113, 113, 0.22);
+  background: #b91c1c;
 }

@@ -1,1 +1,57 @@
-<p>appointment works!</p>
+<div class="appointment-page">
+  <div class="header">
+    <h1>My Appointments</h1>
+    <p>Here are your scheduled medical appointments</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading your appointments...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && appointments.length === 0" class="empty-state">
+    <p>You have no appointments yet.</p>
+  </div>
+
+  <!-- Appointments Grid -->
+  <div class="appointments-grid" *ngIf="!loading && appointments.length > 0">
+    <div class="appointment-card" *ngFor="let app of appointments">
+
+      <div class="card-header">
+        <div class="doctor-info">
+          <div class="avatar">🩺</div>
+          <div class="doctor-details">
+            <h3>Doctor #{{ app.doctorId }}</h3>
+            <p class="type">In-Clinic Consultation</p>
+          </div>
+        </div>
+
+        <span class="status-badge" [ngClass]="getStatusClass(app.status)">
+          {{ app.status }}
+        </span>
+      </div>
+
+      <div class="appointment-details">
+        <div class="detail-row">
+          <span class="label">📅 Date</span>
+          <span class="value">{{ formatDate(app.date) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">⏰ Time</span>
+          <span class="value time">{{ formatTime(app.date) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">💰 Price</span>
+          <span class="value price">${{ app.price.toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn btn-primary">View Prescription / Details</button>
+        <button class="btn btn-secondary">Reschedule</button>
+      </div>
+    </div>
+  </div>
+</div>

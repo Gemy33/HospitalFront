@@ -1,75 +1,136 @@
-<div class="container py-5">
-  <div class="row mb-5 justify-content-center">
-    <div class="col-lg-10">
-      <div class="card border-0 shadow-sm p-4 rounded-4 bg-primary text-white">
-        <h2 class="mb-4 text-center fw-bold">Find a Specialist</h2>
-        <div class="row g-3">
-          <div class="col-md-6">
-            <div class="input-group">
-              <span class="input-group-text border-0 bg-white text-primary">
-                <i class="bi bi-search"></i>
-              </span>
-              <input type="text" class="form-control border-0 py-2" 
-                     placeholder="Search doctor name..." [(ngModel)]="searchQuery">
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="input-group">
-              <span class="input-group-text border-0 bg-white text-primary">
-                <i class="bi bi-filter"></i>
-              </span>
-              <select class="form-select border-0 py-2" [(ngModel)]="selectedSpeciality">
-                <option value="">All Specialities</option>
-                <option value="Gynecology">Gynecology</option>
-                <option value="Cardiology">Cardiology</option>
-                <option value="Pediatrics">Pediatrics</option>
-              </select>
-            </div>
-          </div>
-        </div>
+<div class="fd-root">
+
+  <!-- Header -->
+  <header class="fd-header">
+    <div class="fd-header-inner">
+      <div class="fd-logo">
+        <span class="fd-logo-cross">✚</span>
+        <span class="fd-logo-text">MedFinder</span>
       </div>
+      <p class="fd-tagline">Connect with the right specialist — instantly.</p>
     </div>
+  </header>
+
+  <!-- Search & Filter Bar -->
+  <section class="fd-controls">
+    <div class="fd-controls-inner">
+
+      <!-- Name Search (client-side only) -->
+      <div class="fd-search-wrap">
+        <span class="fd-search-icon">⌕</span>
+        <input
+          class="fd-input fd-search"
+          type="text"
+          placeholder="Search by name or bio…"
+          [(ngModel)]="searchName"
+          (input)="onNameSearch()"
+        />
+      </div>
+
+      <!-- Speciality Filter (calls API with numeric id) -->
+      <div class="fd-select-wrap">
+        <span class="fd-select-icon">◈</span>
+        <select
+          class="fd-input fd-select"
+          [(ngModel)]="selectedSpecialityId"
+          (change)="onSpecialityChange()"
+        >
+          <option [value]="''">All Specialities</option>
+          <option *ngFor="let s of specialities" [value]="s.id">{{ s.name }}</option>
+        </select>
+        <span class="fd-select-arrow">›</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Status Bar -->
+  <div class="fd-status-bar">
+    <span class="fd-result-count" *ngIf="!isLoading() && !error()">
+      <span class="fd-count-num">{{ displayedDoctors().length }}</span>
+      doctor{{ displayedDoctors().length !== 1 ? 's' : '' }} found
+      <span class="fd-filter-pill" *ngIf="selectedSpecialityId !== ''">
+        · {{ getSpecialityName(selectedSpecialityId.toString()) }}
+        <button class="fd-clear-filter" (click)="selectedSpecialityId = ''; loadAllDoctors()">✕</button>
+      </span>
+    </span>
   </div>
 
-  <div class="row g-4">
-    <div *ngFor="let doc of filteredDoctors" class="col-md-6 col-lg-4">
-      <div class="card h-100 border-0 shadow-sm rounded-4 doctor-card">
-        <div class="card-body p-4">
-          <div class="text-center mb-3">
-            <img src="https://ui-avatars.com/api/?name=Dr+{{doc.name}}&background=e7f1ff&color=0d6efd&size=100" 
-                 class="rounded-circle mb-3 border border-3 border-light shadow-sm" alt="Doctor">
-            <h5 class="fw-bold mb-0">Dr. {{ doc.name }}</h5>
-            <span class="badge bg-blue-subtle text-primary rounded-pill px-3">{{ doc.speciality }}</span>
-          </div>
-          
-          <div class="info-list small mb-4">
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted"><i class="bi bi-clock-history me-2"></i>Experience</span>
-              <span class="fw-semibold">{{ doc.yearsOfExperience }} Years</span>
-            </div>
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted"><i class="bi bi-telephone me-2"></i>Contact</span>
-              <span class="fw-semibold">{{ doc.phone }}</span>
-            </div>
-          </div>
-
-          <p class="text-secondary small text-center mb-4 line-clamp-2">
-            {{ doc.bio }}
-          </p>
-
-          <div class="d-grid gap-2">
-            <button class="btn btn-primary rounded-3">Book Appointment</button>
-            <button class="btn btn-outline-light text-primary border-primary-subtle rounded-3">View Profile</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="filteredDoctors.length === 0" class="col-12 text-center py-5">
-      <div class="text-muted">
-        <i class="bi bi-person-exclamation display-1"></i>
-        <h4 class="mt-3">No doctors found matching your criteria.</h4>
-      </div>
-    </div>
+  <!-- Loading -->
+  <div class="fd-loading" *ngIf="isLoading()">
+    <div class="fd-spinner"><span></span><span></span><span></span></div>
+    <p>Searching for doctors…</p>
   </div>
+
+  <!-- Error -->
+  <div class="fd-error" *ngIf="error() && !isLoading()">
+    <span class="fd-error-icon">⚠</span>
+    <p>{{ error() }}</p>
+    <button class="fd-retry-btn" (click)="loadAllDoctors()">Retry</button>
+  </div>
+
+  <!-- Doctor Grid -->
+  <main class="fd-grid" *ngIf="!isLoading() && !error()">
+
+    <!-- Empty -->
+    <div class="fd-empty" *ngIf="displayedDoctors().length === 0">
+      <span class="fd-empty-icon">🔬</span>
+      <p>No doctors match your search.</p>
+      <small>Try a different name or speciality.</small>
+    </div>
+
+    <!-- Cards -->
+    <article
+      class="fd-card"
+      *ngFor="let doctor of displayedDoctors(); let i = index"
+      [style.--delay]="i * 60 + 'ms'"
+    >
+      <!-- Card Header -->
+      <div class="fd-card-header">
+        <div class="fd-avatar">
+          <span class="fd-avatar-initials">{{ getDoctorInitials(doctor) }}</span>
+          <span class="fd-avatar-gender" [class.female]="doctor.gender === 1">
+            {{ getGenderIcon(doctor.gender) }}
+          </span>
+        </div>
+
+        <div class="fd-card-meta">
+          <h3 class="fd-doctor-name">{{ doctor.name ?? 'Doctor #' + doctor.id }}</h3>
+          <span class="fd-speciality-tag" [class.fd-speciality-unknown]="!doctor.speciality">
+            {{ getSpecialityName(doctor.speciality) }}
+          </span>
+        </div>
+
+        <span
+          class="fd-exp-badge"
+          [class]="'badge-' + getExperienceBadge(doctor.yearsOfExperience).toLowerCase()"
+        >
+          {{ getExperienceBadge(doctor.yearsOfExperience) }}
+        </span>
+      </div>
+
+      <!-- Bio -->
+      <p class="fd-bio">{{ doctor.bio }}</p>
+
+      <!-- Card Footer -->
+      <div class="fd-card-footer">
+        <div class="fd-stat">
+          <span class="fd-stat-value">{{ doctor.yearsOfExperience }}</span>
+          <span class="fd-stat-label">yrs exp.</span>
+        </div>
+        <div class="fd-stat">
+          <span class="fd-stat-value fd-gender-val">{{ getGenderLabel(doctor.gender) }}</span>
+          <span class="fd-stat-label">Gender</span>
+        </div>
+        <div class="fd-stat" *ngIf="doctor.phone">
+          <span class="fd-stat-value">{{ doctor.phone }}</span>
+          <span class="fd-stat-label">Phone</span>
+        </div>
+        <button class="fd-book-btn">
+          Book Appointment <span class="fd-btn-arrow">→</span>
+        </button>
+      </div>
+    </article>
+
+  </main>
 </div>

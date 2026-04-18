@@ -1,0 +1,169 @@
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.welcome {
+  margin-bottom: 2.5rem;
+}
+
+.welcome h1 {
+  font-size: 2.6rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.welcome p {
+  color: #aaa;
+  font-size: 1.2rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 16px;
+  padding: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.stat-icon {
+  font-size: 2.8rem;
+}
+
+.stat-info h3 {
+  margin: 0;
+  font-size: 2rem;
+  color: #fff;
+}
+
+.stat-info p {
+  margin: 0;
+  color: #888;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.section-header h2 {
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.view-all {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.appointment-list {
+  background: #111;
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid #222;
+}
+
+.appointment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #222;
+}
+
+.appointment-item:last-child {
+  border-bottom: none;
+}
+
+.appointment-left {
+  display: flex;
+  gap: 1.2rem;
+  align-items: center;
+}
+
+.date {
+  text-align: center;
+  min-width: 60px;
+}
+
+.day {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #60a5fa;
+}
+
+.month {
+  font-size: 0.95rem;
+  color: #999;
+}
+
+.appointment-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.price {
+  color: #34d399;
+  font-weight: 600;
+}
+
+.btn-small {
+  padding: 8px 16px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.quick-actions h2 {
+  margin: 2.5rem 0 1.2rem 0;
+  color: #fff;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.action-btn {
+  padding: 1.4rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  color: #ddd;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}

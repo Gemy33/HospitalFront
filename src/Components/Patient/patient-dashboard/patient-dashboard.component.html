@@ -1,0 +1,65 @@
+<div class="dashboard">
+  <!-- Welcome -->
+  <div class="welcome">
+    <h1>Welcome back, {{ patientName }} 👋</h1>
+    <p>Here's what's happening with your health today</p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of stats">
+      <div class="stat-icon" [style.color]="stat.color">{{ stat.icon }}</div>
+      <div class="stat-info">
+        <h3>{{ stat.value }}</h3>
+        <p>{{ stat.title }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upcoming Appointments -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Upcoming Appointments</h2>
+      <a routerLink="/patient/appointments" class="view-all">View All →</a>
+    </div>
+
+    <div class="appointment-list">
+      <div class="appointment-item" *ngFor="let app of upcomingAppointments">
+        <div class="appointment-left">
+          <div class="date">
+            <span class="day">{{ app.date | date:'dd' }}</span>
+            <span class="month">{{ app.date | date:'MMM' }}</span>
+          </div>
+          <div>
+            <h4>Doctor #{{ app.doctorId }}</h4>
+            <p>{{ app.date | date:'EEEE, h:mm a' }}</p>
+          </div>
+        </div>
+        <div class="appointment-right">
+          <span class="price">${{ app.price.toFixed(2) }}</span>
+          <button class="btn-small">Details</button>
+        </div>
+      </div>
+
+      <div *ngIf="upcomingAppointments.length === 0" class="no-data">
+        No upcoming appointments. <a routerLink="/patient/appointments">Book one now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="actions-grid">
+      <button routerLink="/patient/appointments" class="action-btn">
+        📅 Book New Appointment
+      </button>
+      <button routerLink="/patient/prescriptions" class="action-btn">
+        💊 View Prescriptions
+      </button>
+      <button routerLink="/patient/history" class="action-btn">
+        📋 Medical History
+      </button>
+    </div>
+  </div>
+</div>

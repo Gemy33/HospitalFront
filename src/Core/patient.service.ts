@@ -15,20 +15,20 @@ export interface PatientProfile {
 
 export interface Appointment {
   id: number;
-  patientId: number;
-  doctorAvailabilityId: number;
+  date: string;           // comes from consultionTime
+  doctorId: number;
+  price: number;
+  status: string;         // "Confirmed" or "Pending"
+}
 
-  consultionTime: string;
-  status: number;
-
-  doctorAvailability: {
-    doctorId: number;
-    availableFrom: string;
-    maxPatients: number;
-    sessionDurationMinutes: number;
-    price: number;
-    id: number;
-  };
+export interface Doctor{
+  id:number;
+  name:string;
+  gender : number;
+  bio : string;
+  phone:string;
+  speciality : string;
+  yearsOfExperience : string;
 }
 
 export interface CreateBookingRequest {
@@ -66,18 +66,34 @@ export class PatientService {
 
   // ✅ 3. Get All Appointments
 
-getAppointments() {
-  return this.http.get<Appointment[]>(`${this.baseUrl}/appointments`)
-    .pipe(
-      map((appointments) =>
-        appointments.map(a => ({
-          id: a.id,
-          date: a.consultionTime,
-          doctorId: a.doctorAvailability.doctorId,
-          price: a.doctorAvailability.price,
-          status: this.mapStatus(a.status)
-        }))
-      )
-    );
-}
+getAppointments(patientId: number): Observable<Appointment[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/appointments/${patientId}`)
+      .pipe(
+        map((appointments) =>
+          appointments.map(a => ({
+            id: a.id,
+            date: a.consultionTime,                    // renamed for clarity
+            doctorId: a.doctorAvailability?.doctorId || 0,
+            price: a.doctorAvailability?.price || 0,
+            status: this.mapStatus(a.status)
+          }))
+        )
+      );
+  }
+
+
+
+ // 4. Get all Doctors
+
+ getAllDoctors():Observable<any>
+ {
+   return this.http.get<Doctor[]>(`${this.baseUrl}/Doctors`);
+ }
+
+
+ // get all doctor by speciality
+  getAllDoctorsBySpeciality(spcId:number):Observable<any>
+ {
+   return this.http.get<Doctor[]>(`${this.baseUrl}/Doctors/${spcId}`);
+ }
 }
