@@ -1,2 +1,4 @@
-export interface ITreatment {
+export interface Treatment {
+  medicationName: string;
+  notes: string;
 }

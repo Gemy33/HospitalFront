@@ -1,7 +1,10 @@
+import { IDoctorMini } from "./idoctor-mini";
+import { IPrescriptionTreatment } from "./iprescription-treatment";
+
 export interface IPrescription {
     id: number;
   doctorId: number;
   patientId: number;
-  doctor: DoctorMini;
-  treatments: PrescriptionTreatment[];
+  doctor: IDoctorMini;
+  treatments: IPrescriptionTreatment[];
 }

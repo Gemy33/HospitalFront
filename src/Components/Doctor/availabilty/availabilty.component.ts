@@ -5,6 +5,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { DoctorService } from '../../../Core/doctor.service';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -90,12 +91,16 @@ export class AvailabiltyComponent implements OnInit {
   toastType: ToastType = 'success';
   private toastTimer?: ReturnType<typeof setTimeout>;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,private _doctorservice:DoctorService) {}
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.loadSlots();
+    this._doctorservice.getDoctorAvailabilities(4).subscribe({
+      next:(res)=>console.log(res),
+      error:(err)=>console.log(err)
+    });
   }
 
   // ── Data: Load all ───────────────────────────────────────────────────────────

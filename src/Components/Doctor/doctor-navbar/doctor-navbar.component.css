@@ -1,12 +1,9 @@
 /* =============================================
-   Doctor Sidebar — MediLink Design System
-   Font: 'DM Sans' (body) + 'Syne' (brand/headings)
-   Theme: Deep navy with teal-mint accents
+   Doctor Sidebar — Clean & Compact Version
    ============================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-/* ----- CSS Variables ----- */
 :host {
   --sidebar-width: 248px;
   --sidebar-collapsed-width: 68px;
@@ -17,7 +14,6 @@
   --accent: #38d39f;
   --accent-soft: rgba(56, 211, 159, 0.18);
   --accent-zoom: #2d8cff;
-  --accent-zoom-soft: rgba(45, 140, 255, 0.14);
   --text-primary: #e8edf5;
   --text-secondary: #7b8da6;
   --text-muted: #4a5a70;
@@ -30,10 +26,10 @@
   display: block;
 }
 
-/* ----- Base Sidebar ----- */
+/* ── Sidebar shell ──────────────────────────── */
 .sidebar {
   width: var(--sidebar-width);
-  min-height: 100vh;
+  height: 100vh;
   background: var(--bg);
   border-right: 1px solid var(--border);
   display: flex;
@@ -45,11 +41,7 @@
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
 }
 
-.sidebar.collapsed {
-  width: var(--sidebar-collapsed-width);
-}
-
-/* Subtle gradient stripe on left edge */
+/* Accent left stripe */
 .sidebar::before {
   content: '';
   position: absolute;
@@ -57,26 +49,33 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(to bottom, transparent 0%, var(--accent) 35%, #2d8cff 70%, transparent 100%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--accent) 35%,
+    #2d8cff 70%,
+    transparent 100%
+  );
   opacity: 0.6;
   z-index: 1;
 }
 
-/* ----- Header ----- */
+/* ── Header ─────────────────────────────────── */
 .sidebar-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 14px 18px 18px;
+  padding: 20px 14px 16px 18px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
+/* ── Logo ───────────────────────────────────── */
 .logo-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
-  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .logo-icon {
@@ -88,8 +87,8 @@
   align-items: center;
   justify-content: center;
   color: var(--bg);
-  flex-shrink: 0;
   box-shadow: 0 0 14px rgba(56, 211, 159, 0.35);
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -99,117 +98,107 @@
   color: var(--text-primary);
   letter-spacing: -0.3px;
   white-space: nowrap;
-  opacity: 1;
-  transition: opacity var(--transition);
 }
 
-.collapsed .logo-text {
-  opacity: 0;
-  width: 0;
-  pointer-events: none;
-}
-
-.collapse-btn {
+/* Collapse toggle button */
+.sidebar-header button {
   width: 28px;
   height: 28px;
+  border-radius: 7px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 7px;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
-  padding: 0;
+  transition: all var(--transition);
 }
 
-.collapse-btn:hover {
+.sidebar-header button:hover {
   background: var(--bg-hover);
-  color: var(--accent);
-  border-color: var(--border-accent);
+  color: var(--text-primary);
 }
 
-/* ----- Doctor Card ----- */
+/* ── Doctor card ─────────────────────────────── */
 .doctor-card {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 16px 14px;
-  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  transition: padding var(--transition);
 }
 
-.collapsed .doctor-card {
-  padding: 14px 15px;
-  justify-content: center;
-}
-
+/* Avatar ring — teal glow circle around avatar */
 .avatar-ring {
   position: relative;
   flex-shrink: 0;
 }
 
 .avatar {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2a4d7a 100%);
-  border: 2px solid var(--border-accent);
+  background: linear-gradient(135deg, #1a2e4a 0%, #243650 100%);
+  border: 2px solid var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--accent);
   overflow: hidden;
-  letter-spacing: 0.5px;
+  box-shadow: 0 0 0 3px rgba(56, 211, 159, 0.15);
 }
 
 .avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
+.avatar span {
+  font-family: var(--font-brand);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+/* Online / away dot in bottom-right of avatar */
 .status-dot {
   position: absolute;
   bottom: 1px;
   right: 1px;
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
-  background: var(--text-muted);
+  background: var(--text-muted);       /* default = away/grey */
   border: 2px solid var(--bg);
-  transition: background 0.3s;
+  transition: background var(--transition);
 }
 
 .status-dot.online {
   background: var(--accent);
-  box-shadow: 0 0 6px rgba(56, 211, 159, 0.7);
-  animation: pulse-status 2.5s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(56, 211, 159, 0.6);
 }
 
-@keyframes pulse-status {
-  0%, 100% { box-shadow: 0 0 6px rgba(56, 211, 159, 0.7); }
-  50%       { box-shadow: 0 0 12px rgba(56, 211, 159, 0.5); }
-}
-
+/* Doctor name / specialty text */
 .doctor-info {
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
 .doctor-name {
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0 0 2px;
+  margin: 0;
   line-height: 1.3;
 }
 
@@ -219,64 +208,41 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0 0 6px;
+  margin: 0;
   line-height: 1.3;
 }
 
+/* AVAILABLE / AWAY badge */
 .badge-status {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 5px;
+  padding: 2px 9px;
+  border-radius: 20px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 20px;
-  background: rgba(74, 90, 112, 0.4);
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  transition: all 0.3s;
+  background: rgba(75, 85, 99, 0.35);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  width: fit-content;
+  transition: all var(--transition);
 }
 
 .badge-status.online {
-  background: var(--accent-soft);
+  background: rgba(56, 211, 159, 0.12);
   color: var(--accent);
-  border-color: var(--border-accent);
+  border: 1px solid rgba(56, 211, 159, 0.28);
 }
 
-/* ----- Navigation ----- */
+/* ── Navigation ──────────────────────────────── */
 .sidebar-nav {
   flex: 1;
-  padding: 10px 10px 6px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.sidebar-nav::-webkit-scrollbar {
-  width: 4px;
-}
-.sidebar-nav::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
-}
-
-.nav-section-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  padding: 10px 8px 5px;
-  white-space: nowrap;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  transition: opacity var(--transition), height var(--transition);
-}
-
-.nav-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 6px 8px;
 }
 
 .nav-item {
@@ -287,27 +253,11 @@
   border-radius: var(--radius);
   color: var(--text-secondary);
   text-decoration: none;
-  cursor: pointer;
   font-size: 13.5px;
-  font-weight: 400;
-  white-space: nowrap;
-  transition: background var(--transition), color var(--transition);
+  margin-bottom: 3px;
+  transition: all var(--transition);
   position: relative;
-  overflow: hidden;
-  margin-bottom: 2px;
-}
-
-.nav-item::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%) scaleY(0);
-  width: 2.5px;
-  height: 60%;
-  background: var(--accent);
-  border-radius: 0 2px 2px 0;
-  transition: transform 0.18s ease;
+  cursor: pointer;
 }
 
 .nav-item:hover {
@@ -321,28 +271,36 @@
   font-weight: 500;
 }
 
+/* Green left indicator bar on active item */
 .nav-item.active::after {
-  transform: translateY(-50%) scaleY(1);
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 55%;
+  background: var(--accent);
+  border-radius: 0 3px 3px 0;
 }
 
-/* Zoom/Video Call special item */
+/* Zoom call item — blue accent */
 .nav-item--zoom {
   color: var(--text-secondary);
 }
 
 .nav-item--zoom:hover {
-  background: var(--accent-zoom-soft);
-  color: #2d8cff;
+  background: rgba(45, 140, 255, 0.10);
+  color: #5aabff;
 }
 
 .nav-item--zoom.active {
-  background: var(--accent-zoom-soft);
+  background: rgba(45, 140, 255, 0.12);
   color: #2d8cff;
 }
 
 .nav-item--zoom.active::after {
   background: #2d8cff;
-  transform: translateY(-50%) scaleY(1);
 }
 
 .nav-icon {
@@ -352,95 +310,22 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: transparent;
   flex-shrink: 0;
-  transition: background var(--transition);
-}
-
-.nav-item:hover .nav-icon,
-.nav-item.active .nav-icon {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.collapsed .nav-item {
-  padding: 9px 0;
-  justify-content: center;
-}
-
-.collapsed .nav-icon {
-  margin: 0 auto;
 }
 
 .nav-label {
-  flex: 1;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: opacity var(--transition);
 }
 
-.collapsed .nav-label {
-  opacity: 0;
-  width: 0;
-  pointer-events: none;
-}
-
-/* Badge numbers */
-.nav-badge {
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  border: 1px solid var(--border-accent);
-  border-radius: 10px;
-  font-size: 10.5px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.nav-badge.accent {
-  background: rgba(250, 204, 21, 0.12);
-  color: #facc15;
-  border-color: rgba(250, 204, 21, 0.3);
-}
-
-/* Live indicator */
-.live-dot {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: #ef4444;
-  flex-shrink: 0;
-}
-
-.live-dot span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #ef4444;
-  display: inline-block;
-  animation: blink 1.2s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.2; }
-}
-
-/* ----- Stats Strip ----- */
+/* ── Stats strip ─────────────────────────────── */
 .stats-strip {
-  display: flex;
-  gap: 6px;
   padding: 10px 12px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  display: flex;
+  gap: 6px;
 }
 
 .stat-chip {
@@ -449,46 +334,35 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px 6px;
-  text-align: center;
-  cursor: default;
-  transition: border-color var(--transition), background var(--transition);
-}
-
-.stat-chip:hover {
-  border-color: var(--border-accent);
-  background: var(--bg-hover);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
 .stat-num {
-  display: block;
-  font-family: var(--font-brand);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.1;
+  color: var(--accent);
+  font-family: var(--font-brand);
+  line-height: 1;
 }
 
 .stat-lbl {
-  display: block;
-  font-size: 9.5px;
-  font-weight: 500;
-  letter-spacing: 0.4px;
+  font-size: 10px;
   color: var(--text-muted);
   text-transform: uppercase;
-  margin-top: 2px;
+  letter-spacing: 0.4px;
 }
 
-/* ----- Footer / Sign Out ----- */
+/* ── Footer / sign-out ───────────────────────── */
 .sidebar-footer {
-  padding: 10px 10px 14px;
+  padding: 8px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 .signout-btn {
-  display: flex;
-  align-items: center;
-  gap: 11px;
   width: 100%;
   padding: 9px 10px;
   border-radius: var(--radius);
@@ -497,58 +371,14 @@
   color: var(--text-muted);
   font-family: var(--font-body);
   font-size: 13.5px;
-  font-weight: 400;
   cursor: pointer;
-  text-align: left;
-  transition: background var(--transition), color var(--transition);
-  white-space: nowrap;
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  transition: all var(--transition);
 }
 
 .signout-btn:hover {
   background: rgba(239, 68, 68, 0.08);
   color: #f87171;
-}
-
-.signout-btn .nav-icon {
-  flex-shrink: 0;
-}
-
-.collapsed .signout-btn {
-  justify-content: center;
-  padding: 9px 0;
-}
-
-.collapsed .signout-btn .nav-label {
-  opacity: 0;
-  width: 0;
-  pointer-events: none;
-}
-
-/* ----- Tooltips (collapsed mode) ----- */
-.collapsed .nav-item[title]::before,
-.collapsed .signout-btn[title]::before {
-  content: attr(title);
-  position: absolute;
-  left: calc(var(--sidebar-collapsed-width) + 8px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: #1e2d45;
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 5px 10px;
-  border-radius: 6px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  border: 1px solid var(--border);
-  z-index: 999;
-  transition: opacity 0.15s;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.4);
-}
-
-.collapsed .nav-item[title]:hover::before,
-.collapsed .signout-btn[title]:hover::before {
-  opacity: 1;
 }

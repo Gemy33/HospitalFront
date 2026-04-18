@@ -19,8 +19,8 @@ export class DoctorService {
 
   constructor(private http: HttpClient) { }
  private baseurl:string=environment.baseUrl;
-  getDoctorProfile(doctorId:number): Observable<DoctorProfile> {
-    return this.http.get<DoctorProfile>(`${this.baseurl}/doctor/profile`);
+  getDoctorProfile(doctorId:string|null): Observable<DoctorProfile> {
+    return this.http.get<DoctorProfile>(`${this.baseurl}/doctor/profile/${doctorId}`);
   }
   updateDoctorProfile(data: UpdateDoctorProfile): Observable<any> {
     return this.http.put(
