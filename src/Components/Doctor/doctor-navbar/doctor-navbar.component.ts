@@ -49,11 +49,11 @@ export class DoctorNavbarComponent implements OnInit, OnDestroy {
   @Output() signedOut = new EventEmitter<void>();
   @Output() zoomCallStarted = new EventEmitter<void>();
   @Output() zoomCallEnded = new EventEmitter<void>();
-  @Output() collapsedChange = new EventEmitter<boolean>();
+ 
 
   // ── State ───────────────────────────────────────────────────────────────────
 
-  isCollapsed = false;
+ 
   isInCall = false;
 
   /** Zoom meeting URL generated from the API — injected via ZoomService in real usage */
@@ -62,13 +62,9 @@ export class DoctorNavbarComponent implements OnInit, OnDestroy {
   constructor(private router: Router) {}
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
-
+ fixedId:number=2;
   ngOnInit(): void {
-    // Restore collapse preference from localStorage
-    const saved = localStorage.getItem('sidebar_collapsed');
-    if (saved !== null) {
-      this.isCollapsed = saved === 'true';
-    }
+  
   }
 
   ngOnDestroy(): void {
@@ -80,16 +76,7 @@ export class DoctorNavbarComponent implements OnInit, OnDestroy {
 
   // ── Public Methods ───────────────────────────────────────────────────────────
 
-  /**
-   * Toggle sidebar collapsed / expanded state
-   * Persists preference to localStorage
-   */
-  toggleCollapse(): void {
-    this.isCollapsed = !this.isCollapsed;
-    localStorage.setItem('sidebar_collapsed', String(this.isCollapsed));
-    this.collapsedChange.emit(this.isCollapsed);
-  }
-
+  
   /**
    * Derive initials from a full name for the avatar fallback
    * e.g. "Dr. Sarah Mitchell" → "SM"

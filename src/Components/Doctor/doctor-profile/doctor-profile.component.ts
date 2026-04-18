@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { DoctorService } from '../../../Core/doctor.service';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -62,16 +63,25 @@ export class DoctorProfileComponent implements OnInit {
 
   /** Availability chips for the week */
   weekDays: WeekDay[] = [];
+  _doctorservice:DoctorService=inject(DoctorService);
+
 
   // ── API Config ───────────────────────────────────────────────────────────────
   // private readonly API_URL = '/api/doctor/profile'; // replace with your base URL
 
-  constructor(private http: HttpClient) {}
+  
+  constructor(private http: HttpClient ,private route:ActivatedRoute )  {}
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
-    // this.loadProfile();
+   const doctorId = this.route.snapshot.paramMap.get('id');
+    this._doctorservice.getDoctorProfile(doctorId).subscribe({
+      next:(res)=>{console.log(res);
+        console.log("im in the doctor profile.ts")
+      },
+      error:(err)=>console.log(err)
+    });
     this.buildWeekDays();
   }
 
