@@ -228,151 +228,180 @@
     </div>
 
     <!-- ── CREATE / EDIT FORM ── -->
-    <form class="drawer-body" *ngIf="modalMode !== 'view'" (ngSubmit)="submitForm()" #slotForm="ngForm" novalidate>
+   <form class="drawer-body"
+      *ngIf="modalMode !== 'view'"
+      [formGroup]="createslotForm"
+      (ngSubmit)="submitForm()"
+      novalidate>
 
-      <div class="form-section-label">Date & Time</div>
+  <div class="form-section-label">Date & Time</div>
 
-      <div class="form-row">
-        <div class="form-field full">
-          <label class="field-label">
-            Available From
-            <span class="field-required">*</span>
-          </label>
-          <div class="input-wrap">
-            <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <input
-              type="datetime-local"
-              class="field-input"
-              name="availableFrom"
-              [(ngModel)]="form.availableFrom"
-              required
-              #availableFromCtrl="ngModel"
-              [class.invalid]="availableFromCtrl.invalid && availableFromCtrl.touched"
-            />
-          </div>
-          <span class="field-error" *ngIf="availableFromCtrl.invalid && availableFromCtrl.touched">Date and time is required.</span>
-        </div>
+  <div class="form-row">
+    <div class="form-field full">
+      <label class="field-label">
+        Available From
+        <span class="field-required">*</span>
+      </label>
+
+      <div class="input-wrap">
+        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+
+        <input type="datetime-local"
+               class="field-input"
+               formControlName="availableFrom"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section-label">Session Settings</div>
+
+  <div class="form-row two-col">
+
+    <div class="form-field">
+      <label class="field-label">
+        Max Patients
+        <span class="field-required">*</span>
+      </label>
+
+      <div class="input-wrap">
+        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+          <path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+
+        <input type="number"
+               class="field-input"
+               formControlName="maxPatients"
+               min="1"
+               max="100"
+               placeholder="e.g. 20"/>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label class="field-label">
+        Session Duration (min)
+        <span class="field-required">*</span>
+      </label>
+
+      <div class="input-wrap">
+        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+
+        <input type="number"
+               class="field-input"
+               formControlName="sessionDurationMinutes"
+               min="5"
+               max="240"
+               placeholder="e.g. 30"/>
       </div>
 
-      <div class="form-section-label">Session Settings</div>
-
-      <div class="form-row two-col">
-
-        <div class="form-field">
-          <label class="field-label">
-            Max Patients
-            <span class="field-required">*</span>
-          </label>
-          <div class="input-wrap">
-            <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            <input
-              type="number"
-              class="field-input"
-              name="maxPatients"
-              [(ngModel)]="form.maxPatients"
-              required min="1" max="100"
-              #maxPatientsCtrl="ngModel"
-              [class.invalid]="maxPatientsCtrl.invalid && maxPatientsCtrl.touched"
-              placeholder="e.g. 20"
-            />
-          </div>
-          <span class="field-error" *ngIf="maxPatientsCtrl.invalid && maxPatientsCtrl.touched">Enter a value between 1–100.</span>
-        </div>
-
-        <div class="form-field">
-          <label class="field-label">
-            Session Duration (min)
-            <span class="field-required">*</span>
-          </label>
-          <div class="input-wrap">
-            <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <input
-              type="number"
-              class="field-input"
-              name="sessionDurationMinutes"
-              [(ngModel)]="form.sessionDurationMinutes"
-              required min="5" max="240"
-              #durationCtrl="ngModel"
-              [class.invalid]="durationCtrl.invalid && durationCtrl.touched"
-              placeholder="e.g. 30"
-            />
-          </div>
-          <span class="field-error" *ngIf="durationCtrl.invalid && durationCtrl.touched">Enter 5–240 minutes.</span>
-          <!-- Duration Quick-picks -->
-          <div class="quick-picks">
-            <button type="button" class="qpick" *ngFor="let d of durationPresets" (click)="form.sessionDurationMinutes = d">{{ d }}m</button>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="form-section-label">Pricing</div>
-
-      <div class="form-row">
-        <div class="form-field full">
-          <label class="field-label">
-            Consultation Price (EGP)
-            <span class="field-required">*</span>
-          </label>
-          <div class="input-wrap price-wrap">
-            <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-            <input
-              type="number"
-              class="field-input"
-              name="price"
-              [(ngModel)]="form.price"
-              required min="0"
-              step="0.01"
-              #priceCtrl="ngModel"
-              [class.invalid]="priceCtrl.invalid && priceCtrl.touched"
-              placeholder="e.g. 150.00"
-            />
-            <span class="currency-badge">EGP</span>
-          </div>
-          <span class="field-error" *ngIf="priceCtrl.invalid && priceCtrl.touched">Enter a valid price.</span>
-          <!-- Price presets -->
-          <div class="quick-picks">
-            <button type="button" class="qpick" *ngFor="let p of pricePresets" (click)="form.price = p">{{ p }}</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Summary Preview -->
-      <div class="form-preview" *ngIf="form.availableFrom && form.maxPatients && form.sessionDurationMinutes && form.price">
-        <p class="preview-label">Preview</p>
-        <div class="preview-row">
-          <span>📅</span>
-          <span>{{ formatPreviewDate(form.availableFrom) }}</span>
-        </div>
-        <div class="preview-row">
-          <span>👥</span>
-          <span>Up to {{ form.maxPatients }} patients · {{ form.sessionDurationMinutes }} min sessions</span>
-        </div>
-        <div class="preview-row">
-          <span>💰</span>
-          <span>{{ form.price | number:'1.2-2' }} EGP per session</span>
-        </div>
-      </div>
-
-      <!-- API error -->
-      <div class="api-error" *ngIf="apiError">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        {{ apiError }}
-      </div>
-
-      <!-- Footer -->
-      <div class="drawer-footer">
-        <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
-        <button type="submit" class="btn-primary" [class.loading]="isSaving" [disabled]="slotForm.invalid || isSaving">
-          <span class="btn-spinner" *ngIf="isSaving"></span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" *ngIf="!isSaving">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          {{ isSaving ? 'Saving…' : modalMode === 'create' ? 'Create Slot' : 'Save Changes' }}
+      <div class="quick-picks">
+        <button type="button"
+                class="qpick"
+                *ngFor="let d of durationPresets"
+                (click)="createslotForm.get('sessionDurationMinutes')?.setValue(d)">
+          {{ d }}m
         </button>
       </div>
+    </div>
 
-    </form>
+  </div>
+
+  <div class="form-section-label">Pricing</div>
+
+  <div class="form-row">
+    <div class="form-field full">
+      <label class="field-label">
+        Consultation Price (EGP)
+        <span class="field-required">*</span>
+      </label>
+
+      <div class="input-wrap price-wrap">
+        <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="1" x2="12" y2="23"/>
+          <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+        </svg>
+
+        <input type="number"
+               class="field-input"
+               formControlName="price"
+               min="0"
+               step="0.01"
+               placeholder="e.g. 150.00"/>
+
+        <span class="currency-badge">EGP</span>
+      </div>
+
+      <div class="quick-picks">
+        <button type="button"
+                class="qpick"
+                *ngFor="let p of pricePresets"
+                (click)="createslotForm.get('price')?.setValue(p)">
+          {{ p }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview (unchanged logic) -->
+  <div class="form-preview"
+       *ngIf="createslotForm.value.availableFrom &&
+              createslotForm.value.maxPatients &&
+              createslotForm.value.sessionDurationMinutes &&
+              createslotForm.value.price">
+
+    <p class="preview-label">Preview</p>
+
+    <div class="preview-row">
+      <span>📅</span>
+      <span>{{ formatPreviewDate(createslotForm.value.availableFrom) }}</span>
+    </div>
+
+    <div class="preview-row">
+      <span>👥</span>
+      <span>Up to {{ createslotForm.value.maxPatients }} patients · {{ createslotForm.value.sessionDurationMinutes }} min sessions</span>
+    </div>
+
+    <div class="preview-row">
+      <span>💰</span>
+      <span>{{ createslotForm.value.price | number:'1.2-2' }} EGP per session</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="drawer-footer">
+    <button type="button" class="btn-secondary" (click)="closeModal()">
+      Cancel
+    </button>
+
+    <button type="submit"
+            class="btn-primary"
+            [class.loading]="isSaving"
+            [disabled]="createslotForm.invalid || isSaving">
+
+      <span class="btn-spinner" *ngIf="isSaving"></span>
+
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5"
+           *ngIf="!isSaving">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+
+      {{ isSaving ? 'Saving…' : modalMode === 'create' ? 'Create Slot' : 'Save Changes' }}
+    </button>
+  </div>
+
+</form>
 
   </div><!-- /modal-drawer -->
 </div><!-- /modal-overlay -->

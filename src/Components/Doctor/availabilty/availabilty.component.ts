@@ -2,10 +2,11 @@ import {
   Component, OnInit
 } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, NgForm, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DoctorService } from '../../../Core/doctor.service';
+import { ICreateAvailability } from '../../../Core/Interfaces/Doctor/icreate-availability';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -47,7 +48,7 @@ export type ToastType   = 'success' | 'error';
 @Component({
   selector: 'app-availabilty',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HttpClientModule, DecimalPipe],
+  imports: [CommonModule, ReactiveFormsModule,FormsModule, RouterModule, HttpClientModule, DecimalPipe],
   templateUrl: './availabilty.component.html',
   styleUrls:   ['./availabilty.component.css' ],
 })
@@ -91,16 +92,33 @@ export class AvailabiltyComponent implements OnInit {
   toastType: ToastType = 'success';
   private toastTimer?: ReturnType<typeof setTimeout>;
 
+createslotForm: FormGroup = new FormGroup({
+  availableFrom: new FormControl('', Validators.required),
+
+  maxPatients: new FormControl(1, [
+    Validators.required,
+    Validators.min(1),
+    Validators.max(100)
+  ]),
+
+  sessionDurationMinutes: new FormControl(30, [
+    Validators.required,
+    Validators.min(5),
+    Validators.max(240)
+  ]),
+
+  price: new FormControl(0, [
+    Validators.required,
+    Validators.min(0)
+  ]),
+});
+
   constructor(private http: HttpClient,private _doctorservice:DoctorService) {}
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.loadSlots();
-    this._doctorservice.getDoctorAvailabilities(4).subscribe({
-      next:(res)=>console.log(res),
-      error:(err)=>console.log(err)
-    });
   }
 
   // ── Data: Load all ───────────────────────────────────────────────────────────
@@ -111,9 +129,9 @@ export class AvailabiltyComponent implements OnInit {
    */
   loadSlots(): void {
     this.isLoading = true;
-    this.http.get<AvailabilitySlot[]>(`${this.BASE_URL}?doctorId=${this.DOCTOR_ID}`)
-      .subscribe({
+     this._doctorservice.getDoctorAvailabilities(4).subscribe({
         next: (slots) => {
+          console.log(slots);
           this.allSlots = this.sortSlots(slots);
           this.applyFilter();
           this.buildSummary();
@@ -135,14 +153,13 @@ export class AvailabiltyComponent implements OnInit {
    * POST /api/availability
    * Body: CreateSlotPayload
    */
-  private createSlot(payload: CreateSlotPayload): void {
+  private createSlot(payload: ICreateAvailability): void {
     this.isSaving = true;
     this.apiError = '';
-
-    this.http.post<AvailabilitySlot>(this.BASE_URL, payload)
-      .subscribe({
-        next: (created) => {
-          this.allSlots = this.sortSlots([created, ...this.allSlots]);
+    this._doctorservice.createAvailability(payload).subscribe({
+        next: (res) => {
+          console.log(res)
+          // this.allSlots = this.sortSlots([created, ...this.allSlots]);
           this.applyFilter();
           this.buildSummary();
           this.isSaving = false;
@@ -152,6 +169,7 @@ export class AvailabiltyComponent implements OnInit {
         error: (err) => {
           this.apiError = err?.error?.message ?? 'Failed to create slot. Please try again.';
           this.isSaving = false;
+         
         },
       });
   }
@@ -248,26 +266,28 @@ export class AvailabiltyComponent implements OnInit {
   }
 
   submitForm(): void {
-    if (this.modalMode === 'create') {
-      const payload: CreateSlotPayload = {
-        doctorId:               this.DOCTOR_ID,
-        availableFrom:          this.toISO(this.form.availableFrom),
-        maxPatients:            +this.form.maxPatients,
-        sessionDurationMinutes: +this.form.sessionDurationMinutes,
-        price:                  +this.form.price,
-      };
-      this.createSlot(payload);
-    } else if (this.modalMode === 'edit' && this.activeSlot) {
-      const payload: UpdateSlotPayload = {
-        DoctorAvailabilityId:   this.activeSlot.DoctorAvailabilityId,
-        doctorId:               this.DOCTOR_ID,
-        availableFrom:          this.toISO(this.form.availableFrom),
-        maxPatients:            +this.form.maxPatients,
-        sessionDurationMinutes: +this.form.sessionDurationMinutes,
-        price:                  +this.form.price,
-      };
-      this.updateSlot(payload);
-    }
+    console.log(this.createslotForm);
+    console.log("im islam and will do it by the grace of good")
+    // if (this.modalMode === 'create') {
+    //   const payload: CreateSlotPayload = {
+    //     doctorId:               this.DOCTOR_ID,
+    //     availableFrom:          this.toISO(this.form.availableFrom),
+    //     maxPatients:            +this.form.maxPatients,
+    //     sessionDurationMinutes: +this.form.sessionDurationMinutes,
+    //     price:                  +this.form.price,
+    //   };
+    //   this.createSlot(payload);
+    // } else if (this.modalMode === 'edit' && this.activeSlot) {
+    //   const payload: UpdateSlotPayload = {
+    //     DoctorAvailabilityId:   this.activeSlot.DoctorAvailabilityId,
+    //     doctorId:               this.DOCTOR_ID,
+    //     availableFrom:          this.toISO(this.form.availableFrom),
+    //     maxPatients:            +this.form.maxPatients,
+    //     sessionDurationMinutes: +this.form.sessionDurationMinutes,
+    //     price:                  +this.form.price,
+    //   };
+    //   this.updateSlot(payload);
+    // }
   }
 
   // ── Slot Selection ───────────────────────────────────────────────────────────
@@ -446,7 +466,7 @@ export class AvailabiltyComponent implements OnInit {
     return slot.DoctorAvailabilityId;
   }
 
-  private sortSlots(slots: AvailabilitySlot[]): AvailabilitySlot[] {
+  private sortSlots(slots: any[]): any[] {
     return [...slots].sort(
       (a, b) => new Date(a.availableFrom).getTime() - new Date(b.availableFrom).getTime()
     );
