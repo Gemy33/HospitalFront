@@ -25,7 +25,7 @@ export class PatientNavbarComponent {
     { label: 'Dashboard', icon: '🏠', route: '/patient/dashboard', active: true },
     { label: 'Profile', icon: '👤', route: '/patient/profile' },
     { label: 'My Appointments', icon: '📅', route: '/patient/appointments' },
-    { label: 'Prescriptions', icon: '💊', route: '/patient/prescriptions' },
+    { label: 'Prescription', icon: '💊', route: '/patient/prescription' },
     // { label: 'Medical History', icon: '📋', route: '/patient/history' },
     { label: 'Doctors', icon: '🩺', route: '/patient/find-doctors' },
     { label: 'Settings', icon: '⚙️', route: '/patient/settings' }

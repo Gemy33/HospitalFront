@@ -1,17 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';                        // ✅ add this
+import { RouterModule } from '@angular/router';                  // ✅ add this
 import { PatientService } from '../../../Core/patient.service';
-
-export interface Doctor {
-  id: number;
-  name: string | null;
-  speciality: string | null;
-  gender: number;
-  yearsOfExperience: number;
-  bio: string;
-  phone: string | null;
-}
 
 export interface Speciality {
   id: number;
@@ -21,20 +13,20 @@ export interface Speciality {
 @Component({
   selector: 'app-find-doctor',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],             // ✅ add RouterModule
   templateUrl: './find-doctor.component.html',
   styleUrls: ['./find-doctor.component.css'],
 })
 export class FindDoctorComponent implements OnInit {
-  allDoctors = signal<Doctor[]>([]);
-  displayedDoctors = signal<Doctor[]>([]);
+
+  allDoctors = signal<any[]>([]);
+  displayedDoctors = signal<any[]>([]);
   isLoading = signal(false);
   error = signal<string | null>(null);
 
   searchName = '';
   selectedSpecialityId: number | '' = '';
 
-  // Speciality list — id matches what your API expects
   specialities: Speciality[] = [
     { id: 1,  name: 'Cardiology' },
     { id: 2,  name: 'Dermatology' },
@@ -48,7 +40,10 @@ export class FindDoctorComponent implements OnInit {
     { id: 10, name: 'Endocrinology' },
   ];
 
-  constructor(private _patientservice: PatientService) {}
+  constructor(
+    private patientservice: PatientService,
+    private router: Router,                                       // ✅ inject Router
+  ) {}
 
   ngOnInit(): void {
     this.loadAllDoctors();
@@ -57,7 +52,7 @@ export class FindDoctorComponent implements OnInit {
   loadAllDoctors(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this._patientservice.getAllDoctors().subscribe({
+    this.patientservice.getAllDoctors().subscribe({
       next: (doctors) => {
         this.allDoctors.set(doctors);
         this.applyNameFilter();
@@ -77,8 +72,7 @@ export class FindDoctorComponent implements OnInit {
     } else {
       this.isLoading.set(true);
       this.error.set(null);
-      // passes the numeric id to the API
-      this._patientservice.getAllDoctorsBySpeciality(this.selectedSpecialityId as number).subscribe({
+      this.patientservice.getAllDoctorsBySpeciality(this.selectedSpecialityId as number).subscribe({
         next: (doctors) => {
           this.allDoctors.set(doctors);
           this.displayedDoctors.set(doctors);
@@ -104,19 +98,22 @@ export class FindDoctorComponent implements OnInit {
     }
     const filtered = this.allDoctors().filter((doc) => {
       const name = (doc.name ?? `Doctor #${doc.id}`).toLowerCase();
-      const bio   = doc.bio.toLowerCase();
+      const bio  = (doc.bio ?? '').toLowerCase();
       return name.includes(term) || bio.includes(term);
     });
     this.displayedDoctors.set(filtered);
   }
 
-  // Resolve the speciality display name from the id stored on the doctor
+  // ✅ Navigate to availability page
+  viewAvailability(doctorId: number): void {
+    this.router.navigate(['/patient/doctor', doctorId, 'availability']);
+  }
+
   getSpecialityName(specialityRaw: string | null): string {
     if (!specialityRaw) return 'General Practice';
-    // If it's already a readable string (non-numeric) return it as-is
     const asNum = Number(specialityRaw);
     if (!isNaN(asNum)) {
-      const found = this.specialities.find((s) => s.id === asNum);
+      const found = this.specialities.find(s => s.id === asNum);
       return found ? found.name : 'General Practice';
     }
     return specialityRaw;
@@ -136,10 +133,10 @@ export class FindDoctorComponent implements OnInit {
     return 'Junior';
   }
 
-  getDoctorInitials(doctor: Doctor): string {
-    if (doctor.name) {
-      return doctor.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+  getDoctorInitials(doc: any): string {
+    if (doc.name) {
+      return doc.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
     }
-    return `D${doctor.id}`;
+    return `D${doc.id}`;
   }
 }

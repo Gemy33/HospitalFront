@@ -126,7 +126,7 @@
           <span class="fd-stat-value">{{ doctor.phone }}</span>
           <span class="fd-stat-label">Phone</span>
         </div>
-        <button class="fd-book-btn">
+        <button class="fd-book-btn" (click)="viewAvailability(doctor.id)">
           Book Appointment <span class="fd-btn-arrow">→</span>
         </button>
       </div>

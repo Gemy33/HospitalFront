@@ -1,46 +1,98 @@
-import { Component } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { IPrescription } from '../../../Core/Interfaces/Doctor/iprescription';
+import { DoctorService } from '../../../Core/doctor.service';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-prescription',
+  selector: 'app-prescriptions',
   standalone: true,
   imports: [CommonModule],
-  providers: [DatePipe],
   templateUrl: './prescription.component.html',
-  styleUrls: ['./prescription.component.scss']
+  styleUrls: ['./prescription.component.css'],
 })
-export class PrescriptionComponent {
-  // Your provided JSON data structure
-  prescriptionData = {
-    "treatments": [
-      {
-        "prescriptionId": 6,
-        "medicationName": "Paracetamol",
-        "notes": "Take twice daily after meals",
-        "id": 1,
-        "createdAt": "2024-03-20T10:00:00", // Fixed date for display
-        "updatedAt": "2024-03-20T10:00:00"
-      },
-      {
-        "prescriptionId": 6,
-        "medicationName": "Ibuprofen",
-        "notes": "Take once daily after food",
-        "id": 2,
-        "createdAt": "2024-03-20T10:00:00",
-        "updatedAt": "2024-03-20T10:00:00"
-      }
-    ],
-    "doctorId": 8,
-    "doctor": {
-      "id": 8,
-      "name": "Mostafa K.",
-      "speciality": "Gynecology",
-      "gender": 1,
-      "yearsOfExperience": 11,
-      "bio": "Gynecologist focused on women health and pregnancy care.",
-      "phone": "+201234567890"
-    },
-    "patientId": 1,
-    "id": 6
-  };
+export class PrescriptionsComponent implements OnInit {
+
+  prescriptions = signal<IPrescription[]>([]);
+  loading       = signal(false);
+  error         = signal<string | null>(null);
+  expanded      = signal<Set<number>>(new Set());
+
+  // Replace with auth service
+  private readonly patientId = 3;
+
+  // Search / filter
+  searchTerm    = signal('');
+  filterDoctor  = signal('');
+
+  filtered = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    const doc  = this.filterDoctor().toLowerCase().trim();
+    return this.prescriptions().filter(p => {
+      const matchesMed = !term || p.treatments.some(t =>
+        t.medicationName.toLowerCase().includes(term) ||
+        t.notes.toLowerCase().includes(term)
+      );
+      const matchesDoc = !doc ||
+        (p.doctor?.name ?? '').toLowerCase().includes(doc) ||
+        (p.doctor?.speciality ?? '').toLowerCase().includes(doc);
+      return matchesMed && matchesDoc;
+    });
+  });
+
+  totalMeds = computed(() =>
+    this.prescriptions().reduce((sum, p) => sum + p.treatments.length, 0)
+  );
+
+  uniqueDoctors = computed(() =>
+    [...new Set(this.prescriptions().map(p => p.doctor?.name).filter(Boolean))]
+  );
+
+  constructor(private doctorSvc: DoctorService , private router: Router ) {}
+
+  ngOnInit(): void { this.load(); }
+
+  openDetail(id: number): void {
+  this.router.navigate(['/patient/prescription', id]);
+}
+  load(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.doctorSvc.getPatientPrescriptions(this.patientId).subscribe({
+      next:  data => {
+        console.log('Loaded prescriptions:', data);
+         this.prescriptions.set(data); this.loading.set(false); },
+      error: ()   => { this.error.set('Failed to load prescriptions.'); this.loading.set(false); },
+    });
+  }
+
+  toggleExpand(id: number): void {
+    const s = new Set(this.expanded());
+    s.has(id) ? s.delete(id) : s.add(id);
+    this.expanded.set(s);
+  }
+
+  isExpanded(id: number): boolean {
+    return this.expanded().has(id);
+  }
+
+  getGenderIcon(gender: number): string {
+    return gender === 1 ? '♀' : '♂';
+  }
+
+  getInitials(name: string | null | undefined): string {
+    if (!name) return '?';
+    return name.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  }
+
+  formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric',
+    });
+  }
+
+  clearFilters(): void {
+    this.searchTerm.set('');
+    this.filterDoctor.set('');
+  }
 }
