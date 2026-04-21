@@ -3,7 +3,6 @@ import { PatientLayoutComponent } from './../Layouts/patient-layout/patient-layo
 import { DoctorLayoutComponent } from '../Layouts/doctor-layout/doctor-layout.component';
 import { AuthComponent } from '../Components/auth/auth.component';
 import { ProfileComponent } from '../Components/Patient/profile/profile.component';
-import { PrescriptionComponent } from '../Components/Patient/prescription/prescription.component';
 import { AppointmentComponent } from '../Components/Patient/appointment/appointment.component';
 import { find } from 'rxjs';
 import { FindDoctorComponent } from '../Components/Patient/find-doctor/find-doctor.component';
@@ -11,6 +10,10 @@ import { DoctorProfileComponent } from '../Components/Doctor/doctor-profile/doct
 import { AvailabiltyComponent } from '../Components/Doctor/availabilty/availabilty.component';
 import { BookingComponent } from '../Components/Doctor/booking/booking.component';
 import { PatientDashboardComponent } from '../Components/Patient/patient-dashboard/patient-dashboard.component';
+import { DoctorAvailabilityComponent } from '../Components/Patient/doctor-availability/doctor-availability.component';
+import { PrescriptionsComponent } from '../Components/Patient/prescription/prescription.component';
+import { PrescriptionComponent } from '../Components/Doctor/prescription/prescription.component';
+import { PrescriptionDetailComponent } from '../Components/Patient/prescription-detail/prescription-detail.component';
 
 export const routes: Routes = [
     {path: '', redirectTo: 'auth', pathMatch: 'full'},
@@ -18,10 +21,16 @@ export const routes: Routes = [
     {path : 'patient', component:PatientLayoutComponent,
         children:[
             {path:'profile', component:ProfileComponent },
-            {path:'prescriptions', component:PrescriptionComponent },
+            {path:'prescription', component:PrescriptionsComponent },
             {path:'appointments', component:AppointmentComponent },
             {path:'find-doctors', component:FindDoctorComponent },
             {path:'dashboard', component:PatientDashboardComponent },
+            {
+             path: 'doctor/:doctorId/availability',component: DoctorAvailabilityComponent,title:'Doctor Availability'},
+             {
+  path: 'prescription/:prescriptionId', component:PrescriptionDetailComponent, title:'Prescription Detail'
+  
+}
 
 
         ]

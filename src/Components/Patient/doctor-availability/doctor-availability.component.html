@@ -1,0 +1,240 @@
+<div class="da-root">
+
+  <!-- ░░ Back bar ░░ -->
+  <div class="da-topbar">
+    <button class="da-back" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+           width="16" height="16">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Back to Doctors
+    </button>
+    <span class="da-topbar-id">Doctor #{{ doctorId() }}</span>
+  </div>
+
+  <!-- ░░ Page title ░░ -->
+  <div class="da-hero">
+    <div class="da-hero-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+           width="22" height="22">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <path d="M16 2v4M8 2v4M3 10h18"/>
+        <path d="M8 14h.01M12 14h.01M16 14h.01"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="da-hero-title">Available Slots</h1>
+      <p class="da-hero-sub">Pick a time that works for you</p>
+    </div>
+  </div>
+
+  <!-- ░░ Loading ░░ -->
+  <div class="da-loading" *ngIf="loading()">
+    <div class="da-spinner">
+      <span></span><span></span><span></span>
+    </div>
+    <p>Fetching availability…</p>
+  </div>
+
+  <!-- ░░ Error ░░ -->
+  <div class="da-error" *ngIf="error() && !loading()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" width="28" height="28">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 8v4M12 16h.01"/>
+    </svg>
+    <p>{{ error() }}</p>
+    <button class="da-retry" (click)="load()">Retry</button>
+  </div>
+
+  <!-- ░░ Main content ░░ -->
+  <div class="da-body" *ngIf="!loading() && !error()">
+
+    <!-- ── Empty state ── -->
+    <div class="da-empty" *ngIf="slots().length === 0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.4" stroke-linecap="round" width="48" height="48">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <path d="M16 2v4M8 2v4M3 10h18"/>
+      </svg>
+      <p>No availability found for this doctor.</p>
+      <button class="da-retry" (click)="goBack()">Browse other doctors</button>
+    </div>
+
+    <!-- ── Slots ── -->
+    <div class="da-slots-wrap" *ngIf="slots().length > 0">
+
+      <!-- Section: open slots -->
+      <div class="da-section" *ngIf="available().length > 0">
+        <div class="da-section-header">
+          <span class="da-section-dot da-section-dot--open"></span>
+          <span class="da-section-label">Open slots</span>
+          <span class="da-section-count">{{ available().length }}</span>
+        </div>
+
+        <div class="da-slots">
+          <div
+            class="da-slot"
+            *ngFor="let item of available(); let i = index"
+            [class.da-slot--selected]="isSelected(item)"
+            [style.--si]="i"
+            (click)="select(item)"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="select(item)"
+            (keydown.space)="select(item)"
+          >
+            <!-- Date column -->
+            <div class="da-slot-date">
+              <span class="da-slot-day">{{ formatDay(item.doctorAvailability.availableFrom) }}</span>
+              <span class="da-slot-num">{{ formatDayNum(item.doctorAvailability.availableFrom) }}</span>
+              <span class="da-slot-mon">{{ formatMonth(item.doctorAvailability.availableFrom) }}</span>
+            </div>
+
+            <!-- Divider -->
+            <div class="da-slot-vline"></div>
+
+            <!-- Info -->
+            <div class="da-slot-info">
+              <div class="da-slot-time">
+                {{ formatTime(item.doctorAvailability.availableFrom) }}
+                <span class="da-slot-arrow">→</span>
+                {{ endTime(item.doctorAvailability.availableFrom, item.doctorAvailability.sessionDurationMinutes) }}
+              </div>
+              <div class="da-slot-meta">
+                <span class="da-pill da-pill--dur">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" width="11" height="11">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                  </svg>
+                  {{ item.doctorAvailability.sessionDurationMinutes }} min
+                </span>
+                <span class="da-pill da-pill--cap">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" width="11" height="11">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  {{ item.doctorAvailability.maxPatients }} patients
+                </span>
+              </div>
+            </div>
+
+            <!-- Price + select -->
+            <div class="da-slot-right">
+              <span class="da-slot-price">${{ item.doctorAvailability.price }}</span>
+              <span class="da-slot-check" *ngIf="isSelected(item)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                     width="14" height="14">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: fully booked -->
+      <div class="da-section da-section--dim" *ngIf="booked().length > 0">
+        <div class="da-section-header">
+          <span class="da-section-dot da-section-dot--full"></span>
+          <span class="da-section-label">Fully booked</span>
+          <span class="da-section-count">{{ booked().length }}</span>
+        </div>
+
+        <div class="da-slots">
+          <div
+            class="da-slot da-slot--booked"
+            *ngFor="let item of booked()"
+          >
+            <div class="da-slot-date">
+              <span class="da-slot-day">{{ formatDay(item.doctorAvailability.availableFrom) }}</span>
+              <span class="da-slot-num">{{ formatDayNum(item.doctorAvailability.availableFrom) }}</span>
+              <span class="da-slot-mon">{{ formatMonth(item.doctorAvailability.availableFrom) }}</span>
+            </div>
+            <div class="da-slot-vline"></div>
+            <div class="da-slot-info">
+              <div class="da-slot-time">
+                {{ formatTime(item.doctorAvailability.availableFrom) }}
+                <span class="da-slot-arrow">→</span>
+                {{ endTime(item.doctorAvailability.availableFrom, item.doctorAvailability.sessionDurationMinutes) }}
+              </div>
+              <div class="da-slot-meta">
+                <span class="da-pill da-pill--dur">
+                  {{ item.doctorAvailability.sessionDurationMinutes }} min
+                </span>
+              </div>
+            </div>
+            <div class="da-slot-right">
+              <span class="da-slot-price da-slot-price--dim">${{ item.doctorAvailability.price }}</span>
+              <span class="da-booked-tag">Full</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ░░ Booking panel ░░ -->
+    <div class="da-confirm-panel" *ngIf="selected()">
+      <div class="da-confirm-inner">
+
+        <div class="da-confirm-top">
+          <div class="da-confirm-info">
+            <p class="da-confirm-label">Selected appointment</p>
+            <p class="da-confirm-date">
+              {{ formatDate(selected()!.doctorAvailability.availableFrom) }}
+            </p>
+            <p class="da-confirm-time">
+              {{ formatTime(selected()!.doctorAvailability.availableFrom) }}
+              &nbsp;–&nbsp;
+              {{ endTime(selected()!.doctorAvailability.availableFrom, selected()!.doctorAvailability.sessionDurationMinutes) }}
+              <span class="da-confirm-dur">
+                ({{ selected()!.doctorAvailability.sessionDurationMinutes }} min)
+              </span>
+            </p>
+          </div>
+          <div class="da-confirm-price-box">
+            <span class="da-confirm-price-label">Total</span>
+            <span class="da-confirm-price">${{ selected()!.doctorAvailability.price }}</span>
+          </div>
+        </div>
+
+        <!-- Booking error -->
+        <div class="da-book-err" *ngIf="bookErr()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" width="14" height="14">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v4M12 16h.01"/>
+          </svg>
+          {{ bookErr() }}
+        </div>
+
+        <div class="da-confirm-actions">
+          <button class="da-btn-cancel" (click)="clearSelection()" [disabled]="booking()">
+            Cancel
+          </button>
+          <button class="da-btn-book" (click)="confirmBook()" [disabled]="booking()">
+            <span *ngIf="!booking()">
+              Confirm & Pay
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                   width="15" height="15">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </span>
+            <span class="da-btn-spinner" *ngIf="booking()">
+              <span></span><span></span><span></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

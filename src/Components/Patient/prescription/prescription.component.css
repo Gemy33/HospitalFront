@@ -1,34 +1,495 @@
-/* Custom spacing for the sidebar border on desktop only */
-@media (min-width: 768px) {
-  .border-end-md {
-    border-right: 1px solid #dee2e6 !important;
-  }
+/* ── Tokens — identical to find-doctor / availability ──────── */
+:host {
+  --bg:        #0d1117;
+  --surface:   #161b25;
+  --surface-2: #1c2333;
+  --border:    rgba(255,255,255,0.07);
+  --border-2:  rgba(255,255,255,0.12);
+  --blue:      #3b9eff;
+  --blue-bg:   rgba(59,158,255,0.09);
+  --blue-bd:   rgba(59,158,255,0.22);
+  --green:     #34d399;
+  --green-bg:  rgba(52,211,153,0.09);
+  --green-bd:  rgba(52,211,153,0.20);
+  --amber:     #fbbf24;
+  --amber-bg:  rgba(251,191,36,0.09);
+  --amber-bd:  rgba(251,191,36,0.20);
+  --red:       #f87171;
+  --red-bg:    rgba(248,113,113,0.09);
+  --t1:        #e6edf3;
+  --t2:        #7d8ea1;
+  --t3:        #3d4f62;
+  --font:      'Sora', system-ui, sans-serif;
+  --radius:    12px;
+  --radius-sm: 8px;
 }
 
-.list-group-item {
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+/* ── Root ─────────────────────────────────────────────────── */
+.rx-root {
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--t1);
+  padding-bottom: 80px;
+  background-image:
+    radial-gradient(ellipse 70% 35% at 50% 0%,
+      rgba(59,158,255,0.06) 0%, transparent 60%);
+}
+
+/* ── Topbar ───────────────────────────────────────────────── */
+.rx-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 32px 28px 24px;
+  border-bottom: 1px solid var(--border);
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.rx-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.rx-topbar-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rx-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  margin: 0 0 3px;
+  color: var(--t1);
+}
+
+.rx-page-sub {
+  font-size: 13px;
+  color: var(--t2);
+  margin: 0;
+}
+
+/* Stats chips — matches find-doctor status bar style */
+.rx-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  flex-shrink: 0;
+}
+
+.rx-stat-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.rx-stat-num {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--t1);
+  line-height: 1;
+}
+
+.rx-stat-lbl {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.rx-stat-sep {
+  width: 1px;
+  height: 26px;
+  background: var(--border);
+}
+
+/* ── Filter controls — matches find-doctor search bar ──────── */
+.rx-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 860px;
+  margin: 20px auto 0;
+  padding: 0 28px;
+}
+
+.rx-field {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.rx-field-ico {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--t3);
+  pointer-events: none;
+  display: flex;
+}
+
+.rx-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--t1);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 11px 12px 11px 38px;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.rx-input:focus {
+  border-color: var(--blue-bd);
+  box-shadow: 0 0 0 3px rgba(59,158,255,0.10);
+}
+
+.rx-input::placeholder { color: var(--t3); }
+
+.rx-clear-btn {
+  flex-shrink: 0;
   background: transparent;
-  &:last-child {
-    border-bottom: none !important;
-  }
+  border: 1px solid var(--border-2);
+  color: var(--t2);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
 }
 
-.bg-warning-subtle {
-  background-color: rgba(255, 193, 7, 0.15);
-  border: 1px solid rgba(255, 193, 7, 0.2);
-  color: #664d03;
+.rx-clear-btn:hover {
+  background: var(--red-bg);
+  color: var(--red);
+  border-color: rgba(248,113,113,0.22);
 }
 
-.card {
-  border-radius: 1.25rem;
+/* ── Loading — same spinner as availability ─────────────────── */
+.rx-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 80px 24px;
+  color: var(--t2);
+  font-size: 14px;
 }
 
-/* Print optimization */
-@media print {
-  .btn, .card-footer {
-    display: none !important;
-  }
-  .card {
-    box-shadow: none !important;
-    border: 1px solid #eee !important;
-  }
+.rx-spinner { display: flex; gap: 7px; }
+
+.rx-spinner span {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: rx-bounce 1.1s infinite ease-in-out;
+}
+
+.rx-spinner span:nth-child(2) { animation-delay: 0.18s; }
+.rx-spinner span:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes rx-bounce {
+  0%,80%,100% { transform: scale(0.4); opacity: 0.4; }
+  40%          { transform: scale(1);   opacity: 1; }
+}
+
+/* ── Error / empty ─────────────────────────────────────────── */
+.rx-error-state,
+.rx-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 72px 24px;
+  text-align: center;
+}
+
+.rx-error-state { color: var(--red); }
+
+.rx-empty-state {
+  color: var(--t2);
+  svg { opacity: 0.3; }
+  p   { margin: 0; font-size: 14px; }
+}
+
+.rx-error-state p { margin: 0; font-size: 14px; }
+
+.rx-retry-btn {
+  background: transparent;
+  border: 1px solid var(--border-2);
+  color: var(--t2);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 9px 22px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+.rx-retry-btn:hover { background: var(--surface); color: var(--t1); }
+
+/* ── Card list ─────────────────────────────────────────────── */
+.rx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 860px;
+  margin: 22px auto 0;
+  padding: 0 28px;
+}
+
+/* ── Single card — matches find-doctor fd-card style ────────── */
+.rx-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  animation: rx-in 0.32s ease both;
+  animation-delay: calc(var(--ci, 0) * 55ms);
+}
+
+.rx-card:hover {
+  border-color: var(--border-2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+}
+
+.rx-card--expanded {
+  border-color: var(--blue-bd) !important;
+  box-shadow: 0 0 0 1px rgba(59,158,255,0.06) !important;
+}
+
+/* ── Card header ───────────────────────────────────────────── */
+.rx-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.18s;
+}
+
+.rx-card-head:hover { background: var(--surface-2); }
+
+/* Avatar — same style as find-doctor fd-avatar-initials */
+.rx-avatar {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rx-head-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.rx-head-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t1);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rx-head-gender { font-size: 13px; color: var(--t3); }
+
+.rx-head-spec {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--blue);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rx-head-exp {
+  font-size: 11px;
+  color: var(--t3);
+  margin: 0;
+}
+
+/* Right meta — matches find-doctor fd-card-footer style */
+.rx-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Badge — matches fd-speciality-tag */
+.rx-meds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid var(--green-bd);
+  border-radius: 20px;
+  padding: 3px 9px;
+}
+
+.rx-rx-id {
+  font-size: 11px;
+  color: var(--t3);
+  font-weight: 500;
+}
+
+.rx-chevron {
+  color: var(--t3);
+  display: flex;
+  align-items: center;
+  transition: transform 0.22s ease;
+}
+
+.rx-chevron--flipped { transform: rotate(180deg); }
+
+/* ── Treatments section ────────────────────────────────────── */
+.rx-treatments {
+  border-top: 1px solid var(--border);
+}
+
+.rx-treatment {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.18s;
+  animation: rx-in 0.25s ease both;
+  animation-delay: calc(var(--ti, 0) * 45ms);
+}
+
+.rx-treatment:last-child { border-bottom: none; }
+.rx-treatment:hover { background: var(--surface-2); }
+
+/* Pill icon — amber accent */
+.rx-pill-ico {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-bd);
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.rx-treatment-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.rx-med-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t1);
+}
+
+.rx-med-notes {
+  font-size: 12.5px;
+  color: var(--t2);
+  line-height: 1.55;
+}
+
+.rx-med-date {
+  font-size: 11px;
+  color: var(--t3);
+}
+
+.rx-t-id {
+  font-size: 11px;
+  color: var(--t3);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* ── Bio row ───────────────────────────────────────────────── */
+.rx-bio {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+  background: rgba(59,158,255,0.03);
+  font-size: 12.5px;
+  color: var(--t2);
+  line-height: 1.6;
+  animation: rx-in 0.2s ease both;
+}
+
+.rx-bio svg { flex-shrink: 0; margin-top: 2px; color: var(--blue); }
+
+/* ── Animations ────────────────────────────────────────────── */
+@keyframes rx-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .rx-topbar   { padding: 22px 16px 18px; }
+  .rx-controls { padding: 0 16px; }
+  .rx-list     { padding: 0 16px; }
+  .rx-stats-row { padding: 10px 14px; gap: 12px; }
+  .rx-stat-num { font-size: 16px; }
+  .rx-page-title { font-size: 18px; }
+  .rx-rx-id    { display: none; }
 }
