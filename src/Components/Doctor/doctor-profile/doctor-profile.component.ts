@@ -1,7 +1,8 @@
+import { Doctor } from './../../../Core/patient.service';
 import { Speciality } from './../../Patient/find-doctor/find-doctor.component';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DoctorService } from '../../../Core/doctor.service';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -32,7 +33,7 @@ export interface WeekDay {
 @Component({
   selector: 'app-doctor-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule,ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, HttpClientModule,ReactiveFormsModule,RouterLink],
   templateUrl: './doctor-profile.component.html',
   styleUrls: ['./doctor-profile.component.css'],
 })
@@ -63,7 +64,7 @@ export class DoctorProfileComponent implements OnInit {
   weekDays: WeekDay[] = [];
   _doctorservice: DoctorService = inject(DoctorService);
 
-  constructor(private http: HttpClient, private route: ActivatedRoute,private fb: FormBuilder) {}
+  constructor(private http: HttpClient, private route: ActivatedRoute,private fb: FormBuilder,private _router: Router) {}
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
   Edit:FormGroup=this.fb.group({
@@ -71,7 +72,7 @@ export class DoctorProfileComponent implements OnInit {
       Id: ['1002', [Validators.required, Validators.pattern('^[0-9]+$')]],
       specialityId: [3, [Validators.required, Validators.min(1)]],
       phone:[this.doctor.phone,Validators.required],
-      yearsOfExperience: [5, [Validators.required, Validators.min(0), Validators.max(50)]],
+      yearsOfExperienc: [5, [Validators.required, Validators.min(0), Validators.max(50)]],
       bio: ['Experienced professional with a strong background in the field.', Validators.maxLength(500)]
     });
    
@@ -104,7 +105,10 @@ export class DoctorProfileComponent implements OnInit {
   EditProfile():void{
 
     this._doctorservice.updateDoctorProfile(this.Edit.value).subscribe({
-      next:(res)=>console.log,
+      next:(res)=>{
+        this.loadProfile();
+        
+      },
       error:(err)=>console.log(err)
     });
     console.log(this.Edit)
@@ -121,7 +125,7 @@ export class DoctorProfileComponent implements OnInit {
     Id: this.doctor.id,
     Speciality: this.doctor.speciality,
     phone: this.doctor.phone,
-    yearsOfExperience: this.doctor.yearsOfExperience,
+    yearsOfExperienc: this.doctor.yearsOfExperience,
     bio: this.doctor.bio,
     gender: this.doctor.gender
   });
