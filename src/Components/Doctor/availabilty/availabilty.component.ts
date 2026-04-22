@@ -36,7 +36,7 @@ export interface CreateSlotPayload {
 }
 
 export interface UpdateSlotPayload extends CreateSlotPayload {
-  DoctorAvailabilityId: number;
+  id: number;
 }
 
 export interface SummaryCard {
@@ -171,9 +171,8 @@ export class AvailabiltyComponent implements OnInit {
     this.isSaving = true;
     this.apiError = '';
     this._doctorservice.updateAvailability(payload).subscribe({
-      next: (res) => {
+      next: () => {
         // ✅ Same pattern — reload only after confirmed server response
-        console.log(res);
         this.isSaving = false;
         this.closeModal();
         this.showToast('Slot updated successfully!', 'success');
@@ -251,11 +250,11 @@ export class AvailabiltyComponent implements OnInit {
         price:                  +this.createslotForm.value.price,
       };
       this.createSlot(payload);
-      
+      // ❌ loadSlots() removed from here — was the root cause of NaN cards
 
     } else if (this.modalMode === 'edit' && this.activeSlot) {
       const payload: UpdateSlotPayload = {
-        DoctorAvailabilityId:                     this.slotId(this.activeSlot),
+        id:                     this.slotId(this.activeSlot),
         doctorId:               this.DOCTOR_ID,
         availableFrom:          this.createslotForm.value.availableFrom,
         maxPatients:            +this.createslotForm.value.maxPatients,
@@ -263,7 +262,7 @@ export class AvailabiltyComponent implements OnInit {
         price:                  +this.createslotForm.value.price,
       };
       this.updateSlot(payload);
-     
+      // ❌ loadSlots() removed from here too
     }
   }
 
@@ -292,7 +291,7 @@ export class AvailabiltyComponent implements OnInit {
     const now = new Date();
 
     let result = this.allSlots.filter(slot => {
-      const date = new Date(this.slotFrom(slot));
+      const date = this.parseSlotDate(this.slotFrom(slot));
       switch (this.filterMode) {
         case 'today':  return date.toDateString() === now.toDateString();
         case 'week': {
@@ -325,8 +324,8 @@ export class AvailabiltyComponent implements OnInit {
 
   private buildSummary(): void {
     const now      = new Date();
-    const future   = this.allSlots.filter(s => new Date(this.slotFrom(s)) > now);
-    const today    = this.allSlots.filter(s => new Date(this.slotFrom(s)).toDateString() === now.toDateString());
+    const future   = this.allSlots.filter(s => this.parseSlotDate(this.slotFrom(s)) > now);
+    const today    = this.allSlots.filter(s => this.parseSlotDate(this.slotFrom(s)).toDateString() === now.toDateString());
     const avgPrice = this.allSlots.length
       ? this.allSlots.reduce((sum, s) => sum + s.doctorAvailability.price, 0) / this.allSlots.length
       : 0;
@@ -349,18 +348,39 @@ export class AvailabiltyComponent implements OnInit {
 
   // ── Date helpers ──────────────────────────────────────────────────────────────
 
-  getMonth(iso: string)   { return new Date(iso).toLocaleDateString('en-US', { month: 'short' }).toUpperCase(); }
-  getDay(iso: string)     { return String(new Date(iso).getDate()).padStart(2, '0'); }
-  getYear(iso: string)    { return String(new Date(iso).getFullYear()); }
-  getDayName(iso: string) { return new Date(iso).toLocaleDateString('en-US', { weekday: 'long' }); }
-  isPast(iso: string)     { return new Date(iso) < new Date(); }
+  /**
+   * SINGLE safe parser used by every date comparison and display in this file.
+   *
+   * Root cause of all filter/summary bugs:
+   * The backend returns "2026-03-25T10:30:00" with NO timezone suffix.
+   * Safari and some environments parse this as UTC → dates shift by UTC offset
+   * (Egypt = UTC+3), so a 10:30 local slot becomes 07:30 UTC, appearing 3 hrs
+   * earlier and pushing future slots into "past", wrecking today/upcoming counts.
+   *
+   * Fix: when there is no Z or ±offset, split the string manually and construct
+   * a Date with local-time constructor arguments — guaranteed correct on all browsers.
+   */
+  private parseSlotDate(iso: string): Date {
+    if (!iso) return new Date(NaN);
+    if (iso.endsWith('Z') || /[+\-]\d{2}:?\d{2}$/.test(iso)) return new Date(iso);
+    const [datePart, timePart = '00:00:00'] = iso.split('T');
+    const [yr, mo, dy]          = datePart.split('-').map(Number);
+    const [hr, mn, sc = 0]      = timePart.split(':').map(Number);
+    return new Date(yr, mo - 1, dy, hr, mn, sc);
+  }
+
+  getMonth(iso: string)   { return this.parseSlotDate(iso).toLocaleDateString('en-US', { month: 'short' }).toUpperCase(); }
+  getDay(iso: string)     { return String(this.parseSlotDate(iso).getDate()).padStart(2, '0'); }
+  getYear(iso: string)    { return String(this.parseSlotDate(iso).getFullYear()); }
+  getDayName(iso: string) { return this.parseSlotDate(iso).toLocaleDateString('en-US', { weekday: 'long' }); }
+  isPast(iso: string)     { return this.parseSlotDate(iso) < new Date(); }
 
   formatTime(iso: string): string {
-    return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return this.parseSlotDate(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   }
 
   formatFullDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('en-US', {
+    return this.parseSlotDate(iso).toLocaleDateString('en-US', {
       weekday: 'short', year: 'numeric', month: 'long', day: 'numeric',
     });
   }
@@ -372,7 +392,7 @@ export class AvailabiltyComponent implements OnInit {
   }
 
   private toDateTimeLocal(iso: string): string {
-    const d = new Date(iso);
+    const d = this.parseSlotDate(iso);
     const p = (n: number) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
   }
@@ -381,7 +401,7 @@ export class AvailabiltyComponent implements OnInit {
 
   private sortSlots(slots: AvailabilitySlot[]): AvailabilitySlot[] {
     return [...slots].sort((a, b) =>
-      new Date(this.slotFrom(a)).getTime() - new Date(this.slotFrom(b)).getTime()
+      this.parseSlotDate(this.slotFrom(a)).getTime() - this.parseSlotDate(this.slotFrom(b)).getTime()
     );
   }
 
