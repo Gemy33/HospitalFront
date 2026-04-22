@@ -29,8 +29,8 @@
           <div class="pp-avatar">
             <span class="pp-avatar-initials">{{ getInitials(profile()!.name) }}</span>
           </div>
-          <span class="pp-gender-badge" [class.female]="profile()!.gender == '1'">
-            {{ (profile()!.gender) }}
+          <span class="pp-gender-badge" [class.female]="profile()!.gender == 0">
+            {{ getGenderLabel(profile()!.gender) }}
           </span>
         </div>
 
@@ -90,7 +90,7 @@
 
         <div class="pp-field">
           <span class="pp-field-label">Gender</span>
-          <span class="pp-field-value">{{ (profile()!.gender) }}</span>
+          <span class="pp-field-value">{{ getGenderLabel(profile()!.gender) }}</span>
         </div>
 
       </div>
@@ -148,14 +148,14 @@
         <span class="pp-stat-icon">🗓</span>
         <div class="pp-stat-text">
           <span class="pp-stat-value">0</span>
-          <span class="pp-stat-label">Appointments</span>
+          <span class="pp-stat-label">{{totalappointments}}</span>
         </div>
       </div>
       <div class="pp-stat-card">
         <span class="pp-stat-icon">💊</span>
         <div class="pp-stat-text">
           <span class="pp-stat-value">0</span>
-          <span class="pp-stat-label">Prescriptions</span>
+          <span class="pp-stat-label">{{totalprecriptions}}</span>
         </div>
       </div>
       <div class="pp-stat-card">

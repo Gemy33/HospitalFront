@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { IPrescription } from '../../../Core/Interfaces/Doctor/iprescription';
 import { DoctorService } from '../../../Core/doctor.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../Core/auth.service';
+import { PatientService } from '../../../Core/patient.service';
 
 @Component({
   selector: 'app-prescriptions',
@@ -19,7 +21,7 @@ export class PrescriptionsComponent implements OnInit {
   expanded      = signal<Set<number>>(new Set());
 
   // Replace with auth service
-  private readonly patientId = 3;
+   patientId = 3;
 
   // Search / filter
   searchTerm    = signal('');
@@ -48,9 +50,29 @@ export class PrescriptionsComponent implements OnInit {
     [...new Set(this.prescriptions().map(p => p.doctor?.name).filter(Boolean))]
   );
 
-  constructor(private doctorSvc: DoctorService , private router: Router ) {}
+  constructor(private doctorSvc: DoctorService , private router: Router , private authservice: AuthService  , private patientService: PatientService) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void { 
+    
+    var userId = this.authservice.getUserId();
+    if (!userId) {
+      this.error.set('User not authenticated. Please log in.');
+      return;
+    }
+      this.patientService.getPatientProfileByUserId(userId).subscribe({
+      next: (data) => {
+        this.patientId = data.id; // Update patientId based on profile data 
+        console.log("patient id from prescription load", this.patientId);
+        this.load();
+      },
+      error: () => {
+        this.error.set('Failed to load profile. Please try again.');
+      },
+    });
+
+    // this.load();
+  
+  }
 
   openDetail(id: number): void {
   this.router.navigate(['/patient/prescription', id]);

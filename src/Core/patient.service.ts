@@ -96,4 +96,11 @@ getAppointments(patientId: number): Observable<Appointment[]> {
  {
    return this.http.get<Doctor[]>(`${this.baseUrl}/Doctors/${spcId}`);
  }
+
+ // get patient profile by userId
+  getPatientProfileByUserId(userId:number):Observable<any>
+  {
+    return this.http.get<PatientProfile>(`${this.baseUrl}/${userId}`);
+  }
+
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PatientService } from '../../../Core/patient.service';
+import { AuthService } from '../../../Core/auth.service';
 
 interface TransformedAppointment {
   id: number;
@@ -22,16 +23,35 @@ export class AppointmentComponent implements OnInit {
   appointments: TransformedAppointment[] = [];
   loading = true;
 
-  constructor(private PatientService: PatientService) {}
+  constructor(private PatientService: PatientService , private authservice : AuthService) {}
 
   ngOnInit(): void {
-    this.loadAppointments();
+      var userId = this.authservice.getUserId();
+    if (!userId) {
+      console.log('User not authenticated. Please log in.');
+      this.loading = false;
+      return;
+    }
+      this.PatientService.getPatientProfileByUserId(userId).subscribe({
+      next: (data) => {
+        const patientId = data.id;
+        console.log("patient id from appointment load", patientId);
+        this.loadAppointments(patientId);
+      },
+        
+      error: () => {
+        console.log('Failed to load profile. Please try again.');
+        this.loading = false;}
+    });
+
+
+    
   }
 
-  loadAppointments(): void {
+  loadAppointments(patientId: number): void {
     this.loading = true;
 
-    this.PatientService.getAppointments(3).subscribe({
+    this.PatientService.getAppointments(patientId).subscribe({
       next: (data: TransformedAppointment[]) => {
         console.log('Raw appointments data:', data);
         this.appointments = data;

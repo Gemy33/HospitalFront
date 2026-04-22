@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../Core/auth.service';
+import { PatientService } from '../../../Core/patient.service';
 
 interface MenuItem {
   label: string;
@@ -18,8 +20,29 @@ interface MenuItem {
 })
 export class PatientNavbarComponent {
 
-  patientName = 'Mohamed';        // You can make this dynamic later
+  /**
+   *
+   */
+  constructor(private authservice : AuthService , private patientservice : PatientService) {
+    
+  }
+
+    patientName = 'Mohamed';        // You can make this dynamic later
   patientId = 3;
+  
+   userId = this.authservice.getUserId()!;
+   profile = this.patientservice.getPatientProfileByUserId(this.userId).subscribe({
+    next: (data) => {
+      this.patientName = data.name.split(' ')[0]; // Get first name for display
+      this.patientId = data.id;
+      console.log("patient name from navbar", this.patientName);
+      console.log("patient Id from navbar", data.id);
+    },
+    error: () => {
+      console.log('Failed to load profile. Please try again.');
+    }
+  });
+
 
   menuItems: MenuItem[] = [
     { label: 'Dashboard', icon: '🏠', route: '/patient/dashboard', active: true },

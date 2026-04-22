@@ -85,7 +85,7 @@ export class AuthService {
   // 👤 GET ROLE
   // ========================
   getRole(): string | null {
-    return this.decodeToken()?.role || null;
+    return this.decodeToken()?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || null;
   }
 
   // ========================

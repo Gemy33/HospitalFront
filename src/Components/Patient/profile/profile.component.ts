@@ -2,10 +2,14 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatientService } from '../../../Core/patient.service';
+import { ActivatedRoute } from '@angular/router';
+import { log } from 'console';
+import { AuthService } from '../../../Core/auth.service';
+import { DoctorService } from '../../../Core/doctor.service';
 export interface PatientProfile {
   id: number;
   name: string;
-  gender: string;
+  gender: number;
   email: string;
   phone: string;
 }
@@ -30,21 +34,39 @@ export class ProfileComponent implements OnInit {
   isEditing = signal(false);
 
   // Hardcode or pull from auth service — the patient's own id
-  private readonly patientId = 2;
+   patientId = 2;
 
   editForm: EditableFields = { name: '', email: '', phone: '' };
 
-  constructor(private patientService: PatientService) {}
+  constructor(private patientService: PatientService, private doctorservie : DoctorService, private authservice : AuthService) {}
+
+  totalprecriptions = 0;
+  totalappointments = 0;
+
+ 
+
 
   ngOnInit(): void {
+       
+
     this.loadProfile();
   }
 
   loadProfile(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this.patientService.getProfile(this.patientId).subscribe({
+    var userId = this.authservice.getUserId();
+    if (!userId) {
+      this.error.set('User not authenticated. Please log in.');
+      this.isLoading.set(false);
+      return;
+    }
+    this.patientService.getPatientProfileByUserId(userId).subscribe({
       next: (data) => {
+        this.patientId = data.id; // Update patientId based on profile data
+        console.log("patient id from profile load", this.patientId);
+        console.log(data);
+        
         this.profile.set(data);
         this.isLoading.set(false);
       },
@@ -53,14 +75,37 @@ export class ProfileComponent implements OnInit {
         this.isLoading.set(false);
       },
     });
+    var t  = this.doctorservie.getPatientPrescriptions(this.patientId).subscribe({
+    next: (list) => {
+      console.log("ID list", this.patientId);
+
+      this.totalprecriptions = list.length; 
+      console.log("total prescriptions", this.totalprecriptions);
+    },
+    error: () => {
+      console.log('Failed to load prescriptions. Please try again.');
+    },
+  })
+ var f  = this.patientService.getAppointments(this.patientId).subscribe({
+    next: (list) => {
+      console.log("ID list", this.patientId);
+      this.totalappointments = list.length; 
+      console.log("total appointments", this.totalappointments);
+    }
+    ,
+    error: () => {
+      console.log('Failed to load appointments. Please try again.');
+    },
+  })
+
   }
 
   getGenderLabel(gender: number): string {
-    return gender === 1 ? 'Female' : 'Male';
+    return gender === 0 ? 'Male' : 'Female';
   }
 
   getGenderIcon(gender: number): string {
-    return gender === 1 ? '♀' : '♂';
+    return gender === 0 ? '♂' : '♀';
   }
 
   getInitials(name: string): string {

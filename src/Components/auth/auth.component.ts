@@ -11,6 +11,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 
 export type UserRole = 'doctor' | 'patient';
 export type AuthTab  = 'login' | 'register';
@@ -26,6 +27,7 @@ export class AuthComponent implements OnInit {
 
   private _authService = inject(AuthService);
   private fb           = inject(FormBuilder);
+  private router       = inject(Router);
 
   // ── State ──────────────────────────────────────────────────────
   activeTab: AuthTab     = 'login';
@@ -241,9 +243,21 @@ export class AuthComponent implements OnInit {
       next: (res) => {
         this.loginLoading = false;
         const label = this.loginRole === 'doctor' ? 'Doctor' : 'Patient';
+        var role = this._authService.getRole();
         this.showToast('success', `✅ Welcome back, ${label}!`);
+        console.log('Decoded Token:', this._authService.decodeToken());
+        console.log('role  Token:', this._authService.getRole());
         console.log('Login response:', res);
-        // TODO: this.router.navigate(['/dashboard']);
+        if (label == 'Doctor' && role == 'Doctor') {
+          
+          this.router.navigate(['doctor/profile']);
+        }
+        else if (label == 'Patient' && role == 'Patient') {
+          this.router.navigate(['patient/dashboard']);
+        }
+        else
+        this.showToast('error', '❌ Login failed. Choose a valid role.');
+
       },
       error: (err) => {
         this.loginLoading = false;
@@ -297,9 +311,9 @@ export class AuthComponent implements OnInit {
         this.registerLoading = false;
         console.log('Register response:', response);
         this.showToast('success', '✅ Registration successful!');
-        // TODO: this.router.navigate(['/login']);
+        this.router.navigate(['/login']);
       },
-      error: (error) => {
+      error: (error) => { 
         this.registerLoading = false;
         console.error('Register error:', error);
         this.showToast('error', '❌ Registration failed. Please try again.');
