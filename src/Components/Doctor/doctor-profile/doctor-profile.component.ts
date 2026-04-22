@@ -1,20 +1,15 @@
+import { Speciality } from './../../Patient/find-doctor/find-doctor.component';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DoctorService } from '../../../Core/doctor.service';
+import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { DoctorProfile } from '../../../Core/Interfaces/Doctor/doctor-profile';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
-export interface DoctorProfile {
-  id: number;
-  name: string;
-  speciality: string;
-  gender: number;        // 1 = Male, 2 = Female, 0 = Other
-  yearsOfExperience: number;
-  bio: string;
-  phone: string;
-}
+
 
 export interface StatCard {
   label: string;
@@ -37,7 +32,7 @@ export interface WeekDay {
 @Component({
   selector: 'app-doctor-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule, HttpClientModule,ReactiveFormsModule],
   templateUrl: './doctor-profile.component.html',
   styleUrls: ['./doctor-profile.component.css'],
 })
@@ -47,11 +42,14 @@ export class DoctorProfileComponent implements OnInit {
 
   isLoading = false;
 
+  // ── Edit modal state (only addition — no logic changes) ───────────────────
+  editModalOpen = false;
+
   /** Doctor profile populated from API */
   doctor: DoctorProfile = {
     id: 2,
     name: 'ahmed123',
-    speciality: 'Cardiology',
+    speciality: "Cardiologist",
     gender: 1,
     yearsOfExperience: 10,
     bio: 'Cardiologist with strong experience in heart disease diagnosis and treatment.',
@@ -63,61 +61,88 @@ export class DoctorProfileComponent implements OnInit {
 
   /** Availability chips for the week */
   weekDays: WeekDay[] = [];
-  _doctorservice:DoctorService=inject(DoctorService);
+  _doctorservice: DoctorService = inject(DoctorService);
 
-
-  // ── API Config ───────────────────────────────────────────────────────────────
-  // private readonly API_URL = '/api/doctor/profile'; // replace with your base URL
-
-  
-  constructor(private http: HttpClient ,private route:ActivatedRoute )  {}
+  constructor(private http: HttpClient, private route: ActivatedRoute,private fb: FormBuilder) {}
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
+  Edit:FormGroup=this.fb.group({
+      Name: ['', Validators.required],
+      Id: ['1002', [Validators.required, Validators.pattern('^[0-9]+$')]],
+      specialityId: [3, [Validators.required, Validators.min(1)]],
+      phone:[this.doctor.phone,Validators.required],
+      yearsOfExperience: [5, [Validators.required, Validators.min(0), Validators.max(50)]],
+      bio: ['Experienced professional with a strong background in the field.', Validators.maxLength(500)]
+    });
+   
 
   ngOnInit(): void {
-   const doctorId = this.route.snapshot.paramMap.get('id');
-    this._doctorservice.getDoctorProfile(doctorId).subscribe({
-      next:(res)=>{console.log(res);
-        console.log("im in the doctor profile.ts")
-      },
-      error:(err)=>console.log(err)
-    });
+    this.loadProfile();
     this.buildWeekDays();
+    
+   
   }
 
   // ── Data Loading ─────────────────────────────────────────────────────────────
 
-  /**
-   * Fetch doctor profile from the API.
-   * Falls back to the default data if the request fails (e.g. in dev).
-   *
-   * Replace `this.API_URL` with your actual endpoint, e.g.:
-   *   GET /api/doctors/me          (authenticated current user)
-   *   GET /api/doctors/:id         (specific doctor by ID)
-   */
-  // loadProfile(): void {
-  //   this.isLoading = true;
+  loadProfile(): void {
+    this.isLoading = true;
+    const doctorId = this.route.snapshot.paramMap.get('id');
+    this._doctorservice.getDoctorProfile(doctorId).subscribe({
+      next: (data) => {
+        console.log(data);
+        this.doctor = data;
+        this.buildStats();
+        this.isLoading = false;
+      },
+      error: () => {
+        this.buildStats();
+        this.isLoading = false;
+      },
+    });
+  }
+  EditProfile():void{
 
-  //   this.http.get<DoctorProfile>(this.API_URL).subscribe({
-  //     next: (data) => {
-  //       this.doctor = data;
-  //       this.buildStats();
-  //       this.isLoading = false;
-  //     },
-  //     error: () => {
-  //       // Use default data in dev / fallback
-  //       this.buildStats();
-  //       this.isLoading = false;
-  //     },
-  //   });
-  // }
+    this._doctorservice.updateDoctorProfile(this.Edit.value).subscribe({
+      next:(res)=>console.log,
+      error:(err)=>console.log(err)
+    });
+    console.log(this.Edit)
+    console.log("his im islam")
+  }
+ 
+
+  fillForm() {
+  if (!this.doctor) return;
+ 
+
+  this.Edit.patchValue({
+    Name: this.doctor.name,
+    Id: this.doctor.id,
+    Speciality: this.doctor.speciality,
+    phone: this.doctor.phone,
+    yearsOfExperience: this.doctor.yearsOfExperience,
+    bio: this.doctor.bio,
+    gender: this.doctor.gender
+  });
+}
+
+  // ── Edit modal ────────────────────────────────────────────────────────────────
+
+  openEditModal(): void {
+    this.fillForm();
+    this.editModalOpen = true;
+    document.body.style.overflow = 'hidden';
+
+  }
+
+  closeEditModal(): void {
+    this.editModalOpen = false;
+    document.body.style.overflow = '';
+  }
 
   // ── Helper: Display ──────────────────────────────────────────────────────────
 
-  /**
-   * Derive initials from raw name (handles usernames like "ahmed123").
-   * For a real name like "Ahmed Hassan" → "AH", for "ahmed123" → "AH".
-   */
   getInitials(name: string): string {
     const cleaned = name.replace(/\d+/g, '').trim();
     const parts = cleaned.split(/[\s_-]+/).filter(Boolean);
@@ -127,11 +152,6 @@ export class DoctorProfileComponent implements OnInit {
     return cleaned.slice(0, 2).toUpperCase() || 'DR';
   }
 
-  /**
-   * Format raw username to a display-friendly name.
-   * "ahmed123" → "Dr. Ahmed" (strips trailing digits, capitalises).
-   * Real full names are passed through untouched.
-   */
   formatName(name: string): string {
     const cleaned = name.replace(/\d+$/, '').trim();
     if (cleaned.toLowerCase().startsWith('dr')) return cleaned;
@@ -139,20 +159,17 @@ export class DoctorProfileComponent implements OnInit {
     return `Dr. ${capitalised}`;
   }
 
-  /** Map gender integer to readable label */
   getGenderLabel(gender: number): string {
     const map: Record<number, string> = { 1: 'Male', 2: 'Female', 0: 'Other' };
     return map[gender] ?? 'Not specified';
   }
 
-  /** Zero-pad doctor ID for display (e.g. 2 → "0002") */
   padId(id: number): string {
     return String(id).padStart(4, '0');
   }
 
   // ── Helper: Experience ───────────────────────────────────────────────────────
 
-  /** Descriptive level label based on years */
   getExperienceLevel(): string {
     const y = this.doctor.yearsOfExperience;
     if (y < 3)  return 'Junior';
@@ -161,23 +178,16 @@ export class DoctorProfileComponent implements OnInit {
     return 'Expert';
   }
 
-  /** CSS class suffix for the level badge color */
   getExperienceLevelClass(): string {
     return this.getExperienceLevel().toLowerCase();
   }
 
-  /** Convert years to a 0–100% bar fill (max anchored at 20 years) */
   getExperiencePercent(): number {
     return Math.min((this.doctor.yearsOfExperience / 20) * 100, 100);
   }
 
   // ── Private Builders ─────────────────────────────────────────────────────────
 
-  /**
-   * Build the 3 stat cards shown in the stats grid.
-   * In production, fetch real totals from:
-   *   GET /api/doctors/:id/stats  → { totalPatients, totalConsultations, rating }
-   */
   private buildStats(): void {
     this.profileStats = [
       {
@@ -207,13 +217,8 @@ export class DoctorProfileComponent implements OnInit {
     ];
   }
 
-  /**
-   * Build the availability week strip.
-   * In production, fetch real availability from:
-   *   GET /api/doctors/:id/availability
-   */
   private buildWeekDays(): void {
-    const today = new Date().getDay(); // 0 = Sunday
+    const today = new Date().getDay();
     const days = [
       { short: 'Sun', full: 'Sunday' },
       { short: 'Mon', full: 'Monday' },
@@ -223,26 +228,11 @@ export class DoctorProfileComponent implements OnInit {
       { short: 'Fri', full: 'Friday' },
       { short: 'Sat', full: 'Saturday' },
     ];
-
-    // Placeholder: mark Mon–Thu available; replace with real API data
     const availableDays = [1, 2, 3, 4];
-
     this.weekDays = days.map((d, i) => ({
       ...d,
       available: availableDays.includes(i),
       isToday: i === today,
     }));
-  }
-
-  // ── UI Actions ───────────────────────────────────────────────────────────────
-
-  /**
-   * Open the edit profile modal / navigate to edit route.
-   * In production you might emit an event or use a dialog service:
-   *   this.dialogService.open(EditProfileDialogComponent, { data: this.doctor });
-   */
-  openEditModal(): void {
-    console.log('[DoctorProfile] Open edit modal for doctor:', this.doctor.id);
-    // Example: this.router.navigate(['/doctor/profile/edit']);
   }
 }
