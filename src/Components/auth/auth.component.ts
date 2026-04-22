@@ -51,12 +51,17 @@ export class AuthComponent implements OnInit {
   pwStrengthLabel = 'Enter a password';
   pwStrengthClass = '';
 
-  specialties = [
-    { id: 1, name: 'Cardiology' },
-    { id: 2, name: 'Dermatology' },
-    { id: 3, name: 'Neurology' },
-    { id: 4, name: 'Pediatrics' },
-    { id: 5, name: 'Orthopedics' },
+ specialties = [
+   { id: 1, name: 'Cardiology' },
+  { id: 2, name: 'Dermatology' },
+  { id: 3, name: 'Neurology' },
+  { id: 4, name: 'Orthopedics' },
+  { id: 5, name: 'Pediatrics' },
+  { id: 6, name: 'Ophthalmology' },
+  { id: 7, name: 'Gynecology' },
+  { id: 8, name: 'Psychiatry' },
+  { id: 9, name: 'Gastroenterology' },
+  { id: 10, name: 'Endocrinology' }
   ];
 
   // ── Forms ──────────────────────────────────────────────────────
