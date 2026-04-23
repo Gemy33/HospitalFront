@@ -1,40 +1,117 @@
-<div class="sidebar">
-  <!-- Header -->
-  <div class="sidebar-header">
-    <div class="logo">
-      <span class="logo-icon">🩺</span>
-      <span class="logo-text">MediCare</span>
-    </div>
-    
-    <div class="patient-info">
-      <div class="avatar">
-        👨‍⚕️
-      </div>
-      <div class="info">
-        <h3>{{ patientName }}</h3>
-        <p>Patient ID: #{{ patientId }}</p>
-      </div>
-    </div>
-  </div>
+<aside class="ps" [class.ps--slim]="slim()">
 
-  <!-- Navigation Menu -->
-  <nav class="sidebar-nav">
-    <ul>
-      <li *ngFor="let item of menuItems" 
-          [routerLink]="item.route" 
-          routerLinkActive="active"
-          (click)="setActive(item.route)">
-        <span class="icon">{{ item.icon }}</span>
-        <span class="label">{{ item.label }}</span>
-      </li>
-    </ul>
-  </nav>
-
-  <!-- Footer -->
-  <div class="sidebar-footer">
-    <button class="logout-btn">
-      <span>🚪</span>
-      Logout
+  <!-- ░░ Brand row ░░ -->
+  <div class="ps-brand">
+    <div class="ps-brand-orb">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+        <path d="M9 3h2v5h5v2h-5v5H9v-5H4V8h5z"/>
+      </svg>
+    </div>
+    <span class="ps-brand-name" *ngIf="!slim()">MedFinder</span>
+    <button class="ps-toggle" (click)="toggle()"
+            [title]="slim() ? 'Expand' : 'Collapse'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" width="13" height="13">
+        <path *ngIf="!slim()" d="M15 18l-6-6 6-6"/>
+        <path *ngIf="slim()"  d="M9 18l6-6-6-6"/>
+      </svg>
     </button>
   </div>
-</div>
+
+  <!-- ░░ Patient card ░░ -->
+  <div class="ps-patient" [class.ps-patient--mini]="slim()">
+    <div class="ps-avatar">
+      <span class="ps-avatar-letters">{{ initials() }}</span>
+      <span class="ps-online-dot"
+            [class.ps-online-dot--live]="isOnline"></span>
+    </div>
+    <div class="ps-patient-info" *ngIf="!slim()">
+      <span class="ps-patient-name">{{ patientName }}</span>
+      <span class="ps-patient-id">{{ patientId }}</span>
+      <span class="ps-patient-status"
+            [class.ps-patient-status--on]="isOnline">
+        {{ isOnline ? 'Online' : 'Offline' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ░░ Nav ░░ -->
+  <nav class="ps-nav">
+    <span class="ps-nav-label" *ngIf="!slim()">Navigation</span>
+
+    
+      <div *ngFor="let item of menuItems; let i = index"
+      class="ps-link"
+      [class.ps-link--mini]="slim()"
+      [routerLink]="item.route"
+      routerLinkActive="ps-link--active"
+      [style.--i]="i"
+      [attr.title]="slim() ? item.label : null"
+    >
+      <span class="ps-link-bar"></span>
+
+      <span class="ps-link-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+          <path [attr.d]="item.svgPath"/>
+        </svg>
+      </span>
+
+      <span class="ps-link-body" *ngIf="!slim()">
+        <span class="ps-link-label">{{ item.label }}</span>
+        <span class="ps-link-hint">{{ item.hint }}</span>
+      </span>
+
+      <span
+        *ngIf="item.badge && !slim()"
+        class="ps-badge"
+        [ngClass]="'ps-badge--' + item.badgeColor"
+      >{{ item.badge }}</span>
+
+      <span
+        *ngIf="item.badge && slim()"
+        class="ps-dot"
+        [ngClass]="'ps-dot--' + item.badgeColor"
+      ></span>
+    </div>
+  </nav>
+
+  <div class="ps-spacer"></div>
+
+  <!-- ░░ Footer ░░ -->
+  <div class="ps-footer" [class.ps-footer--mini]="slim()">
+
+    <a routerLink="/help" routerLinkActive="ps-link--active"
+       class="ps-link ps-link--muted"
+       [class.ps-link--mini]="slim()"
+       [attr.title]="slim() ? 'Help' : null">
+      <span class="ps-link-bar"></span>
+      <span class="ps-link-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="18" height="18">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <circle cx="12" cy="17" r=".5" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="ps-link-body" *ngIf="!slim()">
+        <span class="ps-link-label ps-link-label--dim">Help Center</span>
+      </span>
+    </a>
+
+    <button class="ps-logout"
+            [class.ps-logout--mini]="slim()"
+            (click)="logout()"
+            [attr.title]="slim() ? 'Sign out' : null">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+           width="17" height="17">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span *ngIf="!slim()">Sign out</span>
+    </button>
+  </div>
+
+</aside>

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatientService } from '../../../Core/patient.service';
 import { ActivatedRoute } from '@angular/router';
-import { log } from 'console';
 import { AuthService } from '../../../Core/auth.service';
 import { DoctorService } from '../../../Core/doctor.service';
 export interface PatientProfile {
@@ -139,7 +138,18 @@ export class ProfileComponent implements OnInit {
     if (!p) return;
     // Merge edits into the current profile signal (optimistic update)
     // Replace this with a real save API call when available
+    this.patientService.updateProfile(this.patientId, { ...p, ...this.editForm }).subscribe({
+      next: (res) => {
+
+        
+        this.profile.set({ ...p, ...this.editForm }); // Update local state on success  
     this.profile.set({ ...p, ...this.editForm });
     this.isEditing.set(false);
+  }
+      ,
+      error: (err) => {
+        console.error('Error updating profile:', err);
+      } 
+    });
   }
 }

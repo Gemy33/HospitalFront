@@ -13,6 +13,7 @@ export interface PatientProfile {
   phone: string;
 }
 
+
 export interface Appointment {
   id: number;
   date: string;           // comes from consultionTime
@@ -37,7 +38,12 @@ export interface CreateBookingRequest {
   Amount: number;
   Status:number;
 }
-
+ export interface updatepatientprofile
+ {
+  name: string;
+  email: string;
+  phone: string;
+ }
 @Injectable({
   providedIn: 'root'
 })
@@ -90,6 +96,12 @@ getAppointments(patientId: number): Observable<Appointment[]> {
    return this.http.get<Doctor[]>(`${this.baseUrl}/Doctors`);
  }
 
+
+ // update patient profile
+  updateProfile(id:number, data:updatepatientprofile):Observable<any> 
+  {
+    return this.http.put(`${this.baseUrl}/UpdateProfile/${id}`, data);
+  }
 
  // get all doctor by speciality
   getAllDoctorsBySpeciality(spcId:number):Observable<any>
