@@ -59,8 +59,8 @@ export class DoctorService {
   );
 }
 
- getBookingPatients(doctorId: number): Observable<IBooking[]> {
-  return this.http.get<IBooking[]>(
+ getBookingPatients(doctorId: string|null): Observable<IBooking> {
+  return this.http.get<IBooking>(
     `${this.baseurl}/Doctor/BookingPatients/${doctorId}`
   );
 }

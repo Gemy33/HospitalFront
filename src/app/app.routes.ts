@@ -40,7 +40,7 @@ export const routes: Routes = [
         {path:'profile/:id',component:DoctorProfileComponent,title:'Doctor'},
         {path:'Availabilty',component:AvailabiltyComponent,title:'availabilty'},
         {path:'prescription',component:PrescriptionComponent,title:'prescription'},
-        {path:'booking',component:BookingComponent,title:'booking'},
+        {path:'booking/:AvailabilityId',component:BookingComponent,title:'booking'},
         {path:'**',redirectTo:"profile",pathMatch:'full'}
     ]},
 

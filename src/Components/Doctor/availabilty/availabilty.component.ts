@@ -121,6 +121,7 @@ export class AvailabiltyComponent implements OnInit {
       next: (res: any) => {
         const raw: any[] = Array.isArray(res) ? res : res?.data ?? [];
         this.allSlots = this.sortSlots(this.normalise(raw));
+        console.log(res);
         this.applyFilter();
         this.buildSummary();
         this.isLoading = false;
