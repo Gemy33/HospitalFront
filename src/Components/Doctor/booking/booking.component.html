@@ -1,1 +1,455 @@
-<p>booking works!</p>
+<!-- booking.component.html -->
+<div class="bp-page">
+
+  <!-- ── Back ── -->
+  <button class="bp-back" (click)="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to availability
+  </button>
+
+  <!-- ── Hero ── -->
+  <div class="bp-hero" *ngIf="bookings.length > 0">
+    <div class="bp-hero-accent"></div>
+    <div class="bp-hero-top">
+      <div class="bp-hero-left">
+        <p class="bp-slot-id">Availability #{{ availabilityId }}</p>
+        <h1 class="bp-time">{{ formatTime(slotTime) }}</h1>
+        <p class="bp-date">{{ formatDate(slotTime) }}</p>
+        <div class="bp-chips">
+          <span class="bp-chip bp-chip-purple">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            {{ bookings.length }} patient{{ bookings.length !== 1 ? 's' : '' }}
+          </span>
+          <span class="bp-chip bp-chip-blue">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            {{ formatDate(slotTime).split(',')[0] }}
+          </span>
+        </div>
+      </div>
+      <div class="bp-hero-deco">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="bp-stats">
+      <div class="bp-stat">
+        <span class="bp-stat-num">{{ bookings.length }}</span>
+        <span class="bp-stat-lbl">Total</span>
+      </div>
+      <div class="bp-stat-divider"></div>
+      <div class="bp-stat">
+        <span class="bp-stat-num bp-stat-green">{{ countByStatusNum(1) }}</span>
+        <span class="bp-stat-lbl">Confirmed</span>
+      </div>
+      <div class="bp-stat-divider"></div>
+      <div class="bp-stat">
+        <span class="bp-stat-num bp-stat-amber">{{ countByStatusNum(0) }}</span>
+        <span class="bp-stat-lbl">Pending</span>
+      </div>
+      <div class="bp-stat-divider"></div>
+      <div class="bp-stat">
+        <span class="bp-stat-num bp-stat-red">{{ countByStatusNum(2) }}</span>
+        <span class="bp-stat-lbl">Cancelled</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Patient list ── -->
+  <div class="bp-section" *ngIf="bookings.length > 0">
+
+    <div class="bp-section-head">
+      <div class="bp-section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Booked patients
+        <span class="bp-count-pill">{{ filteredBookings.length }}</span>
+      </div>
+      <div class="bp-filters">
+        <button class="bp-ftab" [class.active]="filterMode==='all'"       (click)="setFilter('all')">All</button>
+        <button class="bp-ftab" [class.active]="filterMode==='confirmed'" (click)="setFilter('confirmed')">Confirmed</button>
+        <button class="bp-ftab" [class.active]="filterMode==='pending'"   (click)="setFilter('pending')">Pending</button>
+        <button class="bp-ftab" [class.active]="filterMode==='cancelled'" (click)="setFilter('cancelled')">Cancelled</button>
+      </div>
+    </div>
+
+    <!-- Empty -->
+    @if (filteredBookings.length === 0) {
+      <div class="bp-empty">
+        <div class="bp-empty-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <p class="bp-empty-title">No patients in this category</p>
+        <p class="bp-empty-sub">Try switching to "All"</p>
+      </div>
+    }
+
+    <!-- Cards -->
+    <div class="bp-patient-list">
+      @for (record of filteredBookings; track record.id) {
+        <div class="bp-patient-card"
+          [class.status-confirmed]="record.status === 1"
+          [class.status-cancelled]="record.status === 2"
+          [class.status-pending]="record.status === 0">
+
+          <!-- Avatar -->
+          <div class="bp-avatar" [class.female]="getGender(record) === 2">
+            {{ getInitials(record.patient.user.userName) }}
+          </div>
+
+          <!-- Info -->
+          <div class="bp-patient-info">
+            <div class="bp-patient-name">{{ getDisplayName(record) }}</div>
+            <div class="bp-patient-meta">
+              <span class="bp-meta-item">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+                {{ getEmail(record) }}
+              </span>
+              <span class="bp-meta-item">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.37 2 2 0 013.6 1.18h3a2 2 0 012 1.72 12 12 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 8.8a16 16 0 006 6l.98-.98a2 2 0 012.11-.45 12 12 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                {{ getPhone(record) }}
+              </span>
+              <span class="bp-meta-item">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                DOB: {{ formatDOB(record.patient.dateOfBirath) }}
+              </span>
+              <span class="bp-meta-item">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{ record.patient.address.city }}, {{ record.patient.address.country }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Right -->
+          <div class="bp-patient-right">
+            <span class="bp-status-badge"
+              [class.badge-confirmed]="record.status === 1"
+              [class.badge-cancelled]="record.status === 2"
+              [class.badge-pending]="record.status === 0">
+              @if (record.status === 1) {
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              }
+              @if (record.status === 2) {
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              }
+              @if (record.status === 0) {
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              }
+              {{ statusLabel(record.status) }}
+            </span>
+
+            <span class="bp-gender-tag" [class.male]="getGender(record) === 1" [class.female]="getGender(record) === 2">
+              {{ getGenderLabel(getGender(record)) }}
+            </span>
+
+            <span class="bp-pid">Booking #{{ record.id }}</span>
+
+            <!-- 3 action buttons -->
+            <div class="bp-actions">
+              <button class="bp-act bp-act-call" title="Call patient" (click)="openPhone(getPhone(record))">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.37 2 2 0 013.6 1.18h3a2 2 0 012 1.72 12 12 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 8.8a16 16 0 006 6l.98-.98a2 2 0 012.11-.45 12 12 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                <span class="bp-act-label">Call</span>
+              </button>
+              <button class="bp-act bp-act-rx" title="Write prescription" (click)="openRxDrawer(record)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="10" y1="15" x2="14" y2="15"/></svg>
+                <span class="bp-act-label">Prescribe</span>
+              </button>
+              <button class="bp-act bp-act-hist" title="View history"  (click)="openHistoryDrawer(record)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span class="bp-act-label">History</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Empty page state -->
+  <div class="bp-page-empty" *ngIf="bookings.length === 0">
+    <div class="bp-empty-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    </div>
+    <p class="bp-empty-title">No bookings found</p>
+    <p class="bp-empty-sub">No patients have booked this availability slot yet</p>
+  </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     CREATE PRESCRIPTION DRAWER
+════════════════════════════════════════════════════════════ -->
+<div class="dr-overlay" [class.open]="rxDrawerOpen" (click)="closeRxDrawer()">
+  <div class="dr-drawer" [class.open]="rxDrawerOpen" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="dr-header">
+      <div class="dr-header-left">
+        <div class="dr-header-icon rx-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="10" y1="15" x2="14" y2="15"/></svg>
+        </div>
+        <div>
+          <h2 class="dr-title">Write Prescription</h2>
+          <p class="dr-sub" *ngIf="activeRecord">
+            For {{ getDisplayName(activeRecord) }} &middot; Patient #{{ activeRecord.patientId }}
+          </p>
+        </div>
+      </div>
+      <button class="dr-close" type="button" (click)="closeRxDrawer()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="dr-body" [formGroup]="rxForm" *ngIf="rxForm">
+
+      <!-- Patient pill -->
+      <div class="dr-patient-pill" *ngIf="activeRecord">
+        <div class="dr-pill-avatar" [class.female]="getGender(activeRecord) === 2">
+          {{ getInitials(activeRecord.patient.user.userName) }}
+        </div>
+        <div class="dr-pill-info">
+          <div class="dr-pill-name">{{ getDisplayName(activeRecord) }}</div>
+          <div class="dr-pill-meta">
+            {{ getGenderLabel(getGender(activeRecord)) }}
+            &middot; {{ getPhone(activeRecord) }}
+            &middot; DOB: {{ formatDOB(activeRecord.patient.dateOfBirath) }}
+          </div>
+          <div class="dr-pill-address">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ activeRecord.patient.address.street }}, {{ activeRecord.patient.address.city }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Diagnosis field -->
+      <p class="dr-section-label">Diagnosis</p>
+      <div class="dr-field">
+        <label class="dr-label">
+          Primary diagnosis / reason for visit
+          <span class="dr-required">*</span>
+        </label>
+        <div class="dr-input-wrap">
+          <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          <input class="dr-input" type="text"
+                 placeholder="e.g. Upper respiratory tract infection"
+                  />
+        </div>
+      </div>
+
+      <!-- Treatments -->
+      <p class="dr-section-label" style="margin-top:16px">Treatments</p>
+      <p class="dr-section-hint">Add one or more medications with dosage instructions</p>
+
+      <div class="dr-treatments" formArrayName="treatments">
+        @for (treatment of treatmentsArray.controls; track $index) {
+          <div class="dr-treatment-row" [formGroupName]="$index">
+            <div class="dr-treatment-num">{{ $index + 1 }}</div>
+            <div class="dr-treatment-fields">
+              <div class="dr-field">
+                <label class="dr-label">
+                  Medication name
+                  <span class="dr-required">*</span>
+                </label>
+                <div class="dr-input-wrap">
+                  <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+                    <path d="M9 12h6M12 9v6"/>
+                  </svg>
+                  <input class="dr-input" type="text"
+                         placeholder="e.g. Paracetamol 500mg"
+                         formControlName="medicationName" />
+                </div>
+              </div>
+              <div class="dr-field">
+                <label class="dr-label">Dosage instructions / notes</label>
+                <div class="dr-input-wrap">
+                  <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                  </svg>
+                  <input class="dr-input" type="text"
+                         placeholder="e.g. Take twice daily after meals"
+                         formControlName="notes" />
+                </div>
+              </div>
+            </div>
+            <button class="dr-remove-btn" type="button"
+                    *ngIf="treatmentsArray.length > 1"
+                    (click)="removeTreatment($index)" title="Remove">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        }
+      </div>
+
+      <button class="dr-add-btn" type="button" (click)="addTreatment()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add another medication
+      </button>
+
+      <div class="dr-error" *ngIf="rxError">{{ rxError }}</div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="dr-footer">
+      <button class="dr-btn-cancel" type="button" (click)="closeRxDrawer()">Cancel</button>
+      <button class="dr-btn-save" type="button" (click)="submitRx()" [disabled]="rxSaving">
+        @if (rxSaving) { <span class="dr-spinner"></span> }
+        @else {
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        }
+        {{ rxSaving ? 'Saving…' : 'Save prescription' }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     PRESCRIPTION HISTORY DRAWER
+════════════════════════════════════════════════════════════ -->
+<div class="dr-overlay" [class.open]="historyDrawerOpen" (click)="closeHistoryDrawer()">
+  <div class="dr-drawer dr-drawer-wide" [class.open]="historyDrawerOpen" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="dr-header">
+      <div class="dr-header-left">
+        <div class="dr-header-icon hist-icon">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+          <h2 class="dr-title">Prescription History</h2>
+          <p class="dr-sub" *ngIf="activeRecord">
+            {{ getDisplayName(activeRecord) }}
+            &middot; {{ prescriptionHistory.length }} record{{ prescriptionHistory.length !== 1 ? 's' : '' }}
+          </p>
+        </div>
+      </div>
+      <button class="dr-close" type="button" (click)="closeHistoryDrawer()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="dr-body">
+
+      <!-- Patient pill -->
+      <div class="dr-patient-pill" *ngIf="activeRecord">
+        <div class="dr-pill-avatar" [class.female]="getGender(activeRecord) === 2">
+          {{ getInitials(activeRecord.patient.user.userName) }}
+        </div>
+        <div class="dr-pill-info">
+          <div class="dr-pill-name">{{ getDisplayName(activeRecord) }}</div>
+          <div class="dr-pill-meta">
+            {{ getGenderLabel(getGender(activeRecord)) }}
+            &middot; {{ getPhone(activeRecord) }}
+            &middot; DOB: {{ formatDOB(activeRecord.patient.dateOfBirath) }}
+          </div>
+          <div class="dr-pill-address">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{ activeRecord.patient.address.city }}, {{ activeRecord.patient.address.country }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="dr-loading" *ngIf="historyLoading">
+        <span class="dr-spinner-large"></span>
+        <span>Loading prescriptions…</span>
+      </div>
+
+      <!-- Empty -->
+      <div class="dr-hist-empty" *ngIf="!historyLoading && prescriptionHistory.length === 0">
+        <div class="dr-hist-empty-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <p class="dr-hist-empty-title">No prescriptions yet</p>
+        <p class="dr-hist-empty-sub">This patient has no prescription history</p>
+      </div>
+
+      <!-- Records -->
+      <div class="dr-hist-list" *ngIf="!historyLoading && prescriptionHistory.length > 0">
+        @for (rx of prescriptionHistory; track rx.id) {
+          <div class="dr-hist-card">
+
+            <!-- Card header: Rx number + prescribing doctor -->
+            <div class="dr-hist-card-head">
+              <div class="dr-hist-rx-num">Rx #{{ rx.id }}</div>
+              <div class="dr-hist-doctor">
+                <div class="dr-hist-doc-avatar">{{ getInitials(rx.doctor?.name ?? 'DR') }}</div>
+                <div>
+                  <div class="dr-hist-doc-name">{{ formatDisplayName(rx.doctor?.name ?? 'Unknown') }}</div>
+                  <div class="dr-hist-doc-spec">{{ rx.doctor?.speciality }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diagnosis block -->
+            <div class="dr-hist-diagnosis">
+              <div class="dr-hist-diag-label">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                Diagnosis
+              </div>
+              <!-- [class.dr-hist-diag-empty]="!rx.diagnosis" -->
+              <div class="dr-hist-diag-value" >
+                'No diagnosis recorded' 
+              </div>
+            </div>
+
+            <!-- Treatments -->
+            <div class="dr-hist-treatments">
+              <div class="dr-hist-treatments-label">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+                  <path d="M9 12h6M12 9v6"/>
+                </svg>
+                Medications ({{ rx.treatments.length }})
+              </div>
+              @for (t of rx.treatments; track t.id) {
+                <div class="dr-hist-treatment">
+                  <div class="dr-hist-pill-icon">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                      <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+                      <path d="M9 12h6M12 9v6"/>
+                    </svg>
+                  </div>
+                  <div class="dr-hist-treatment-info">
+                    <span class="dr-hist-med-name">{{ t.medicationName }}</span>
+                    <span class="dr-hist-med-notes">{{ t.notes }}</span>
+                  </div>
+                  <span class="dr-hist-treatment-id">#{{ t.id }}</span>
+                </div>
+              }
+            </div>
+
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="dr-footer">
+      <button class="dr-btn-cancel" type="button" (click)="closeHistoryDrawer()">Close</button>
+      <button class="dr-btn-save" type="button" (click)="openRxFromHistory()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="10" y1="15" x2="14" y2="15"/></svg>
+        New prescription
+      </button>
+    </div>
+
+  </div>
+</div>
