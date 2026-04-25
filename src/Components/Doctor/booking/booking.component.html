@@ -43,7 +43,7 @@
       </div>
       <div class="bp-stat-divider"></div>
       <div class="bp-stat">
-        <span class="bp-stat-num bp-stat-green">{{ countByStatusNum(1) }}</span>
+        <span class="bp-stat-num bp-stat-green">{{ countByStatusNum(2) }}</span>
         <span class="bp-stat-lbl">Confirmed</span>
       </div>
       <div class="bp-stat-divider"></div>
@@ -53,7 +53,7 @@
       </div>
       <div class="bp-stat-divider"></div>
       <div class="bp-stat">
-        <span class="bp-stat-num bp-stat-red">{{ countByStatusNum(2) }}</span>
+        <span class="bp-stat-num bp-stat-red">{{ countByStatusNum(1) }}</span>
         <span class="bp-stat-lbl">Cancelled</span>
       </div>
     </div>
@@ -91,8 +91,8 @@
     <div class="bp-patient-list">
       @for (record of filteredBookings; track record.id) {
         <div class="bp-patient-card"
-          [class.status-confirmed]="record.status === 1"
-          [class.status-cancelled]="record.status === 2"
+          [class.status-confirmed]="record.status === 2"
+          [class.status-cancelled]="record.status === 1"
           [class.status-pending]="record.status === 0">
 
           <!-- Avatar -->
@@ -126,8 +126,8 @@
           <!-- Right -->
           <div class="bp-patient-right">
             <span class="bp-status-badge"
-              [class.badge-confirmed]="record.status === 1"
-              [class.badge-cancelled]="record.status === 2"
+              [class.badge-confirmed]="record.status === 2"
+              [class.badge-cancelled]="record.status === 1"
               [class.badge-pending]="record.status === 0">
               @if (record.status === 1) {
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -240,7 +240,7 @@
           </svg>
           <input class="dr-input" type="text"
                  placeholder="e.g. Upper respiratory tract infection"
-                  />
+                 formControlName="diagnosis" />
         </div>
       </div>
 
@@ -404,9 +404,9 @@
                 </svg>
                 Diagnosis
               </div>
-              <!-- [class.dr-hist-diag-empty]="!rx.diagnosis" -->
-              <div class="dr-hist-diag-value" >
-                'No diagnosis recorded' 
+              
+              <div class="dr-hist-diag-value" [class.dr-hist-diag-empty]="!rx.diagnosis">
+              {{rx.diagnosis||'No diagnosis recorded' }}  
               </div>
             </div>
 

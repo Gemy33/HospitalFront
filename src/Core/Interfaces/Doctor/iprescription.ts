@@ -6,5 +6,6 @@ export interface IPrescription {
   doctorId: number;
   patientId: number;
   doctor: IDoctorMini;
+  diagnosis:string;
   treatments: IPrescriptionTreatment[];
 }

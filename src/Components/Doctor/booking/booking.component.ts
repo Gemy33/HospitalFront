@@ -7,7 +7,7 @@ import { DoctorService } from '../../../Core/doctor.service';
 import { IPrescription } from '../../../Core/Interfaces/Doctor/iprescription';
 
 // ══════════════════════════════════════════════════════════════════════════════
-// INTERFACES — matching the real API response exactly
+// INTERFACES
 // ══════════════════════════════════════════════════════════════════════════════
 
 export interface BookingAddress {
@@ -17,26 +17,25 @@ export interface BookingAddress {
 }
 
 export interface BookingUser {
-  id:                  number;
-  userName:            string;
-  email:               string;
-  phoneNumber:         string;
-  gender:              number;   // 1 = Male, 2 = Female, 0 = Other
-  createdAt:           string;
-  updatedAt:           string;
+  id:          number;
+  userName:    string;
+  email:       string;
+  phoneNumber: string;
+  gender:      number;   // 1 = Male, 2 = Female, 0 = Other
+  createdAt:   string;
+  updatedAt:   string;
 }
 
 export interface BookingPatientData {
   id:           number;
   userId:       number;
-  dateOfBirath: string;   // API typo preserved
+  dateOfBirath: string;  // API typo preserved
   address:      BookingAddress;
   user:         BookingUser;
   createdAt:    string;
   updatedAt:    string;
 }
 
-/** One record in the getBookingPatients array */
 export interface BookingRecord {
   id:                   number;
   patientId:            number;
@@ -44,12 +43,10 @@ export interface BookingRecord {
   doctorAvailabilityId: number;
   doctorAvailability:   null;
   status:               number;   // 0 = Pending, 1 = Confirmed, 2 = Cancelled
-  consultionTime:       string;   // API typo "consultion" preserved
+  consultionTime:       string;   // API typo preserved
   createdAt:            string;
   updatedAt:            string;
 }
-
-// ── Prescription interfaces ────────────────────────────────────────────────
 
 export interface Treatment {
   id:             number;
@@ -76,6 +73,7 @@ export interface Prescription {
   patientId:  number;
   doctor:     PrescriptionDoctor;
   treatments: Treatment[];
+  diagnosis?: string;  // ✅ optional — API may not return it yet
 }
 
 export type FilterMode = 'all' | 'confirmed' | 'cancelled' | 'pending';
@@ -98,7 +96,6 @@ export class BookingComponent implements OnInit {
   filteredBookings: BookingRecord[] = [];
   filterMode:       FilterMode      = 'all';
 
-  // All records share the same slot — derive from first item
   get slotTime():       string { return this.bookings[0]?.consultionTime ?? ''; }
   get availabilityId(): number { return this.bookings[0]?.doctorAvailabilityId ?? 0; }
 
@@ -132,8 +129,6 @@ export class BookingComponent implements OnInit {
       error: err => console.error(err),
     });
   }
-
-
 
   // ── Filter ────────────────────────────────────────────────────────────────
 
@@ -226,9 +221,16 @@ export class BookingComponent implements OnInit {
   openRxDrawer(record: BookingRecord): void {
     this.activeRecord = record;
     this.rxError      = '';
+
+    // ✅ FIX: diagnosis is a TOP-LEVEL control, NOT inside the treatments array.
+    // Previously diagnosis was inside newTreatmentGroup() which caused
+    // "No control found for formControlName: 'diagnosis'" because the HTML
+    // binds formControlName="diagnosis" directly on rxForm, not on a nested group.
     this.rxForm = this.fb.group({
+      diagnosis:  ['', Validators.required],           // ← top level
       treatments: this.fb.array([this.newTreatmentGroup()]),
     });
+
     this.rxDrawerOpen = true;
     document.body.style.overflow = 'hidden';
   }
@@ -242,38 +244,45 @@ export class BookingComponent implements OnInit {
     return this.rxForm?.get('treatments') as FormArray;
   }
 
+  // ✅ FIX: only medicationName + notes here — diagnosis is top-level above
   private newTreatmentGroup(): FormGroup {
     return this.fb.group({
       medicationName: ['', Validators.required],
       notes:          [''],
-      
     });
   }
 
-  addTreatment(): void         { this.treatmentsArray.push(this.newTreatmentGroup()); }
+  addTreatment(): void             { this.treatmentsArray.push(this.newTreatmentGroup()); }
   removeTreatment(i: number): void { this.treatmentsArray.removeAt(i); }
 
   submitRx(): void {
-    // if (!this.rxForm || this.rxForm.invalid) {
-    //   this.rxError = 'Please fill in all medication names.';
-    //   return;
-    // }
+    if (!this.rxForm || this.rxForm.invalid) {
+      this.rxError = 'Please fill in the diagnosis and all medication names.';
+      return;
+    }
+
     const payload = {
       doctorId:   2, // replace: AuthService.getDoctorId()
       patientId:  this.activeRecord!.patientId,
+      diagnosis:  this.rxForm.value.diagnosis,       // ← now correctly top-level
       treatments: this.rxForm.value.treatments,
     };
-    console.log("berfore")
-    console.log(this.rxForm);
+
     console.log('[Prescription payload]', payload);
-    // this.rxSaving = true;
+
+    this.rxSaving = true;
     this._doctorservice.createPrescription(payload).subscribe({
-      next: (res) => { this.rxSaving = false; this.closeRxDrawer(); console.log(res)},
-      error: err => { this.rxError = err?.error?.message ?? 'Failed'; this.rxSaving = false;
+      next: (res) => {
+        this.rxSaving = false;
+        this.closeRxDrawer();
+        console.log(res);
+      },
+      error: err => {
+        this.rxError  = err?.error?.message ?? 'Failed to save prescription.';
+        this.rxSaving = false;
         console.log(err);
-       }
+      },
     });
-    this.closeRxDrawer();
   }
 
   // ── History Drawer ────────────────────────────────────────────────────────
@@ -284,39 +293,18 @@ export class BookingComponent implements OnInit {
     this.historyLoading      = true;
     this.prescriptionHistory = [];
     document.body.style.overflow = 'hidden';
-   console.log("before")
-    this._doctorservice.getPatientPrescriptions(record.patientId).subscribe({
-      next: (res:IPrescription[]) => { 
-        console.log(res);
-        console.log("history islam")
-        this.prescriptionHistory = res; this.historyLoading = false; },
-      error: (err) => { this.historyLoading = false; 
-        console.log(err);
-      }
-    });
-    console.log("after")
 
-    // setTimeout(() => {
-    //   this.prescriptionHistory = [
-    //     {
-    //       id: 6, doctorId: 8, patientId: record.patientId,
-    //       doctor: { id: 8, name: 'mostafa_k', speciality: 'Gynecology', gender: 1, yearsOfExperience: 11, bio: '', phone: '+201234567890' },
-    //       treatments: [
-    //         { id: 1, prescriptionId: 6, medicationName: 'Paracetamol', notes: 'Take twice daily after meals', createdAt: '', updatedAt: '' },
-    //         { id: 2, prescriptionId: 6, medicationName: 'Ibuprofen',   notes: 'Take once daily after food',  createdAt: '', updatedAt: '' },
-    //       ],
-    //     },
-    //     {
-    //       id: 7, doctorId: 6, patientId: record.patientId,
-    //       doctor: { id: 6, name: 'sara_m', speciality: 'Pediatrics', gender: 1, yearsOfExperience: 6, bio: '', phone: '+201112345678' },
-    //       treatments: [
-    //         { id: 3, prescriptionId: 7, medicationName: 'Amoxicillin', notes: 'Take three times daily',     createdAt: '', updatedAt: '' },
-    //         { id: 4, prescriptionId: 7, medicationName: 'Vitamin C',   notes: 'Take once daily with water', createdAt: '', updatedAt: '' },
-    //       ],
-    //     },
-    //   ];
-    //   this.historyLoading = false;
-    // }, 600);
+    this._doctorservice.getPatientPrescriptions(record.patientId).subscribe({
+      next: (res: IPrescription[]) => {
+        console.log(res);
+        this.prescriptionHistory = res;
+        this.historyLoading = false;
+      },
+      error: (err) => {
+        this.historyLoading = false;
+        console.log(err);
+      },
+    });
   }
 
   closeHistoryDrawer(): void {
