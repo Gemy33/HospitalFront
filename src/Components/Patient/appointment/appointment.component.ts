@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PatientService } from '../../../Core/patient.service';
 import { AuthService } from '../../../Core/auth.service';
+import { Router } from '@angular/router';
 
 interface TransformedAppointment {
   id: number;
@@ -15,7 +16,8 @@ interface TransformedAppointment {
   selector: 'app-appointment-list',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './appointment.component.html',
+  
+templateUrl: './appointment.component.html',
   styleUrl: './appointment.component.css'
 })
 export class AppointmentComponent implements OnInit {
@@ -23,7 +25,7 @@ export class AppointmentComponent implements OnInit {
   appointments: TransformedAppointment[] = [];
   loading = true;
 
-  constructor(private PatientService: PatientService , private authservice : AuthService) {}
+  constructor(private PatientService: PatientService , private route: Router, private authservice : AuthService) {}
 
   ngOnInit(): void {
       var userId = this.authservice.getUserId();
@@ -63,7 +65,10 @@ export class AppointmentComponent implements OnInit {
       }
     });
   }
-
+naviagetoPresci():void{
+  this.route.navigate(['/patient/prescription']);
+  console.log("navigating to prescription");
+}
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', {

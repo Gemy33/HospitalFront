@@ -7,7 +7,7 @@
 
   <!-- Stats Cards -->
   <div class="stats-grid">
-    <div class="stat-card" *ngFor="let stat of stats">
+    <div class="stat-card" *ngFor="let stat of stats()">
       <div class="stat-icon" [style.color]="stat.color">{{ stat.icon }}</div>
       <div class="stat-info">
         <h3>{{ stat.value }}</h3>
@@ -54,7 +54,7 @@
       <button routerLink="/patient/appointments" class="action-btn">
         📅 Book New Appointment
       </button>
-      <button routerLink="/patient/prescriptions" class="action-btn">
+      <button routerLink="/patient/prescription" class="action-btn">
         💊 View Prescriptions
       </button>
       <button routerLink="/patient/history" class="action-btn">

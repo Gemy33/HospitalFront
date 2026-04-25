@@ -8,6 +8,7 @@ import { IAvailabilityItem } from '../../../Core/Interfaces/Doctor/iavailability
 
 import { DoctorService } from '../../../Core/doctor.service';
 import { CreateBookingRequest, PatientService } from '../../../Core/patient.service';
+import { AuthService } from '../../../Core/auth.service';
 
 @Component({
   selector: 'app-doctor-availability',
@@ -27,7 +28,7 @@ export class DoctorAvailabilityComponent implements OnInit {
   bookErr  = signal<string | null>(null);
 
   // Replace with your auth service when ready
-  private readonly patientId = 2;
+   patientId = 2;
 
   available = computed(() => this.slots().filter(s => !s.book_Complete));
   booked    = computed(() => this.slots().filter(s => s.book_Complete));
@@ -37,19 +38,38 @@ export class DoctorAvailabilityComponent implements OnInit {
     private router: Router,
     private doctorSvc: DoctorService,
     private patientservice: PatientService,
+    private auth: AuthService,
   ) {}
+
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('doctorId'));
+
+  var  userId = this.auth.getUserId()!;
+      this.patientservice.getPatientProfileByUserId(userId).subscribe({ 
+        next: (res: any) => {
+          this.patientId = res.id;
+          console.log(this.patientId,"Patient Id");
+          this.load();
+        }
+      });
+    console.log(id,"Doctor Id");
+    console.log(this.patientId);
+    
+    
     this.doctorId.set(id);
-    this.load();
+    // this.load();
   }
 
   load(): void {
     this.loading.set(true);
     this.error.set(null);
     this.doctorSvc.getDoctorAvailabilities(this.doctorId()).subscribe({
-      next: data  => { this.slots.set(data); this.loading.set(false); },
+      next: data  => { 
+        console.log(data , "from load in avialiby");
+        
+        this.slots.set(data); this.loading.set(false);
+       },
       error: ()   => { this.error.set('Could not load slots. Try again.'); this.loading.set(false); },
     });
   }
@@ -70,7 +90,7 @@ export class DoctorAvailabilityComponent implements OnInit {
       DoctorAvailabilityId: slot.doctorAvailability.id,
       PatientId: this.patientId,
       Amount: slot.doctorAvailability.price,
-      Status: 0,
+      Status: 1,
     };
 
     this.booking.set(true);
