@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DoctorService } from '../../../Core/doctor.service';
+import { IPrescription } from '../../../Core/Interfaces/Doctor/iprescription';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // INTERFACES — matching the real API response exactly
@@ -111,7 +112,7 @@ export class BookingComponent implements OnInit {
   // ── History drawer ────────────────────────────────────────────────────────
   historyDrawerOpen    = false;
   historyLoading       = false;
-  prescriptionHistory: Prescription[] = [];
+  prescriptionHistory: IPrescription[] = [];
 
   constructor(
     private router:         Router,
@@ -131,6 +132,8 @@ export class BookingComponent implements OnInit {
       error: err => console.error(err),
     });
   }
+
+
 
   // ── Filter ────────────────────────────────────────────────────────────────
 
@@ -243,6 +246,7 @@ export class BookingComponent implements OnInit {
     return this.fb.group({
       medicationName: ['', Validators.required],
       notes:          [''],
+      
     });
   }
 
@@ -250,21 +254,25 @@ export class BookingComponent implements OnInit {
   removeTreatment(i: number): void { this.treatmentsArray.removeAt(i); }
 
   submitRx(): void {
-    if (!this.rxForm || this.rxForm.invalid) {
-      this.rxError = 'Please fill in all medication names.';
-      return;
-    }
+    // if (!this.rxForm || this.rxForm.invalid) {
+    //   this.rxError = 'Please fill in all medication names.';
+    //   return;
+    // }
     const payload = {
       doctorId:   2, // replace: AuthService.getDoctorId()
       patientId:  this.activeRecord!.patientId,
       treatments: this.rxForm.value.treatments,
     };
+    console.log("berfore")
+    console.log(this.rxForm);
     console.log('[Prescription payload]', payload);
     // this.rxSaving = true;
-    // this._doctorservice.createPrescription(payload).subscribe({
-    //   next: () => { this.rxSaving = false; this.closeRxDrawer(); },
-    //   error: err => { this.rxError = err?.error?.message ?? 'Failed'; this.rxSaving = false; }
-    // });
+    this._doctorservice.createPrescription(payload).subscribe({
+      next: (res) => { this.rxSaving = false; this.closeRxDrawer(); console.log(res)},
+      error: err => { this.rxError = err?.error?.message ?? 'Failed'; this.rxSaving = false;
+        console.log(err);
+       }
+    });
     this.closeRxDrawer();
   }
 
@@ -276,33 +284,39 @@ export class BookingComponent implements OnInit {
     this.historyLoading      = true;
     this.prescriptionHistory = [];
     document.body.style.overflow = 'hidden';
+   console.log("before")
+    this._doctorservice.getPatientPrescriptions(record.patientId).subscribe({
+      next: (res:IPrescription[]) => { 
+        console.log(res);
+        console.log("history islam")
+        this.prescriptionHistory = res; this.historyLoading = false; },
+      error: (err) => { this.historyLoading = false; 
+        console.log(err);
+      }
+    });
+    console.log("after")
 
-    // this._doctorservice.getPatientPrescriptions(record.patientId).subscribe({
-    //   next: (res: Prescription[]) => { this.prescriptionHistory = res; this.historyLoading = false; },
-    //   error: () => { this.historyLoading = false; }
-    // });
-
-    setTimeout(() => {
-      this.prescriptionHistory = [
-        {
-          id: 6, doctorId: 8, patientId: record.patientId,
-          doctor: { id: 8, name: 'mostafa_k', speciality: 'Gynecology', gender: 1, yearsOfExperience: 11, bio: '', phone: '+201234567890' },
-          treatments: [
-            { id: 1, prescriptionId: 6, medicationName: 'Paracetamol', notes: 'Take twice daily after meals', createdAt: '', updatedAt: '' },
-            { id: 2, prescriptionId: 6, medicationName: 'Ibuprofen',   notes: 'Take once daily after food',  createdAt: '', updatedAt: '' },
-          ],
-        },
-        {
-          id: 7, doctorId: 6, patientId: record.patientId,
-          doctor: { id: 6, name: 'sara_m', speciality: 'Pediatrics', gender: 1, yearsOfExperience: 6, bio: '', phone: '+201112345678' },
-          treatments: [
-            { id: 3, prescriptionId: 7, medicationName: 'Amoxicillin', notes: 'Take three times daily',     createdAt: '', updatedAt: '' },
-            { id: 4, prescriptionId: 7, medicationName: 'Vitamin C',   notes: 'Take once daily with water', createdAt: '', updatedAt: '' },
-          ],
-        },
-      ];
-      this.historyLoading = false;
-    }, 600);
+    // setTimeout(() => {
+    //   this.prescriptionHistory = [
+    //     {
+    //       id: 6, doctorId: 8, patientId: record.patientId,
+    //       doctor: { id: 8, name: 'mostafa_k', speciality: 'Gynecology', gender: 1, yearsOfExperience: 11, bio: '', phone: '+201234567890' },
+    //       treatments: [
+    //         { id: 1, prescriptionId: 6, medicationName: 'Paracetamol', notes: 'Take twice daily after meals', createdAt: '', updatedAt: '' },
+    //         { id: 2, prescriptionId: 6, medicationName: 'Ibuprofen',   notes: 'Take once daily after food',  createdAt: '', updatedAt: '' },
+    //       ],
+    //     },
+    //     {
+    //       id: 7, doctorId: 6, patientId: record.patientId,
+    //       doctor: { id: 6, name: 'sara_m', speciality: 'Pediatrics', gender: 1, yearsOfExperience: 6, bio: '', phone: '+201112345678' },
+    //       treatments: [
+    //         { id: 3, prescriptionId: 7, medicationName: 'Amoxicillin', notes: 'Take three times daily',     createdAt: '', updatedAt: '' },
+    //         { id: 4, prescriptionId: 7, medicationName: 'Vitamin C',   notes: 'Take once daily with water', createdAt: '', updatedAt: '' },
+    //       ],
+    //     },
+    //   ];
+    //   this.historyLoading = false;
+    // }, 600);
   }
 
   closeHistoryDrawer(): void {

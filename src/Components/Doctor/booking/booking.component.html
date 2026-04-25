@@ -43,7 +43,7 @@
       </div>
       <div class="bp-stat-divider"></div>
       <div class="bp-stat">
-        <span class="bp-stat-num bp-stat-green">{{ countByStatusNum(2) }}</span>
+        <span class="bp-stat-num bp-stat-green">{{ countByStatusNum(1) }}</span>
         <span class="bp-stat-lbl">Confirmed</span>
       </div>
       <div class="bp-stat-divider"></div>
@@ -53,7 +53,7 @@
       </div>
       <div class="bp-stat-divider"></div>
       <div class="bp-stat">
-        <span class="bp-stat-num bp-stat-red">{{ countByStatusNum(1) }}</span>
+        <span class="bp-stat-num bp-stat-red">{{ countByStatusNum(2) }}</span>
         <span class="bp-stat-lbl">Cancelled</span>
       </div>
     </div>
@@ -91,8 +91,8 @@
     <div class="bp-patient-list">
       @for (record of filteredBookings; track record.id) {
         <div class="bp-patient-card"
-          [class.status-confirmed]="record.status === 2"
-          [class.status-cancelled]="record.status === 1"
+          [class.status-confirmed]="record.status === 1"
+          [class.status-cancelled]="record.status === 2"
           [class.status-pending]="record.status === 0">
 
           <!-- Avatar -->
@@ -126,13 +126,13 @@
           <!-- Right -->
           <div class="bp-patient-right">
             <span class="bp-status-badge"
-              [class.badge-confirmed]="record.status === 2"
-              [class.badge-cancelled]="record.status === 1"
+              [class.badge-confirmed]="record.status === 1"
+              [class.badge-cancelled]="record.status === 2"
               [class.badge-pending]="record.status === 0">
-              @if (record.status === 2) {
+              @if (record.status === 1) {
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               }
-              @if (record.status === 1) {
+              @if (record.status === 2) {
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               }
               @if (record.status === 0) {
@@ -157,7 +157,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="10" y1="15" x2="14" y2="15"/></svg>
                 <span class="bp-act-label">Prescribe</span>
               </button>
-              <button class="bp-act bp-act-hist" title="View history" (click)="openHistoryDrawer(record)">
+              <button class="bp-act bp-act-hist" title="View history"  (click)="openHistoryDrawer(record)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span class="bp-act-label">History</span>
               </button>
@@ -240,7 +240,7 @@
           </svg>
           <input class="dr-input" type="text"
                  placeholder="e.g. Upper respiratory tract infection"
-                 formControlName="diagnosis" />
+                  />
         </div>
       </div>
 
@@ -396,8 +396,29 @@
               </div>
             </div>
 
-            <!-- Treatments — matching exact API structure -->
+            <!-- Diagnosis block -->
+            <div class="dr-hist-diagnosis">
+              <div class="dr-hist-diag-label">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                Diagnosis
+              </div>
+              <!-- [class.dr-hist-diag-empty]="!rx.diagnosis" -->
+              <div class="dr-hist-diag-value" >
+                'No diagnosis recorded' 
+              </div>
+            </div>
+
+            <!-- Treatments -->
             <div class="dr-hist-treatments">
+              <div class="dr-hist-treatments-label">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+                  <path d="M9 12h6M12 9v6"/>
+                </svg>
+                Medications ({{ rx.treatments.length }})
+              </div>
               @for (t of rx.treatments; track t.id) {
                 <div class="dr-hist-treatment">
                   <div class="dr-hist-pill-icon">
