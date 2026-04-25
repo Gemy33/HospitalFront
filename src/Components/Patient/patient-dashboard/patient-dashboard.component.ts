@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, computed, OnInit, Signal, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PatientService } from '../../../Core/patient.service';
-import { map } from 'rxjs';
+import { map, single } from 'rxjs';
 import { AuthService } from '../../../Core/auth.service';
 
 interface StatCard {
@@ -22,11 +22,13 @@ interface StatCard {
 export class PatientDashboardComponent implements OnInit {
 
   patientName = 'Mohamed';
+  patientId = 0;
   upcomingAppointments: any[] = [];
-  stats: StatCard[] = [];
-   upcomming = 0
-     completed = 0
-     total = 0
+  stats: Signal<StatCard[]> = signal([]);
+  upcoming = signal(0);
+   completed = signal(0);
+    total = signal(0 );
+  
 
   constructor(private patientservice: PatientService , private authservice: AuthService) {}
 
@@ -44,28 +46,25 @@ export class PatientDashboardComponent implements OnInit {
     this.patientservice.getPatientProfileByUserId(id).subscribe({
       next: (data) => {
         this.patientName = data.name;
-        id = data.id;
+        this.patientId = data.id;
         console.log("patient name from dashboard", this.patientName);
-        console.log("patient Id from dashboard", data.id);
-
-
-      },
-      error: () => {
-        console.log('Failed to load profile. Please try again.');
-      }
-    });
-    this.patientservice.getAppointments(id).subscribe({
+        console.log("patient Id from dashboard", this.patientId);
+this.patientservice.getAppointments(this.patientId).subscribe({
       next: (appointments) => {
-         this.total = appointments.length
+
+         this.total.set(appointments.length);
+         console.log(this.total(),"total appointments");
+         
          console.log(appointments);
        
          
          
         appointments.forEach((app) => {
           if (app.status === 'Pending') {
-            this.upcomming++;
+
+            this.upcoming.set(this.upcoming() + 1);
           } else if (app.status === 'Completed') {
-            this.completed++;
+            this.completed.set(this.completed() + 1)    ;
           }
         });
         // Sort by date and take only upcoming ones
@@ -76,6 +75,13 @@ export class PatientDashboardComponent implements OnInit {
           .slice(0, 3);
       }
     });
+
+      },
+      error: () => {
+        console.log('Failed to load profile. Please try again.');
+      }
+    });
+    
 
     // get total appointments count (for demo, using static value here, you can calculate from API data later)
 
@@ -95,15 +101,18 @@ export class PatientDashboardComponent implements OnInit {
     //   }
     // });
     // Static stats for now (you can make them dynamic later)
-    this.stats = [
-      { title: 'Total Appointments', value: this.total, icon: '📅', color: '#3b82f6' },
-      { title: 'Upcoming', value: this.upcomming, icon: '⏰', color: '#eab308' },
-      { title: 'Completed', value: this.  completed, icon: '✅', color: '#22c55e' }
-    ];
+    this.stats = computed(() => [
+      { title: 'Upcoming Appointments', value: this.upcoming(), icon: '📅', color: 'blue' },
+      { title: 'Completed Appointments', value: this.completed(), icon: '✅', color: 'green' },
+      { title: 'Total Appointments', value: this.total(), icon: '📊', color: 'purple' },
+    ]);
+     
+ 
+  
   }
 
   // For demo - change this to real patientId from auth later
-   patientId(): number {
-   return 3;
-  }
+  //  patientId(): number {
+  //  return 2003;
+  // }
 }

@@ -51,9 +51,9 @@ export class PatientService {
   private http = inject(HttpClient);
   private mapStatus(status: number): string {
   switch (status) {
-    case 0: return 'Pending';
-    case 1: return 'Cancelled';
-    case 2: return 'Confirmed';
+    case 1: return 'Pending';
+    case 2: return 'Cancelled';
+    case 3: return 'Confirmed';
     default: return 'Unknown';
   }
 }

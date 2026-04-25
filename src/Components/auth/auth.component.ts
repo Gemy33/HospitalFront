@@ -316,7 +316,7 @@ export class AuthComponent implements OnInit {
         this.registerLoading = false;
         console.log('Register response:', response);
         this.showToast('success', '✅ Registration successful!');
-        this.router.navigate(['/login']);
+        this.activeTab = "login"
       },
       error: (error) => { 
         this.registerLoading = false;
