@@ -14,6 +14,7 @@ import { DoctorAvailabilityComponent } from '../Components/Patient/doctor-availa
 import { PrescriptionsComponent } from '../Components/Patient/prescription/prescription.component';
 import { PrescriptionComponent } from '../Components/Doctor/prescription/prescription.component';
 import { PrescriptionDetailComponent } from '../Components/Patient/prescription-detail/prescription-detail.component';
+import { DoctorPatientsComponent } from '../Components/Doctor/doctor-patients/doctor-patients.component';
 
 export const routes: Routes = [
     {path: '', redirectTo: 'auth', pathMatch: 'full'},
@@ -41,6 +42,7 @@ export const routes: Routes = [
         {path:'Availabilty',component:AvailabiltyComponent,title:'availabilty'},
         {path:'prescription',component:PrescriptionComponent,title:'prescription'},
         {path:'booking/:AvailabilityId',component:BookingComponent,title:'booking'},
+        {path:'patients',component:DoctorPatientsComponent,title:'doctor patients'},
         {path:'**',redirectTo:"profile",pathMatch:'full'}
     ]},
 
