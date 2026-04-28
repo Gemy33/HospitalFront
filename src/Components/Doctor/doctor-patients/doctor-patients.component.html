@@ -1,0 +1,428 @@
+<!-- my-patients.component.html -->
+<div class="mp-page">
+
+  <!-- ══ PAGE HEADER ══════════════════════════════════════════ -->
+  <div class="mp-header">
+    <div class="mp-header-left">
+      <div class="mp-header-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+          <path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="mp-title">My Patients</h1>
+        <p class="mp-sub">
+          {{ allPatients.length }} patients &middot; {{ totalRxCount() }} prescriptions total
+        </p>
+      </div>
+    </div>
+
+    <!-- Summary chips -->
+    <div class="mp-header-stats">
+      <div class="mp-hstat">
+        <span class="mp-hstat-num">{{ allPatients.length }}</span>
+        <span class="mp-hstat-lbl">Total</span>
+      </div>
+      <div class="mp-hstat-div"></div>
+      <div class="mp-hstat">
+        <span class="mp-hstat-num mp-green">patientsWithRxCount()</span>
+        <span class="mp-hstat-lbl">With Rx</span>
+      </div>
+      <div class="mp-hstat-div"></div>
+      <div class="mp-hstat">
+        <span class="mp-hstat-num mp-amber">{{ totalRxCount() }}</span>
+        <span class="mp-hstat-lbl">Prescriptions</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FILTER BAR ════════════════════════════════════════════ -->
+  <div class="mp-filters-bar">
+
+    <!-- Search -->
+    <div class="mp-search-wrap">
+      <svg class="mp-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="mp-search" type="text" placeholder="Search by name, email, city…"
+             [(ngModel)]="searchQuery" (input)="applyFilters()" />
+      @if (searchQuery) {
+        <button class="mp-search-clear" (click)="searchQuery=''; applyFilters()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      }
+    </div>
+
+    <!-- Filter by keyword in notes / treatment -->
+    <div class="mp-filter-field">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+        <line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      <input class="mp-filter-input" type="text"
+             placeholder="Filter by treatment / notes…"
+             [(ngModel)]="filterKeyword" (input)="applyFilters()" />
+    </div>
+
+    <!-- Filter by diagnosis -->
+    <div class="mp-filter-field">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+      </svg>
+      <input class="mp-filter-input" type="text"
+             placeholder="Filter by diagnosis…"
+             [(ngModel)]="filterDiagnosis" (input)="applyFilters()" />
+    </div>
+
+    <!-- Date filter tabs -->
+    <div class="mp-date-tabs">
+      <button class="mp-dtab" [class.active]="filterDate==='all'"   (click)="filterDate='all';   applyFilters()">All time</button>
+      <button class="mp-dtab" [class.active]="filterDate==='today'" (click)="filterDate='today'; applyFilters()">Today</button>
+      <button class="mp-dtab" [class.active]="filterDate==='week'"  (click)="filterDate='week';  applyFilters()">Week</button>
+      <button class="mp-dtab" [class.active]="filterDate==='month'" (click)="filterDate='month'; applyFilters()">Month</button>
+    </div>
+
+    <!-- Clear filters -->
+    @if (activeFiltersCount() > 0) {
+      <button class="mp-clear-btn" (click)="clearFilters()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Clear ({{ activeFiltersCount() }})
+      </button>
+    }
+  </div>
+
+  <!-- Results count -->
+  @if (activeFiltersCount() > 0) {
+    <p class="mp-results-meta">
+      Showing {{ filteredPatients.length }} of {{ allPatients.length }} patients
+    </p>
+  }
+
+  <!-- ══ EMPTY STATE ══════════════════════════════════════════ -->
+  @if (filteredPatients.length === 0) {
+    <div class="mp-empty">
+      <div class="mp-empty-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        </svg>
+      </div>
+      <p class="mp-empty-title">No patients found</p>
+      <p class="mp-empty-sub">Try adjusting your search or filters</p>
+      <button class="mp-clear-btn" (click)="clearFilters()">Clear filters</button>
+    </div>
+  }
+
+  <!-- ══ PATIENT CARDS ══════════════════════════════════════════ -->
+  <div class="mp-patient-list">
+    @for (pw of filteredPatients; track pw.patient.id) {
+
+      <div class="mp-card" [class.mp-card-expanded]="pw.expanded">
+
+        <!-- ── Card header ── -->
+        <div class="mp-card-head" (click)="toggleExpand(pw)">
+
+          <!-- Avatar + name -->
+          <div class="mp-card-identity">
+            <div class="mp-avatar" [class.female]="pw.patient.gender === 2">
+              {{ getInitials(pw.patient.name) }}
+            </div>
+            <div class="mp-identity-info">
+              <div class="mp-patient-name">{{ formatDisplayName(pw.patient.name) }}</div>
+              <div class="mp-patient-meta">
+                <span>{{ genderLabel(pw.patient.gender) }}</span>
+                <span class="mp-dot"></span>
+                <span>{{ age(pw.patient.dateOfBirth) }} yrs</span>
+                <span class="mp-dot"></span>
+                <span>{{ pw.patient.city }}, {{ pw.patient.country }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact info -->
+          <div class="mp-card-contact">
+            <span class="mp-contact-item">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+              {{ pw.patient.email }}
+            </span>
+            <span class="mp-contact-item">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.37 2 2 0 013.6 1.18h3a2 2 0 012 1.72 12 12 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 8.8a16 16 0 006 6l.98-.98a2 2 0 012.11-.45 12 12 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+              {{ pw.patient.phone }}
+            </span>
+          </div>
+
+          <!-- Rx badge -->
+          <div class="mp-rx-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            {{ pw.prescriptions.length }} Rx
+          </div>
+
+          <!-- Action buttons row -->
+          <div class="mp-card-actions" (click)="$event.stopPropagation()">
+
+            <!-- Chat / message -->
+            <button class="mp-action-btn mp-btn-chat"
+                    [class.active]="pw.chatOpen"
+                    title="Send message or instructions"
+                    (click)="openChat(pw)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              <span>Message</span>
+              @if (pw.chatMessages.length > 0) {
+                <span class="mp-badge-count">{{ pw.chatMessages.length }}</span>
+              }
+            </button>
+
+            <!-- Upload lab results -->
+            <button class="mp-action-btn mp-btn-upload"
+                    [class.active]="pw.uploadOpen"
+                    title="Upload lab results / reports"
+                    (click)="openUpload(pw)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span>Upload</span>
+              @if (pw.attachments.length > 0) {
+                <span class="mp-badge-count mp-badge-amber">{{ pw.attachments.length }}</span>
+              }
+            </button>
+
+            <!-- Download PDF -->
+            <button class="mp-action-btn mp-btn-pdf"
+                    title="Download prescription history as PDF"
+                    (click)="downloadPdf(pw)"
+                    [disabled]="generatingPdf && pdfPatientId === pw.patient.id">
+              @if (generatingPdf && pdfPatientId === pw.patient.id) {
+                <span class="mp-spinner-sm"></span>
+              } @else {
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              }
+              <span>PDF</span>
+            </button>
+
+            <!-- Expand toggle -->
+            <button class="mp-expand-btn" [class.rotated]="pw.expanded">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+
+        </div><!-- /mp-card-head -->
+
+        <!-- ── Chat panel ── -->
+        @if (pw.chatOpen) {
+          <div class="mp-panel mp-chat-panel" (click)="$event.stopPropagation()">
+            <div class="mp-panel-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              Messages &amp; Instructions — {{ formatDisplayName(pw.patient.name) }}
+            </div>
+
+            <!-- Messages -->
+            <div class="mp-messages">
+              @if (pw.chatMessages.length === 0) {
+                <div class="mp-messages-empty">No messages yet. Send the first one below.</div>
+              }
+              @for (msg of pw.chatMessages; track msg.id) {
+                <div class="mp-message" [class.sent]="msg.sender === 'doctor'" [class.received]="msg.sender === 'patient'">
+                  <div class="mp-msg-bubble" [class.instruction]="msg.type === 'instruction'">
+                    @if (msg.type === 'instruction') {
+                      <span class="mp-msg-tag">📋 Instruction</span>
+                    }
+                    {{ msg.text }}
+                  </div>
+                  <div class="mp-msg-time">
+                    {{ msg.sender === 'doctor' ? 'You' : formatDisplayName(pw.patient.name) }}
+                    &middot; {{ formatTime(msg.timestamp.toISOString()) }}
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Compose -->
+            <div class="mp-compose" [formGroup]="messageForm">
+              <div class="mp-compose-type">
+                <button class="mp-type-btn" [class.active]="messageForm.value.type==='message'"
+                        type="button" (click)="messageForm.patchValue({type:'message'})">
+                  💬 Message
+                </button>
+                <button class="mp-type-btn" [class.active]="messageForm.value.type==='instruction'"
+                        type="button" (click)="messageForm.patchValue({type:'instruction'})">
+                  📋 Instruction
+                </button>
+              </div>
+              <div class="mp-compose-row">
+                <textarea class="mp-compose-input"
+                          formControlName="text"
+                          rows="2"
+                          placeholder="{{ messageForm.value.type === 'instruction' ? 'Write post-consultation instructions…' : 'Write a message to the patient…' }}"
+                          (keydown.enter)="$event.preventDefault(); sendMessage(pw)"></textarea>
+                <button class="mp-send-btn" type="button"
+                        [disabled]="!messageForm.value.text?.trim()"
+                        (click)="sendMessage(pw)">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ── Upload / attachments panel ── -->
+        @if (pw.uploadOpen) {
+          <div class="mp-panel mp-upload-panel" (click)="$event.stopPropagation()">
+            <div class="mp-panel-header">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Lab Results &amp; Reports — {{ formatDisplayName(pw.patient.name) }}
+            </div>
+
+            <!-- Drop zone -->
+            <label class="mp-drop-zone">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span class="mp-drop-title">Click or drag files here</span>
+              <span class="mp-drop-sub">PDF, images, lab reports</span>
+              <input type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                     (change)="onFileSelected($event, pw)" />
+            </label>
+
+            <!-- Existing attachments -->
+            @if (pw.attachments.length > 0) {
+              <div class="mp-attachments">
+                @for (att of pw.attachments; track att.id) {
+                  <div class="mp-attachment">
+                    <div class="mp-att-icon" [class.img]="att.type === 'img'">
+                      @if (att.type === 'pdf') {
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      } @else {
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      }
+                    </div>
+                    <div class="mp-att-info">
+                      <a [href]="att.url" target="_blank" class="mp-att-name">{{ att.name }}</a>
+                      <span class="mp-att-meta">{{ att.size }} &middot; {{ formatDate(att.date.toISOString()) }}</span>
+                    </div>
+                    <button class="mp-att-remove" (click)="removeAttachment(pw, att.id)" title="Remove">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ── Expanded: prescriptions ── -->
+        @if (pw.expanded) {
+          <div class="mp-expanded-body">
+
+            <!-- Patient detail strip -->
+            <div class="mp-detail-strip">
+              <div class="mp-detail-item">
+                <span class="mp-detail-label">Date of Birth</span>
+                <span class="mp-detail-val">{{ formatDate(pw.patient.dateOfBirth) }}</span>
+              </div>
+              <div class="mp-detail-item">
+                <span class="mp-detail-label">Address</span>
+                <span class="mp-detail-val">{{ pw.patient.street }}, {{ pw.patient.city }}</span>
+              </div>
+              <div class="mp-detail-item">
+                <span class="mp-detail-label">Email</span>
+                <span class="mp-detail-val">{{ pw.patient.email }}</span>
+              </div>
+              <div class="mp-detail-item">
+                <span class="mp-detail-label">Phone</span>
+                <span class="mp-detail-val">{{ pw.patient.phone }}</span>
+              </div>
+            </div>
+
+            <!-- Prescriptions -->
+            <div class="mp-rx-section">
+              <div class="mp-rx-section-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="12" y1="13" x2="12" y2="17"/>
+                  <line x1="10" y1="15" x2="14" y2="15"/>
+                </svg>
+                Prescriptions
+                <span class="mp-rx-count">{{ pw.prescriptions.length }}</span>
+              </div>
+
+              @if (pw.prescriptions.length === 0) {
+                <div class="mp-rx-empty">No prescriptions recorded for this patient yet.</div>
+              }
+
+              @for (rx of pw.prescriptions; track rx.id) {
+                <div class="mp-rx-card" [class.rx-open]="pw.rxExpanded[rx.id]">
+
+                  <!-- Rx header -->
+                  <div class="mp-rx-head" (click)="toggleRx(pw, rx.id)">
+                    <div class="mp-rx-num">Rx #{{ rx.id }}</div>
+                    <div class="mp-rx-diag">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                      </svg>
+                      {{ rx.diagnosis }}
+                    </div>
+                    <div class="mp-rx-meds-count">
+                      {{ rx.treatments.length }} medication{{ rx.treatments.length !== 1 ? 's' : '' }}
+                    </div>
+                    <button class="mp-rx-toggle" [class.rotated]="pw.rxExpanded[rx.id]">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                  </div>
+
+                  <!-- Rx treatments -->
+                  @if (pw.rxExpanded[rx.id]) {
+                    <div class="mp-rx-treatments">
+                      @for (t of rx.treatments; track t.id) {
+                        <div class="mp-treatment">
+                          <div class="mp-treatment-icon">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                              <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+                              <path d="M9 12h6M12 9v6"/>
+                            </svg>
+                          </div>
+                          <div class="mp-treatment-info">
+                            <span class="mp-treatment-name">{{ t.medicationName }}</span>
+                            <span class="mp-treatment-notes">{{ t.notes }}</span>
+                          </div>
+                          <span class="mp-treatment-id">#{{ t.id }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+
+                </div><!-- /mp-rx-card -->
+              }
+            </div><!-- /mp-rx-section -->
+
+          </div><!-- /mp-expanded-body -->
+        }
+
+      </div><!-- /mp-card -->
+    }
+  </div><!-- /mp-patient-list -->
+
+</div><!-- /mp-page -->

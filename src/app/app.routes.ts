@@ -3,7 +3,6 @@ import { PatientLayoutComponent } from './../Layouts/patient-layout/patient-layo
 import { DoctorLayoutComponent } from '../Layouts/doctor-layout/doctor-layout.component';
 import { AuthComponent } from '../Components/auth/auth.component';
 import { ProfileComponent } from '../Components/Patient/profile/profile.component';
-import { find } from 'rxjs';
 import { FindDoctorComponent } from '../Components/Patient/find-doctor/find-doctor.component';
 import { DoctorProfileComponent } from '../Components/Doctor/doctor-profile/doctor-profile.component';
 import { AvailabiltyComponent } from '../Components/Doctor/availabilty/availabilty.component';
@@ -13,9 +12,13 @@ import { DoctorAvailabilityComponent } from '../Components/Patient/doctor-availa
 import { PrescriptionsComponent } from '../Components/Patient/prescription/prescription.component';
 import { PrescriptionComponent } from '../Components/Doctor/prescription/prescription.component';
 import { PrescriptionDetailComponent } from '../Components/Patient/prescription-detail/prescription-detail.component';
+
 import { AppointmentsComponent } from '../Components/Patient/appointment/appointment.component';
 import { DoctorApprovalComponent } from '../Components/doctor-approval/doctor-approval.component';
 import { PaymentSuccessComponent } from '../Components/Patient/payment-success/payment-success.component';
+
+import { DoctorPatientsComponent } from '../Components/Doctor/doctor-patients/doctor-patients.component';
+
 
 export const routes: Routes = [
 
@@ -47,6 +50,7 @@ export const routes: Routes = [
         {path:'Availabilty',component:AvailabiltyComponent,title:'availabilty'},
         {path:'prescription',component:PrescriptionComponent,title:'prescription'},
         {path:'booking/:AvailabilityId',component:BookingComponent,title:'booking'},
+        {path:'patients',component:DoctorPatientsComponent,title:'doctor patients'},
         {path:'**',redirectTo:"profile",pathMatch:'full'}
     ]},
     
