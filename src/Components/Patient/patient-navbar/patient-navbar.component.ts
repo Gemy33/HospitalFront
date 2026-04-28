@@ -89,7 +89,12 @@ export class PatientNavbarComponent {
   });
 
 
-  logout(): void { console.log('logout'); }
+  logout(): void { 
+    this.authservice.logout();
+    
+    console.log('logout');
+    
+   }
 toggle(): void { this.slim.update(v => !v); }
   // setActive(route: string): void {
   //   this.menuItems.forEach(item => {

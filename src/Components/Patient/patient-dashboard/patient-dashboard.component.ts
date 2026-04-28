@@ -60,18 +60,18 @@ this.patientservice.getAppointments(this.patientId).subscribe({
          
          
         appointments.forEach((app) => {
-          if (app.status === 'Pending') {
+          if (app.status ==1) {
 
             this.upcoming.set(this.upcoming() + 1);
-          } else if (app.status === 'Completed') {
+          } else if (app.status === 2) {
             this.completed.set(this.completed() + 1)    ;
           }
         });
         // Sort by date and take only upcoming ones
         const now = new Date();
         this.upcomingAppointments = appointments
-          .filter(app => new Date(app.date) > now)
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+          .filter(app => new Date(app.consultionTime) > now)
+          .sort((a, b) => new Date(a.consultionTime).getTime() - new Date(b.consultionTime).getTime())
           .slice(0, 3);
       }
     });

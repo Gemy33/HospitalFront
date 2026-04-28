@@ -42,7 +42,7 @@
       </div>
 
       <div *ngIf="upcomingAppointments.length === 0" class="no-data">
-        No upcoming appointments. <a routerLink="/patient/appointments">Book one now</a>
+        No upcoming appointments. <a routerLink="/patient/find-doctors">Book one now</a>
       </div>
     </div>
   </div>
@@ -51,15 +51,13 @@
   <div class="quick-actions">
     <h2>Quick Actions</h2>
     <div class="actions-grid">
-      <button routerLink="/patient/appointments" class="action-btn">
+      <button routerLink="/patient/find-doctors" class="action-btn">
         📅 Book New Appointment
       </button>
       <button routerLink="/patient/prescription" class="action-btn">
         💊 View Prescriptions
       </button>
-      <button routerLink="/patient/history" class="action-btn">
-        📋 Medical History
-      </button>
+      
     </div>
   </div>
 </div>

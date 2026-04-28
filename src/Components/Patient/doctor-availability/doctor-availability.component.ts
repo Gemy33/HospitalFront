@@ -42,24 +42,24 @@ export class DoctorAvailabilityComponent implements OnInit {
   ) {}
 
 
-  ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('doctorId'));
+ ngOnInit(): void {
+  const id = Number(this.route.snapshot.paramMap.get('doctorId'));
+  this.doctorId.set(id); // ✅ set doctorId FIRST before any async call
 
-  var  userId = this.auth.getUserId()!;
-      this.patientservice.getPatientProfileByUserId(userId).subscribe({ 
-        next: (res: any) => {
-          this.patientId = res.id;
-          console.log(this.patientId,"Patient Id");
-          this.load();
-        }
-      });
-    console.log(id,"Doctor Id");
-    console.log(this.patientId);
-    
-    
-    this.doctorId.set(id);
-    // this.load();
-  }
+  const userId = this.auth.getUserId()!;
+  this.patientservice.getPatientProfileByUserId(userId).subscribe({
+    next: (res: any) => {
+      this.patientId = res.id;
+      console.log(this.patientId, 'Patient Id');
+      console.log(this.doctorId(), 'Doctor Id'); // ✅ will now have the correct value
+      this.load(); // ✅ now doctorId is set correctly before load runs
+    },
+    error: () => {
+      // fallback — load anyway even if profile fails
+      this.load();
+    }
+  });
+}
 
   load(): void {
     this.loading.set(true);
@@ -90,7 +90,7 @@ export class DoctorAvailabilityComponent implements OnInit {
       DoctorAvailabilityId: slot.doctorAvailability.id,
       PatientId: this.patientId,
       Amount: slot.doctorAvailability.price,
-      Status: 1,
+      
     };
 
     this.booking.set(true);

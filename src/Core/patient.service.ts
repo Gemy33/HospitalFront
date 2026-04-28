@@ -14,12 +14,28 @@ export interface PatientProfile {
 }
 
 
-export interface Appointment {
-  id: number;
-  date: string;           // comes from consultionTime
+export interface IDoctorAvailabilitySnapshot {
   doctorId: number;
+  doctor: null;
+  availableFrom: string;
+  maxPatients: number;
+  sessionDurationMinutes: number;
   price: number;
-  status: string;         // "Confirmed" or "Pending"
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IAppointment {
+  patientId: number;
+  patient: null;
+  doctorAvailabilityId: number;
+  doctorAvailability: IDoctorAvailabilitySnapshot;
+  status: number;
+  consultionTime: string;
+  id: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Doctor{
@@ -36,7 +52,6 @@ export interface CreateBookingRequest {
   DoctorAvailabilityId: number;
   PatientId: number;
   Amount: number;
-  Status:number;
 }
  export interface updatepatientprofile
  {
@@ -51,9 +66,9 @@ export class PatientService {
   private http = inject(HttpClient);
   private mapStatus(status: number): string {
   switch (status) {
-    case 1: return 'Pending';
-    case 2: return 'Cancelled';
-    case 3: return 'Confirmed';
+    case 0: return 'Pending';
+    case 1: return 'Cancelled';
+    case 2: return 'Confirmed';
     default: return 'Unknown';
   }
 }
@@ -64,6 +79,12 @@ export class PatientService {
   createBooking(data: CreateBookingRequest): Observable<any> {
     return this.http.post(`${this.baseUrl}/Book`, data);
   }
+  confirmBooking(sessionId: string): Observable<any> {
+  return this.http.post(
+    `${this.baseUrl}/confirm?sessionId=${sessionId}`,
+    {}
+  );
+}
 
   // ✅ 2. Get Patient Profile
   getProfile(id: number): Observable<PatientProfile> {
@@ -72,20 +93,11 @@ export class PatientService {
 
   // ✅ 3. Get All Appointments
 
-getAppointments(patientId: number): Observable<Appointment[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/appointments/${patientId}`)
-      .pipe(
-        map((appointments) =>
-          appointments.map(a => ({
-            id: a.id,
-            date: a.consultionTime,                    // renamed for clarity
-            doctorId: a.doctorAvailability?.doctorId || 0,
-            price: a.doctorAvailability?.price || 0,
-            status: this.mapStatus(a.status)
-          }))
-        )
-      );
-  }
+getAppointments(patientId: number): Observable<IAppointment[]> {
+  return this.http.get<IAppointment[]>(
+    `${this.baseUrl}/appointments/${patientId}`
+  );
+}
 
 
 
