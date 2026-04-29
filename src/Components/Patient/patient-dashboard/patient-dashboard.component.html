@@ -1,63 +1,278 @@
-<div class="dashboard">
-  <!-- Welcome -->
-  <div class="welcome">
-    <h1>Welcome back, {{ patientName }} 👋</h1>
-    <p>Here's what's happening with your health today</p>
+<div class="pd-root">
+
+  <!-- ░░ Loading ░░ -->
+  <div class="pd-loading" *ngIf="loading()">
+    <div class="pd-spinner"><span></span><span></span><span></span></div>
+    <p>Loading your dashboard…</p>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="stats-grid">
-    <div class="stat-card" *ngFor="let stat of stats()">
-      <div class="stat-icon" [style.color]="stat.color">{{ stat.icon }}</div>
-      <div class="stat-info">
-        <h3>{{ stat.value }}</h3>
-        <p>{{ stat.title }}</p>
-      </div>
-    </div>
+  <!-- ░░ Error ░░ -->
+  <div class="pd-error" *ngIf="error() && !loading()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" width="30" height="30">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 8v4M12 16h.01"/>
+    </svg>
+    <p>{{ error() }}</p>
+    <button class="pd-btn-outline" (click)="load()">Retry</button>
   </div>
 
-  <!-- Upcoming Appointments -->
-  <div class="section">
-    <div class="section-header">
-      <h2>Upcoming Appointments</h2>
-      <a routerLink="/patient/appointments" class="view-all">View All →</a>
-    </div>
+  <!-- ░░ Content ░░ -->
+  <div class="pd-content" *ngIf="!loading() && !error()">
 
-    <div class="appointment-list">
-      <div class="appointment-item" *ngFor="let app of upcomingAppointments">
-        <div class="appointment-left">
-          <div class="date">
-            <span class="day">{{ app.date | date:'dd' }}</span>
-            <span class="month">{{ app.date | date:'MMM' }}</span>
-          </div>
-          <div>
-            <h4>Doctor #{{ app.doctorId }}</h4>
-            <p>{{ app.date | date:'EEEE, h:mm a' }}</p>
-          </div>
-        </div>
-        <div class="appointment-right">
-          <span class="price">${{ app.price.toFixed(2) }}</span>
-          <button class="btn-small">Details</button>
+    <!-- ── Welcome hero ── -->
+    <div class="pd-hero">
+      <div class="pd-hero-left">
+        <div class="pd-hero-avatar">{{ initials(patientName()) }}</div>
+        <div class="pd-hero-text">
+          <span class="pd-greeting">{{ greeting() }},</span>
+          <h1 class="pd-hero-name">{{ patientName() }}</h1>
+          <span class="pd-hero-sub">Here's your health overview for today</span>
         </div>
       </div>
-
-      <div *ngIf="upcomingAppointments.length === 0" class="no-data">
-        No upcoming appointments. <a routerLink="/patient/find-doctors">Book one now</a>
+      <div class="pd-hero-date">
+        <!-- <span class="pd-date-day">{{ formatDayNum(now) }}</span> -->
+        <!-- <span class="pd-date-month">{{ formatMonth(now) }}</span> -->
       </div>
     </div>
-  </div>
 
-  <!-- Quick Actions -->
-  <div class="quick-actions">
-    <h2>Quick Actions</h2>
-    <div class="actions-grid">
-      <button routerLink="/patient/find-doctors" class="action-btn">
-        📅 Book New Appointment
-      </button>
-      <button routerLink="/patient/prescription" class="action-btn">
-        💊 View Prescriptions
-      </button>
-      
+    <!-- ── Stat cards ── -->
+    <div class="pd-stats">
+
+      <div class="pd-stat pd-stat--blue">
+        <div class="pd-stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" width="20" height="20">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </div>
+        <div class="pd-stat-body">
+          <span class="pd-stat-val">{{ upcoming() }}</span>
+          <span class="pd-stat-lbl">Confirmed</span>
+        </div>
+        <div class="pd-stat-bg"></div>
+      </div>
+
+      <div class="pd-stat pd-stat--green">
+        <div class="pd-stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" width="20" height="20">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="pd-stat-body">
+          <span class="pd-stat-val">{{ completed() }}</span>
+          <span class="pd-stat-lbl">Completed</span>
+        </div>
+        <div class="pd-stat-bg"></div>
+      </div>
+
+      <div class="pd-stat pd-stat--amber">
+        <div class="pd-stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" width="20" height="20">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <div class="pd-stat-body">
+          <span class="pd-stat-val">{{ cancelled() }}</span>
+          <span class="pd-stat-lbl">Cancelled</span>
+        </div>
+        <div class="pd-stat-bg"></div>
+      </div>
+
+      <div class="pd-stat pd-stat--purple">
+        <div class="pd-stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" width="20" height="20">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+          </svg>
+        </div>
+        <div class="pd-stat-body">
+          <span class="pd-stat-val">{{ total() }}</span>
+          <span class="pd-stat-lbl">Total</span>
+        </div>
+        <div class="pd-stat-bg"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Two column layout ── -->
+    <div class="pd-columns">
+
+      <!-- Left: upcoming appointments -->
+      <div class="pd-panel">
+        <div class="pd-panel-head">
+          <div class="pd-panel-title-row">
+            <span class="pd-panel-icon pd-panel-icon--blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" width="16" height="16">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </span>
+            <h2 class="pd-panel-title">Upcoming Appointments</h2>
+          </div>
+          <a class="pd-view-all" routerLink="/patient/appointments">
+            View all
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" width="13" height="13">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Empty -->
+        <div class="pd-panel-empty" *ngIf="nextAppointments().length === 0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.3" stroke-linecap="round" width="40" height="40">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+          <p>No upcoming appointments</p>
+          <a class="pd-btn-link" routerLink="/patient/find-doctors">Book one now →</a>
+        </div>
+
+        <!-- Appointment rows -->
+        <div class="pd-apt-list" *ngIf="nextAppointments().length > 0">
+          <div
+            class="pd-apt-row"
+            *ngFor="let apt of nextAppointments(); let i = index"
+            [style.--ri]="i"
+          >
+            <div class="pd-apt-date">
+              <span class="pd-apt-day">
+                {{ formatDayNum(apt.doctorAvailability.availableFrom) }}
+              </span>
+              <span class="pd-apt-mon">
+                {{ formatMonth(apt.doctorAvailability.availableFrom) }}
+              </span>
+            </div>
+
+            <div class="pd-apt-info">
+              <span class="pd-apt-doc">
+                Doctor #{{ apt.doctorAvailability.doctorId }}
+              </span>
+              <span class="pd-apt-time">
+                {{ formatTime(apt.doctorAvailability.availableFrom) }}
+                · {{ apt.doctorAvailability.sessionDurationMinutes }} min
+              </span>
+            </div>
+
+            <div class="pd-apt-right">
+              <span class="pd-apt-price">
+                ${{ apt.doctorAvailability.price.toFixed(2) }}
+              </span>
+              <span class="pd-chip" [ngClass]="statusClass(apt.status)">
+                {{ statusLabel(apt.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: quick actions -->
+      <div class="pd-panel pd-panel--actions">
+        <div class="pd-panel-head">
+          <div class="pd-panel-title-row">
+            <span class="pd-panel-icon pd-panel-icon--green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" width="16" height="16">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </span>
+            <h2 class="pd-panel-title">Quick Actions</h2>
+          </div>
+        </div>
+
+        <div class="pd-actions">
+
+          <a routerLink="/patient/find-doctors" class="pd-action">
+            <div class="pd-action-icon pd-action-icon--blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" width="20" height="20">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="m21 21-4.35-4.35"/>
+                <path d="M11 8v6M8 11h6"/>
+              </svg>
+            </div>
+            <div class="pd-action-body">
+              <span class="pd-action-label">Find Doctors</span>
+              <span class="pd-action-hint">Search & book specialists</span>
+            </div>
+            <svg class="pd-action-arrow" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 width="14" height="14">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+
+          <a routerLink="/patient/appointments" class="pd-action">
+            <div class="pd-action-icon pd-action-icon--amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" width="20" height="20">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+            </div>
+            <div class="pd-action-body">
+              <span class="pd-action-label">My Appointments</span>
+              <span class="pd-action-hint">View all sessions</span>
+            </div>
+            <svg class="pd-action-arrow" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 width="14" height="14">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+
+          <a routerLink="/patient/prescriptions" class="pd-action">
+            <div class="pd-action-icon pd-action-icon--green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" width="20" height="20">
+                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10
+                         a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                <rect x="9" y="3" width="6" height="4" rx="2"/>
+                <path d="M9 12h6M9 16h4"/>
+              </svg>
+            </div>
+            <div class="pd-action-body">
+              <span class="pd-action-label">Prescriptions</span>
+              <span class="pd-action-hint">View active medications</span>
+            </div>
+            <svg class="pd-action-arrow" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 width="14" height="14">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+
+          <a routerLink="/patient/profile" class="pd-action">
+            <div class="pd-action-icon pd-action-icon--purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" width="20" height="20">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="pd-action-body">
+              <span class="pd-action-label">My Profile</span>
+              <span class="pd-action-hint">Personal info & settings</span>
+            </div>
+            <svg class="pd-action-arrow" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 width="14" height="14">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

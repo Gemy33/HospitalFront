@@ -25,6 +25,8 @@ export class PaymentSuccessComponent implements OnInit {
   ngOnInit(): void {
     const sessionId = this.route.snapshot.queryParamMap.get('session_id');
     if (!sessionId) {
+      console.log(sessionId , "setionId");
+      
       this.status.set('error');
       return;
     }
@@ -35,7 +37,9 @@ export class PaymentSuccessComponent implements OnInit {
         // Redirect to appointments after 3 seconds
         setTimeout(() => this.router.navigate(['/patient/appointments']), 3000);
       },
-      error: () => this.status.set('error'),
+      error: (err) =>
+        {console.error('Error confirming booking:', err);
+         this.status.set('error')},
     });
   }
 

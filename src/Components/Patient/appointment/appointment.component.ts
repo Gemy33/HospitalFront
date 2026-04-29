@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { PatientService, IAppointment } from '../../../Core/patient.service';
+import { AuthService } from '../../../Core/auth.service';
 
 @Component({
   selector: 'app-appointments',
@@ -19,7 +20,7 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   error        = signal<string | null>(null);
   now          = signal(new Date());
 
-  private readonly patientId = 2004;
+   patientId = 2004;
   private ticker: any;
 
   // ── Enum reference ──────────────────────────────────────────
@@ -56,10 +57,20 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   constructor(
     private appointmentSvc: PatientService,
     private router: Router,
+    private authservice : AuthService,
   ) {}
 
   ngOnInit(): void {
-    this.load();
+    const userId = this.authservice.getUserId()!;
+    this.appointmentSvc.getPatientProfileByUserId(userId).subscribe({
+      next: (res: any) => {
+        this.patientId = res.id;
+        console.log(this.patientId, 'Patient Id');
+        this.load();
+      }
+    });
+    
+    // this.load();
     this.ticker = setInterval(() => this.now.set(new Date()), 1000);
   }
 

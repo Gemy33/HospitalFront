@@ -55,7 +55,7 @@ export class FindDoctorComponent implements OnInit {
     this.patientservice.getAllDoctors().subscribe({
       next: (doctors) => {
         this.allDoctors.set(doctors);
-        console.log("all doctors" , this.allDoctors);
+        console.log("all doctors" , this.allDoctors());
         
         this.applyNameFilter();
         this.isLoading.set(false);
