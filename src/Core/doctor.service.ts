@@ -11,6 +11,7 @@ import { IPrescription } from './Interfaces/Doctor/iprescription';
 import { IBooking } from './Interfaces/Patient/ibooking';
 import { IAvailabilityItem } from './Interfaces/Doctor/iavailability-item';
 import { IAvailabilityResponse } from './Interfaces/Doctor/iavailability-response';
+import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,7 @@ export class DoctorService {
   }
   updateDoctorProfile(data: UpdateDoctorProfile): Observable<any> {
     return this.http.put(
-      `${this.baseurl}/doctor/profile`,
+      `${this.baseurl}/doctor/Profile`,
       data
     );
   }
@@ -81,6 +82,10 @@ getPatientPrescriptions(patientId: number): Observable<IPrescription[]> {
   return this.http.get<IPrescription[]>(
     `${this.baseurl}/Doctor/Prescriptions/${patientId}`
   );
+}
+
+getDoctorPatientsWithHisPrescriptions(doctorId:number):Observable<any>{
+  return this.http.get(`${this.baseurl}/Doctor/DoctorPatients/${doctorId}`)
 }
 
 }

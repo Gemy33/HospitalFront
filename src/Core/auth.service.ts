@@ -8,6 +8,7 @@ interface DecodedToken {
   id?: number;
   role?: string;
   exp?: number;
+  DoctorId:string;
   [key: string]: any;
 }
 
@@ -29,7 +30,7 @@ export class AuthService {
 
     return this._http.post(url, user);
   }
-
+   Id:string="";
   // ========================
   // 🔑 LOGIN + SAVE TOKEN
   // ========================

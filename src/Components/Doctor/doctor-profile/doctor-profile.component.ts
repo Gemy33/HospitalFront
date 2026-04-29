@@ -7,6 +7,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DoctorService } from '../../../Core/doctor.service';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { DoctorProfile } from '../../../Core/Interfaces/Doctor/doctor-profile';
+import { AuthService } from '../../../Core/auth.service';
+import { cwd } from 'process';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -64,12 +66,12 @@ export class DoctorProfileComponent implements OnInit {
   weekDays: WeekDay[] = [];
   _doctorservice: DoctorService = inject(DoctorService);
 
-  constructor(private http: HttpClient, private route: ActivatedRoute,private fb: FormBuilder,private _router: Router) {}
+  constructor(private http: HttpClient,private _authservice:AuthService, private route: ActivatedRoute,private fb: FormBuilder,private _router: Router) {}
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
   Edit:FormGroup=this.fb.group({
       Name: ['', Validators.required],
-      Id: ['1002', [Validators.required, Validators.pattern('^[0-9]+$')]],
+      Id: [, [Validators.required, Validators.pattern('^[0-9]+$')]],
       specialityId: [3, [Validators.required, Validators.min(1)]],
       phone:[this.doctor.phone,Validators.required],
       yearsOfExperienc: [5, [Validators.required, Validators.min(0), Validators.max(50)]],
@@ -103,11 +105,11 @@ export class DoctorProfileComponent implements OnInit {
     });
   }
   EditProfile():void{
-
+   this.Edit.value.Id=this._authservice.Id;
+   console.log("edit",this.Edit);
     this._doctorservice.updateDoctorProfile(this.Edit.value).subscribe({
       next:(res)=>{
         this.loadProfile();
-        
       },
       error:(err)=>console.log(err)
     });
