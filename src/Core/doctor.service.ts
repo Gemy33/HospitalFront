@@ -66,11 +66,11 @@ export class DoctorService {
   );
 }
 
- createPrescription(data: ICreatePrescription): Observable<any> {
-  return this.http.post(
-    `${this.baseurl}/Doctor/Prescription`,
-    data
-  );
+  createPrescription(data: ICreatePrescription): Observable<any> {
+    return this.http.post(
+      `${this.baseurl}/Doctor/Prescription`,
+      data
+    );
 }
  getPrescription(prescriptionId: number): Observable<IPrescription> {
   return this.http.get<IPrescription>(
@@ -85,7 +85,7 @@ getPatientPrescriptions(patientId: number): Observable<IPrescription[]> {
 }
 
 getDoctorPatientsWithHisPrescriptions(doctorId:number):Observable<any>{
-  return this.http.get(`${this.baseurl}/Doctor/DoctorPatients/${doctorId}`)
+  return this.http.get(`${this.baseurl}/Doctor/DoctorPatients/2002`)
 }
 
 }

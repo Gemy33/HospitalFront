@@ -148,7 +148,9 @@ export class DoctorPatientsComponent implements OnInit {
   loadPatients(): void {
     this.isLoading = true;
    
-    this.doctorService.getDoctorPatientsWithHisPrescriptions(Number(this._authService.Id)).subscribe({
+    this.doctorService.getDoctorPatientsWithHisPrescriptions(Number(this._authService.Id
+
+    )).subscribe({
       next: (res: ApiPrescriptionRecord[]) => {
         console.log(res);
         this.allPatients = this.groupByPatient(res);
@@ -157,6 +159,7 @@ export class DoctorPatientsComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
+       
         // Fallback to mock data so UI is still usable in development
         this.allPatients = this.groupByPatient(this.mockApiResponse());
         this.applyFilters();

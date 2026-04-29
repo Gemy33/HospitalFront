@@ -37,7 +37,7 @@ export interface CreateSlotPayload {
 }
 
 export interface UpdateSlotPayload extends CreateSlotPayload {
-  id: number;
+  DoctorAvailabilityId: number;
 }
 
 export interface SummaryCard {
@@ -252,11 +252,11 @@ export class AvailabiltyComponent implements OnInit {
         price:                  +this.createslotForm.value.price,
       };
       this.createSlot(payload);
-      // ❌ loadSlots() removed from here — was the root cause of NaN cards
+      
 
     } else if (this.modalMode === 'edit' && this.activeSlot) {
       const payload: UpdateSlotPayload = {
-        id:                     this.slotId(this.activeSlot),
+        DoctorAvailabilityId:                     this.slotId(this.activeSlot),
         doctorId:               this.DOCTOR_ID,
         availableFrom:          this.createslotForm.value.availableFrom,
         maxPatients:            +this.createslotForm.value.maxPatients,
@@ -264,7 +264,7 @@ export class AvailabiltyComponent implements OnInit {
         price:                  +this.createslotForm.value.price,
       };
       this.updateSlot(payload);
-      // ❌ loadSlots() removed from here too
+     
     }
   }
 
