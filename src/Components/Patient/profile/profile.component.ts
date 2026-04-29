@@ -39,8 +39,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(private patientService: PatientService, private doctorservie : DoctorService, private authservice : AuthService) {}
 
-  totalprecriptions = 0;
-  totalappointments = 0;
+  totalprecriptions = signal(0);
+  totalappointments = signal(0);
 
  
 
@@ -74,22 +74,24 @@ export class ProfileComponent implements OnInit {
         this.isLoading.set(false);
       },
     });
-    var t  = this.doctorservie.getPatientPrescriptions(this.patientId).subscribe({
+    this.doctorservie.getPatientPrescriptions(this.patientId).subscribe({
     next: (list) => {
       console.log("ID list", this.patientId);
 
-      this.totalprecriptions = list.length; 
-      console.log("total prescriptions", this.totalprecriptions);
+      this.totalprecriptions.set(list.length);
+      console.log("total prescriptions", this.totalprecriptions());
     },
     error: () => {
       console.log('Failed to load prescriptions. Please try again.');
     },
   })
- var f  = this.patientService.getAppointments(this.patientId).subscribe({
+ this.patientService.getAppointments(this.patientId).subscribe({
     next: (list) => {
+      console.log(list);
+      
       console.log("ID list", this.patientId);
-      this.totalappointments = list.length; 
-      console.log("total appointments", this.totalappointments);
+      this.totalappointments.set(list.length);
+      console.log("total appointments", this.totalappointments());
     }
     ,
     error: () => {

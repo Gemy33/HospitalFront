@@ -9,6 +9,7 @@ import { IAvailabilityItem } from '../../../Core/Interfaces/Doctor/iavailability
 import { DoctorService } from '../../../Core/doctor.service';
 import { CreateBookingRequest, PatientService } from '../../../Core/patient.service';
 import { AuthService } from '../../../Core/auth.service';
+import { cwd } from 'node:process';
 
 @Component({
   selector: 'app-doctor-availability',
@@ -30,6 +31,10 @@ export class DoctorAvailabilityComponent implements OnInit {
   // Replace with your auth service when ready
    patientId = 2;
 
+
+
+   
+
   available = computed(() => this.slots().filter(s => !s.book_Complete));
   booked    = computed(() => this.slots().filter(s => s.book_Complete));
 
@@ -42,24 +47,28 @@ export class DoctorAvailabilityComponent implements OnInit {
   ) {}
 
 
-  ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('doctorId'));
+ ngOnInit(): void {
 
-  var  userId = this.auth.getUserId()!;
-      this.patientservice.getPatientProfileByUserId(userId).subscribe({ 
-        next: (res: any) => {
-          this.patientId = res.id;
-          console.log(this.patientId,"Patient Id");
-          this.load();
-        }
-      });
-    console.log(id,"Doctor Id");
-    console.log(this.patientId);
-    
-    
-    this.doctorId.set(id);
-    // this.load();
-  }
+
+  const id = Number(this.route.snapshot.paramMap.get('doctorId'));
+  this.doctorId.set(id); // ✅ set doctorId FIRST before any async call
+
+  console.log("doctorId" , id);
+  
+  const userId = this.auth.getUserId()!;
+  this.patientservice.getPatientProfileByUserId(userId).subscribe({
+    next: (res: any) => {
+      this.patientId = res.id;
+      console.log(this.patientId, 'Patient Id');
+      console.log(this.doctorId() , 'Doctor Id'); // ✅ will now have the correct value
+      this.load(); // ✅ now doctorId is set correctly before load runs
+    },
+    error: () => {
+      // fallback — load anyway even if profile fails
+      this.load();
+    }
+  });
+}
 
   load(): void {
     this.loading.set(true);
@@ -85,12 +94,13 @@ export class DoctorAvailabilityComponent implements OnInit {
   confirmBook(): void {
     const slot = this.selected();
     if (!slot) return;
+    console.log("avaId",slot.doctorAvailability)
 
     const payload: CreateBookingRequest = {
       DoctorAvailabilityId: slot.doctorAvailability.id,
       PatientId: this.patientId,
       Amount: slot.doctorAvailability.price,
-      Status: 1,
+      
     };
 
     this.booking.set(true);
@@ -98,6 +108,8 @@ export class DoctorAvailabilityComponent implements OnInit {
 
     this.patientservice.createBooking(payload).subscribe({
       next: (res: any) => {
+        console.log(res);
+        
         this.booking.set(false);
         const url = res?.url ?? res?.paymentUrl ?? res?.stripeUrl ?? res;
         if (typeof url === 'string' && url.startsWith('http')) {
@@ -106,7 +118,9 @@ export class DoctorAvailabilityComponent implements OnInit {
           this.bookErr.set('Booking created but no payment URL was returned.');
         }
       },
-      error: () => {
+      error: (err) => {
+        console.log(err);
+        
         this.booking.set(false);
         this.bookErr.set('Booking failed. Please try again.');
       },

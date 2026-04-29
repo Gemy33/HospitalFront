@@ -1,17 +1,9 @@
-import { Component, computed, OnInit, Signal, signal } from '@angular/core';
+import { Component, computed, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PatientService } from '../../../Core/patient.service';
-import { map, single } from 'rxjs';
 import { AuthService } from '../../../Core/auth.service';
-
-interface StatCard {
-  title: string;
-  value: number | string;
-  icon: string;
-  color: string;
-}
-
+import { IAppointment } from '../../../Core/patient.service';
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
@@ -21,98 +13,117 @@ interface StatCard {
 })
 export class PatientDashboardComponent implements OnInit {
 
-  patientName = 'Mohamed';
-  patientId = 0;
-  upcomingAppointments: any[] = [];
-  stats: Signal<StatCard[]> = signal([]);
-  upcoming = signal(0);
-   completed = signal(0);
-    total = signal(0 );
-  
+  // ── State ────────────────────────────────────────────────────
+  patientName    = signal('');
+  patientId      = signal(0);
+  appointments   = signal<IAppointment[]>([]);
+  loading        = signal(true);
+  error          = signal<string | null>(null);
+  greeting       = signal('');
 
-  constructor(private patientservice: PatientService , private authservice: AuthService) {}
+  // ── Computed stats ───────────────────────────────────────────
+  total = computed(() => this.appointments().length);
+
+  upcoming = computed(() =>
+    this.appointments().filter(a => a.status === 1).length
+  );
+
+  completed = computed(() =>
+    this.appointments().filter(a => a.status === 2).length
+  );
+
+  cancelled = computed(() =>
+    this.appointments().filter(a => a.status === 3).length
+  );
+
+  // Next 3 upcoming appointments sorted by date
+  nextAppointments = computed(() => {
+    const now = new Date();
+    return this.appointments()
+      .filter(a => a.status === 1 && new Date(a.doctorAvailability.availableFrom) > now)
+      .sort((a, b) =>
+        new Date(a.doctorAvailability.availableFrom).getTime() -
+        new Date(b.doctorAvailability.availableFrom).getTime()
+      )
+      .slice(0, 3);
+  });
+
+  constructor(
+    private patientSvc: PatientService,
+    private authSvc: AuthService,
+  ) {}
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    this.setGreeting();
+    this.load();
   }
-   
-    
 
-  loadDashboardData(): void {
-    // Load only upcoming appointments (limit 3)
-    var id = this.authservice.getUserId()!;
-    console.log("id user" , id);
-    
-    this.patientservice.getPatientProfileByUserId(id).subscribe({
-      next: (data) => {
-        this.patientName = data.name;
-        this.patientId = data.id;
-        console.log("patient name from dashboard", this.patientName);
-        console.log("patient Id from dashboard", this.patientId);
-this.patientservice.getAppointments(this.patientId).subscribe({
-      next: (appointments) => {
+  setGreeting(): void {
+    const h = new Date().getHours();
+    if (h < 12)      this.greeting.set('Good morning');
+    else if (h < 18) this.greeting.set('Good afternoon');
+    else             this.greeting.set('Good evening');
+  }
 
-         this.total.set(appointments.length);
-         console.log(this.total(),"total appointments");
-         
-         console.log(appointments);
-       
-         
-         
-        appointments.forEach((app) => {
-          if (app.status === 'Pending') {
+  load(): void {
+    const userId = this.authSvc.getUserId()!;
+    this.loading.set(true);
+    this.error.set(null);
 
-            this.upcoming.set(this.upcoming() + 1);
-          } else if (app.status === 'Completed') {
-            this.completed.set(this.completed() + 1)    ;
+    this.patientSvc.getPatientProfileByUserId(userId).subscribe({
+      next: (profile: any) => {
+        this.patientName.set(profile.name);
+        this.patientId.set(profile.id);
+
+        this.patientSvc.getAppointments(profile.id).subscribe({
+          next: (apts) => {
+            this.appointments.set(apts);
+            this.loading.set(false);
+          },
+          error: () => {
+            this.error.set('Failed to load appointments.');
+            this.loading.set(false);
           }
         });
-        // Sort by date and take only upcoming ones
-        const now = new Date();
-        this.upcomingAppointments = appointments
-          .filter(app => new Date(app.date) > now)
-          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-          .slice(0, 3);
-      }
-    });
-
       },
       error: () => {
-        console.log('Failed to load profile. Please try again.');
+        this.error.set('Failed to load profile.');
+        this.loading.set(false);
       }
     });
-    
-
-    // get total appointments count (for demo, using static value here, you can calculate from API data later)
-
-   
-   
-    // var appointmens = this.patientservice.getAppointments(this.patientId).subscribe({
-    //   next: (appointments) => {
-    //     total = appointments.length
-    //     appointments.forEach((app) => {
-    //       if (app.status === 'Pending') {
-    //         upcomming++;
-    //       } else if (app.status === 'Completed') {
-    //         completed++;
-    //       }
-    //     });
-    //     console.log(appointments);
-    //   }
-    // });
-    // Static stats for now (you can make them dynamic later)
-    this.stats = computed(() => [
-      { title: 'Upcoming Appointments', value: this.upcoming(), icon: '📅', color: 'blue' },
-      { title: 'Completed Appointments', value: this.completed(), icon: '✅', color: 'green' },
-      { title: 'Total Appointments', value: this.total(), icon: '📊', color: 'purple' },
-    ]);
-     
- 
-  
   }
 
-  // For demo - change this to real patientId from auth later
-  //  patientId(): number {
-  //  return 2003;
-  // }
+  // ── Helpers ──────────────────────────────────────────────────
+  formatDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric',
+    });
+  }
+
+  formatTime(iso: string): string {
+    return new Date(iso).toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', hour12: true,
+    });
+  }
+
+  formatDayNum(iso: string): string {
+    return new Date(iso).getDate().toString();
+  }
+
+  formatMonth(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short' });
+  }
+
+  statusLabel(s: number): string {
+    return ['Pending','Confirmed','Completed','Cancelled'][s] ?? 'Unknown';
+  }
+
+  statusClass(s: number): string {
+    return ['pd-chip--pending','pd-chip--confirmed',
+            'pd-chip--completed','pd-chip--cancelled'][s] ?? '';
+  }
+
+  initials(name: string): string {
+    return name.trim().split(/\s+/).slice(0,2).map(w => w[0].toUpperCase()).join('');
+  }
 }

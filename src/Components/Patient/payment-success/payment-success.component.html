@@ -1,0 +1,41 @@
+<div class="ps-root">
+
+  <!-- Loading -->
+  <div class="ps-box" *ngIf="status() === 'loading'">
+    <div class="ps-spinner"><span></span><span></span><span></span></div>
+    <p class="ps-msg">Confirming your payment…</p>
+  </div>
+
+  <!-- Success -->
+  <div class="ps-box" *ngIf="status() === 'success'">
+    <div class="ps-icon ps-icon--green">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+           width="32" height="32">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <h2 class="ps-title">Payment Confirmed!</h2>
+    <p class="ps-msg">Your appointment is now confirmed. Redirecting you…</p>
+    <button class="ps-btn" (click)="goToAppointments()">
+      Go to Appointments
+    </button>
+  </div>
+
+  <!-- Error -->
+  <div class="ps-box" *ngIf="status() === 'error'">
+    <div class="ps-icon ps-icon--red">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" width="32" height="32">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+      </svg>
+    </div>
+    <h2 class="ps-title">Something went wrong</h2>
+    <p class="ps-msg">We could not confirm your payment. Please contact support.</p>
+    <button class="ps-btn" (click)="goToAppointments()">
+      View Appointments
+    </button>
+  </div>
+
+</div>

@@ -55,6 +55,8 @@ export class FindDoctorComponent implements OnInit {
     this.patientservice.getAllDoctors().subscribe({
       next: (doctors) => {
         this.allDoctors.set(doctors);
+        console.log("all doctors" , this.allDoctors());
+        
         this.applyNameFilter();
         this.isLoading.set(false);
       },
@@ -106,6 +108,8 @@ export class FindDoctorComponent implements OnInit {
 
   // ✅ Navigate to availability page
   viewAvailability(doctorId: number): void {
+    console.log(doctorId,"doctor Id");
+    
     this.router.navigate(['/patient/doctor', doctorId, 'availability']);
   }
 
