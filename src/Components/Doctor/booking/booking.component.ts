@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DoctorService } from '../../../Core/doctor.service';
 import { IPrescription } from '../../../Core/Interfaces/Doctor/iprescription';
+import { AuthService } from '../../../Core/auth.service';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // INTERFACES
@@ -116,6 +117,7 @@ export class BookingComponent implements OnInit {
     private route:          ActivatedRoute,
     private fb:             FormBuilder,
     private _doctorservice: DoctorService,
+    private _authService : AuthService
   ) {}
 
   ngOnInit(): void {
@@ -213,7 +215,7 @@ export class BookingComponent implements OnInit {
 
   // ── Navigation ────────────────────────────────────────────────────────────
 
-  goBack(): void { this.router.navigate(['..'], { relativeTo: this.route }); }
+  goBack(): void { this.router.navigate(['/doctor/Availabilty'], { relativeTo: this.route }); }
   openPhone(phone: string): void { window.open(`tel:${phone}`, '_blank'); }
 
   // ── Create Prescription Drawer ────────────────────────────────────────────
@@ -262,7 +264,7 @@ export class BookingComponent implements OnInit {
     }
 
     const payload = {
-      doctorId:   2, // replace: AuthService.getDoctorId()
+      doctorId:   Number(this._authService.Id), // replace: AuthService.getDoctorId()
       patientId:  this.activeRecord!.patientId,
       diagnosis:  this.rxForm.value.diagnosis,       // ← now correctly top-level
       treatments: this.rxForm.value.treatments,
@@ -270,14 +272,17 @@ export class BookingComponent implements OnInit {
 
     console.log('[Prescription payload]', payload);
 
+    console.log("create prescription islam")
     this.rxSaving = true;
     this._doctorservice.createPrescription(payload).subscribe({
       next: (res) => {
+        console.log("next")
         this.rxSaving = false;
         this.closeRxDrawer();
         console.log(res);
       },
-      error: err => {
+      error: (err) => {
+         console.log("error")
         this.rxError  = err?.error?.message ?? 'Failed to save prescription.';
         this.rxSaving = false;
         console.log(err);

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DoctorService } from '../../../Core/doctor.service';
+import { AuthService } from '../../../Core/auth.service';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // INTERFACES — matching the real API response exactly
@@ -114,6 +115,8 @@ export class DoctorPatientsComponent implements OnInit {
 
   private fb            = inject(FormBuilder);
   private doctorService = inject(DoctorService);
+  private _authService=inject(AuthService);
+  
 
   // ── State ─────────────────────────────────────────────────────────────────
 
@@ -144,8 +147,8 @@ export class DoctorPatientsComponent implements OnInit {
 
   loadPatients(): void {
     this.isLoading = true;
-
-    this.doctorService.getDoctorPatientsWithHisPrescriptions(8).subscribe({
+   
+    this.doctorService.getDoctorPatientsWithHisPrescriptions(Number(this._authService.Id)).subscribe({
       next: (res: ApiPrescriptionRecord[]) => {
         console.log(res);
         this.allPatients = this.groupByPatient(res);
