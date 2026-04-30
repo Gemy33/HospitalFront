@@ -85,7 +85,7 @@ getPatientPrescriptions(patientId: number): Observable<IPrescription[]> {
 }
 
 getDoctorPatientsWithHisPrescriptions(doctorId:number):Observable<any>{
-  return this.http.get(`${this.baseurl}/Doctor/DoctorPatients/2002`)
+  return this.http.get(`${this.baseurl}/Doctor/DoctorPatients/${doctorId}`)
 }
 
 }
