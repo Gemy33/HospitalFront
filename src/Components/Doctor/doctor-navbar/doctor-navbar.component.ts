@@ -3,6 +3,7 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angu
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../Core/auth.service';
 
 export interface Doctor {
   name: string;
@@ -59,10 +60,10 @@ export class DoctorNavbarComponent implements OnInit, OnDestroy {
   /** Zoom meeting URL generated from the API — injected via ZoomService in real usage */
   private zoomMeetingUrl = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,private _authservice:AuthService) {}
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
- fixedId:number=2;
+ DoctorId:string=this._authservice.Id;
   ngOnInit(): void {
   
   }

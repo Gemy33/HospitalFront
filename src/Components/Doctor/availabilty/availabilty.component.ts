@@ -3,10 +3,11 @@ import {
 } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterLink, RouterModule } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DoctorService } from '../../../Core/doctor.service';
 import { ICreateAvailability } from '../../../Core/Interfaces/Doctor/icreate-availability';
+import { AuthService } from '../../../Core/auth.service';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ export interface CreateSlotPayload {
 }
 
 export interface UpdateSlotPayload extends CreateSlotPayload {
-  id: number;
+  DoctorAvailabilityId: number;
 }
 
 export interface SummaryCard {
@@ -56,13 +57,13 @@ export type ToastType  = 'success' | 'error';
 @Component({
   selector: 'app-availabilty',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, HttpClientModule, DecimalPipe],
+  imports: [CommonModule, ReactiveFormsModule,RouterLink, FormsModule, RouterModule, HttpClientModule, DecimalPipe],
   templateUrl: './availabilty.component.html',
   styleUrls:   ['./availabilty.component.css'],
 })
 export class AvailabiltyComponent implements OnInit {
 
-  private readonly DOCTOR_ID = 4;
+  private readonly DOCTOR_ID = Number(this._authservice.Id);
   private readonly BASE_URL  = '/api/availability';
 
   isLoading         = true;
@@ -101,7 +102,7 @@ export class AvailabiltyComponent implements OnInit {
     price:                  new FormControl(0,  [Validators.required, Validators.min(0)]),
   });
 
-  constructor(private http: HttpClient, private _doctorservice: DoctorService) {}
+  constructor(private http: HttpClient, private _doctorservice: DoctorService,private _authservice:AuthService) {}
 
   ngOnInit(): void {
     this.loadSlots();
@@ -251,11 +252,11 @@ export class AvailabiltyComponent implements OnInit {
         price:                  +this.createslotForm.value.price,
       };
       this.createSlot(payload);
-      // ❌ loadSlots() removed from here — was the root cause of NaN cards
+      
 
     } else if (this.modalMode === 'edit' && this.activeSlot) {
       const payload: UpdateSlotPayload = {
-        id:                     this.slotId(this.activeSlot),
+        DoctorAvailabilityId:                     this.slotId(this.activeSlot),
         doctorId:               this.DOCTOR_ID,
         availableFrom:          this.createslotForm.value.availableFrom,
         maxPatients:            +this.createslotForm.value.maxPatients,
@@ -263,7 +264,7 @@ export class AvailabiltyComponent implements OnInit {
         price:                  +this.createslotForm.value.price,
       };
       this.updateSlot(payload);
-      // ❌ loadSlots() removed from here too
+     
     }
   }
 

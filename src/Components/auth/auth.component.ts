@@ -12,6 +12,8 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { cwd } from 'node:process';
+import { Token } from '@angular/compiler';
 
 export type UserRole = 'doctor' | 'patient';
 export type AuthTab  = 'login' | 'register';
@@ -249,13 +251,14 @@ export class AuthComponent implements OnInit {
         this.loginLoading = false;
         const label = this.loginRole === 'doctor' ? 'Doctor' : 'Patient';
         var role = this._authService.getRole();
+
         this.showToast('success', `✅ Welcome back, ${label}!`);
-        console.log('Decoded Token:', this._authService.decodeToken());
-        console.log('role  Token:', this._authService.getRole());
-        console.log('Login response:', res);
+        var decode=this._authService.decodeToken();
+        
+        console.log("decode",decode)
         if (label == 'Doctor' && role == 'Doctor') {
-          
-          this.router.navigate(['doctor/profile']);
+          this._authService.Id=decode?.DoctorId !;
+          this.router.navigate(['doctor/profile',decode?.DoctorId]);
         }
         else if (label == 'Patient' && role == 'Patient') {
           this.router.navigate(['patient/dashboard']);

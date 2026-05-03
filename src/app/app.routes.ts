@@ -21,6 +21,8 @@ import { DoctorPatientsComponent } from '../Components/Doctor/doctor-patients/do
 import { PharmacyComponent } from '../Components/Patient/pharmacy/pharmacy.component';
 import { ChatComponent } from '../Components/chat/chat.component';
 
+import { DoctorDashboardComponent } from '../Components/Doctor/doctor-dashboard/doctor-dashboard.component';
+
 
 export const routes: Routes = [
 
@@ -51,6 +53,7 @@ export const routes: Routes = [
     },
     {path:'doctor',component:DoctorLayoutComponent,children:[
         {path:'',redirectTo:'profile',pathMatch:'full'},
+        {path:"dashboard",component:DoctorDashboardComponent,title:'Doctor'},
         {path:'profile/:id',component:DoctorProfileComponent,title:'Doctor'},
         {path:'Availabilty',component:AvailabiltyComponent,title:'availabilty'},
         {path:'prescription',component:PrescriptionComponent,title:'prescription'},
