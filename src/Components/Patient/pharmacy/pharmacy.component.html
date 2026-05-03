@@ -1,0 +1,347 @@
+<div class="ph-root">
+
+  <!-- ░░ Header ░░ -->
+  <div class="ph-header">
+    <div class="ph-header-left">
+      <div class="ph-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+             width="22" height="22">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <path d="M9 22V12h6v10"/>
+          <path d="M12 7v6M9 10h6"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="ph-title">Pharmacies</h1>
+        <p class="ph-subtitle">Find medications near you</p>
+      </div>
+    </div>
+
+    <!-- Global med search -->
+    <div class="ph-global-search">
+      <svg class="ph-search-ico" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round"
+           width="15" height="15">
+        <circle cx="11" cy="11" r="7"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        class="ph-input"
+        type="text"
+        placeholder="Search for a medication across all pharmacies…"
+        [value]="medSearch()"
+        (input)="medSearch.set($any($event.target).value); clearSelected()"
+      />
+      <button class="ph-clear-search"
+              *ngIf="medSearch()"
+              (click)="medSearch.set(''); clearSelected()">✕</button>
+    </div>
+  </div>
+
+  <!-- ── Global med search results banner ── -->
+  <div class="ph-search-banner" *ngIf="medSearch() && !selected()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" width="14" height="14">
+      <circle cx="11" cy="11" r="7"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+    <span>
+      Found
+      <strong>{{ totalMedsFound() }}</strong>
+      {{ totalMedsFound() === 1 ? 'pharmacy' : 'pharmacies' }}
+      stocking
+      <strong>"{{ medSearch() }}"</strong>
+    </span>
+  </div>
+
+  <!-- ░░ Two-pane layout ░░ -->
+ <!-- ░░ Main area ░░ -->
+<div class="ph-main">
+
+  <!-- ── Pharmacy list view ── -->
+  <div class="ph-list-view" *ngIf="!selected()">
+
+    <!-- Pharmacy filter search -->
+    <div class="ph-controls">
+      <div class="ph-field">
+        <svg class="ph-search-ico" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             width="14" height="14">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          class="ph-input ph-input--sm"
+          type="text"
+          placeholder="Filter pharmacies by name or area…"
+          [value]="pharmacySearch()"
+          (input)="pharmacySearch.set($any($event.target).value)"
+        />
+      </div>
+      <div class="ph-count">
+        <span class="ph-count-num">{{ filteredPharmacies().length }}</span>
+        pharmacies
+      </div>
+    </div>
+
+    <!-- Empty -->
+    <div class="ph-empty" *ngIf="filteredPharmacies().length === 0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.3" stroke-linecap="round" width="44" height="44">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      </svg>
+      <p>No pharmacies found.</p>
+    </div>
+
+    <!-- Grid -->
+    <div class="ph-grid">
+      <div
+        class="ph-card"
+        *ngFor="let ph of filteredPharmacies(); let i = index"
+        [class.ph-card--closed]="!ph.isOpen"
+        [class.ph-card--highlight]="medSearch() && pharmacyHasMed(ph, medSearch())"
+        [style.--ci]="i"
+        (click)="selectPharmacy(ph)"
+      >
+        <!-- Has med strip -->
+        <div class="ph-card-has-med"
+             *ngIf="medSearch() && pharmacyHasMed(ph, medSearch())">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" width="11" height="11">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Has "{{ medSearch() }}"
+        </div>
+
+        <div class="ph-card-body">
+          <div class="ph-card-top">
+            <div class="ph-card-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.6" stroke-linecap="round" width="20" height="20">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <path d="M12 7v6M9 10h6"/>
+              </svg>
+            </div>
+            <div class="ph-card-title">
+              <span class="ph-card-name">{{ ph.name }}</span>
+              <span class="ph-open-chip"
+                    [class.ph-open-chip--closed]="!ph.isOpen">
+                {{ ph.isOpen ? 'Open' : 'Closed' }}
+              </span>
+            </div>
+          </div>
+
+          <span class="ph-card-addr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" width="11" height="11">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            {{ ph.address }}
+          </span>
+
+          <div class="ph-card-footer-row">
+            <div class="ph-stars">
+              <span
+                *ngFor="let s of stars(ph.rating)"
+                class="ph-star"
+                [class.ph-star--full]="s === 'full'"
+                [class.ph-star--half]="s === 'half'"
+              >★</span>
+              <span class="ph-rating-val">{{ ph.rating }}</span>
+            </div>
+            <span class="ph-med-count-chip">
+              {{ ph.medications.length }} meds
+            </span>
+          </div>
+
+          <div class="ph-card-cta">
+            View Medications
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" width="13" height="13">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Detail view (full page) ── -->
+  <div class="ph-detail-view" *ngIf="selected()">
+
+    <!-- Top bar -->
+    <div class="ph-detail-topbar">
+      <button class="ph-back-btn" (click)="clearSelected()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" width="15" height="15">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back to Pharmacies
+      </button>
+      <span class="ph-detail-topbar-name">{{ selected()!.name }}</span>
+    </div>
+
+    <!-- Pharmacy info card -->
+    <div class="ph-detail-info-card">
+      <div class="ph-detail-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.6" stroke-linecap="round" width="24" height="24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <path d="M12 7v6M9 10h6"/>
+        </svg>
+      </div>
+      <div class="ph-detail-meta">
+        <div class="ph-detail-name-row">
+          <h2 class="ph-detail-name">{{ selected()!.name }}</h2>
+          <span class="ph-open-chip"
+                [class.ph-open-chip--closed]="!selected()!.isOpen">
+            {{ selected()!.isOpen ? 'Open now' : 'Closed' }}
+          </span>
+        </div>
+        <span class="ph-detail-addr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" width="12" height="12">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          {{ selected()!.address }}
+        </span>
+        <span class="ph-detail-phone">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" width="12" height="12">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2
+                     19.79 19.79 0 0 1-8.63-3.07
+                     19.5 19.5 0 0 1-6-6
+                     19.79 19.79 0 0 1-3.07-8.67
+                     A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72
+                     c.127.96.361 1.903.7 2.81
+                     a2 2 0 0 1-.45 2.11L8.09 9.91
+                     a16 16 0 0 0 6 6l1.27-1.27
+                     a2 2 0 0 1 2.11-.45
+                     c.907.339 1.85.573 2.81.7
+                     A2 2 0 0 1 22 16.92z"/>
+          </svg>
+          {{ selected()!.phone }}
+        </span>
+      </div>
+      <div class="ph-detail-stars">
+        <div class="ph-stars">
+          <span
+            *ngFor="let s of stars(selected()!.rating)"
+            class="ph-star"
+            [class.ph-star--full]="s === 'full'"
+            [class.ph-star--half]="s === 'half'"
+          >★</span>
+        </div>
+        <span class="ph-rating-val ph-rating-val--lg">{{ selected()!.rating }}</span>
+      </div>
+    </div>
+
+    <!-- Closed warning -->
+    <div class="ph-closed-warn" *ngIf="!selected()!.isOpen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" width="14" height="14">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4M12 16h.01"/>
+      </svg>
+      This pharmacy is currently closed. Orders are unavailable.
+    </div>
+
+    <!-- Success -->
+    <div class="ph-success" *ngIf="buySuccess()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" width="15" height="15">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      {{ buySuccess() }}
+    </div>
+
+    <!-- Medication search -->
+    <div class="ph-detail-search-wrap">
+      <div class="ph-field">
+        <svg class="ph-search-ico" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             width="14" height="14">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          class="ph-input"
+          type="text"
+          placeholder="Search medications…"
+          [value]="medSearch()"
+          (input)="medSearch.set($any($event.target).value)"
+        />
+      </div>
+      <div class="ph-detail-section-label">
+        <span class="ph-detail-section-dot"></span>
+        {{ filteredMeds().length }}
+        {{ filteredMeds().length === 1 ? 'medication' : 'medications' }}
+      </div>
+    </div>
+
+    <!-- Empty meds -->
+    <div class="ph-empty" *ngIf="filteredMeds().length === 0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.3" stroke-linecap="round" width="40" height="40">
+        <rect x="2" y="6" width="20" height="12" rx="6"/>
+        <path d="M12 6v12"/>
+      </svg>
+      <p>No medications match your search.</p>
+    </div>
+
+    <!-- Medication grid -->
+    <div class="ph-med-grid" *ngIf="filteredMeds().length > 0">
+      <div
+        class="ph-med-card"
+        *ngFor="let med of filteredMeds(); let i = index"
+        [style.--mi]="i"
+      >
+        <div class="ph-med-card-top">
+          <div class="ph-med-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" width="16" height="16">
+              <rect x="2" y="6" width="20" height="12" rx="6"/>
+              <path d="M12 6v12"/>
+            </svg>
+          </div>
+          <span class="ph-stock-chip" [ngClass]="stockClass(med.stock)">
+            {{ stockLabel(med.stock) }}
+          </span>
+        </div>
+
+        <div class="ph-med-card-body">
+          <span class="ph-med-name">{{ med.medicationName }}</span>
+          <span class="ph-med-unit">{{ med.unit }}</span>
+          <span class="ph-med-stock-count">{{ med.stock }} units available</span>
+        </div>
+
+        <div class="ph-med-card-footer">
+          <span class="ph-med-price">${{ med.price.toFixed(2) }}</span>
+          <button
+            class="ph-buy-btn"
+            [disabled]="!selected()!.isOpen || buying() !== null"
+            (click)="buyMedication(med)"
+          >
+            <span *ngIf="buying() !== med.id">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" width="13" height="13">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+              Buy Now
+            </span>
+            <span class="ph-btn-spinner" *ngIf="buying() === med.id">
+              <span></span><span></span><span></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>

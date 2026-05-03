@@ -214,7 +214,18 @@ export class BookingComponent implements OnInit {
   // ── Navigation ────────────────────────────────────────────────────────────
 
   goBack(): void { this.router.navigate(['..'], { relativeTo: this.route }); }
-  openPhone(phone: string): void { window.open(`tel:${phone}`, '_blank'); }
+  openPhone(phone: string): void { 
+
+    // window.open(`tel:${phone}`, '_blank');
+    window.open(this.meetingUrl(this.availabilityId), '_blank');
+  
+  }
+
+   meetingUrl(id:number): string {
+      return `https://meet.jit.si/MedFinder-Appointment-${id}`;
+    }
+  
+    
 
   // ── Create Prescription Drawer ────────────────────────────────────────────
 

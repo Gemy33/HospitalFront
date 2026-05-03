@@ -51,16 +51,27 @@ export class PatientNavbarComponent {
       label: 'Appointments',
       hint:  'Schedule & upcoming visits',
       route: '/patient/appointments',
-      badge: 2,
-      badgeColor: 'amber',
+      
       svgPath: 'M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z',
+    },
+    {
+  label: 'Messages',
+  hint:  'Chat with your doctors',
+  route: '/patient/chat',
+ 
+  svgPath: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+},
+    {
+      label: 'Pharmacies',
+      hint:  'Nearby pharmacies',
+      route: '/patient/pharmacies',
+      svgPath: 'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2V7h2v10z',
     },
     {
       label: 'Prescriptions',
       hint:  'Active medications',
       route: '/patient/prescription',
-      badge: 3,
-      badgeColor: 'blue',
+      
       svgPath: 'M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
     },
   ];

@@ -26,8 +26,8 @@ export class DoctorApprovalComponent implements OnInit {
   activeTab = signal<Tab>('overview');
 
   // ── Data ────────────────────────────────────────────────────
-  admins          = signal<AddAdmin[]>([]);
-  pendingDoctors  = signal<Doctor[]>([]);
+  admins          = signal([] as AddAdmin[]);
+  pendingDoctors  = signal([] as Doctor[]);
 
   // ── Loading states ──────────────────────────────────────────
   loadingAdmins   = signal(false);
@@ -56,6 +56,7 @@ export class DoctorApprovalComponent implements OnInit {
     const term = this.adminSearch().toLowerCase();
     return this.admins().filter(a =>
       !term ||
+
       a.name.toLowerCase().includes(term) ||
       a.email.toLowerCase().includes(term)
     );
@@ -112,10 +113,15 @@ export class DoctorApprovalComponent implements OnInit {
   // ── Approve doctor ──────────────────────────────────────────
 
   approveDoctor(id: number): void {
+    console.log(id,"docId to approv");
+    
     this.approvingId.set(id);
     this.adminSvc.approveDoctor(id).subscribe({
-      next: () => {
-        this.pendingDoctors.update(list => list.filter(d => d.id !== id));
+      next: (res) => {
+        console.log(res , "approve doctor");
+        
+        // this.pendingDoctors().update(list => list.filter(d => d.id !== id));
+        this.loadPendingDoctors();
         this.approvingId.set(null);
       },
       error: () => { this.approvingId.set(null); },
@@ -175,7 +181,8 @@ export class DoctorApprovalComponent implements OnInit {
     this.deletingId.set(id);
     this.adminSvc.deleteAdmin(id).subscribe({
       next: () => {
-        this.admins.update(list => list.filter(a => a.id !== id));
+        // this.admins.update(list => list.filter(a => a.id !== id));
+        this.loadAdmins();
         this.deletingId.set(null);
       },
       error: () => { this.deletingId.set(null); },

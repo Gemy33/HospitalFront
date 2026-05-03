@@ -18,6 +18,8 @@ import { DoctorApprovalComponent } from '../Components/doctor-approval/doctor-ap
 import { PaymentSuccessComponent } from '../Components/Patient/payment-success/payment-success.component';
 
 import { DoctorPatientsComponent } from '../Components/Doctor/doctor-patients/doctor-patients.component';
+import { PharmacyComponent } from '../Components/Patient/pharmacy/pharmacy.component';
+import { ChatComponent } from '../Components/chat/chat.component';
 
 
 export const routes: Routes = [
@@ -32,6 +34,9 @@ export const routes: Routes = [
             {path:'',redirectTo:'dashboard',pathMatch:'full'},
             {path:'profile', component:ProfileComponent },
             {path:'prescription', component:PrescriptionsComponent },
+            {path:'pharmacies', component:PharmacyComponent },
+            {path:"chat", component:ChatComponent},
+
             {path:'appointments', component:AppointmentsComponent },
             {path:'find-doctors', component:FindDoctorComponent },
             {path:'dashboard', component:PatientDashboardComponent },
