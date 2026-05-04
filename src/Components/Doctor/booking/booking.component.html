@@ -34,34 +34,19 @@
         </svg>
       </div>
     </div>
-
-    <!-- Stats -->
     <div class="bp-stats">
-      <div class="bp-stat">
-        <span class="bp-stat-num">{{ bookings.length }}</span>
-        <span class="bp-stat-lbl">Total</span>
-      </div>
+      <div class="bp-stat"><span class="bp-stat-num">{{ bookings.length }}</span><span class="bp-stat-lbl">Total</span></div>
       <div class="bp-stat-divider"></div>
-      <div class="bp-stat">
-        <span class="bp-stat-num bp-stat-green">{{ countByStatusNum(2) }}</span>
-        <span class="bp-stat-lbl">Confirmed</span>
-      </div>
+      <div class="bp-stat"><span class="bp-stat-num bp-stat-green">{{ countByStatusNum(2) }}</span><span class="bp-stat-lbl">Confirmed</span></div>
       <div class="bp-stat-divider"></div>
-      <div class="bp-stat">
-        <span class="bp-stat-num bp-stat-amber">{{ countByStatusNum(0) }}</span>
-        <span class="bp-stat-lbl">Pending</span>
-      </div>
+      <div class="bp-stat"><span class="bp-stat-num bp-stat-amber">{{ countByStatusNum(0) }}</span><span class="bp-stat-lbl">Pending</span></div>
       <div class="bp-stat-divider"></div>
-      <div class="bp-stat">
-        <span class="bp-stat-num bp-stat-red">{{ countByStatusNum(1) }}</span>
-        <span class="bp-stat-lbl">Cancelled</span>
-      </div>
+      <div class="bp-stat"><span class="bp-stat-num bp-stat-red">{{ countByStatusNum(1) }}</span><span class="bp-stat-lbl">Cancelled</span></div>
     </div>
   </div>
 
   <!-- ── Patient list ── -->
   <div class="bp-section" *ngIf="bookings.length > 0">
-
     <div class="bp-section-head">
       <div class="bp-section-title">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
@@ -76,7 +61,6 @@
       </div>
     </div>
 
-    <!-- Empty -->
     @if (filteredBookings.length === 0) {
       <div class="bp-empty">
         <div class="bp-empty-icon">
@@ -87,7 +71,6 @@
       </div>
     }
 
-    <!-- Cards -->
     <div class="bp-patient-list">
       @for (record of filteredBookings; track record.id) {
         <div class="bp-patient-card"
@@ -95,12 +78,10 @@
           [class.status-cancelled]="record.status === 1"
           [class.status-pending]="record.status === 0">
 
-          <!-- Avatar -->
           <div class="bp-avatar" [class.female]="getGender(record) === 2">
             {{ getInitials(record.patient.user.userName) }}
           </div>
 
-          <!-- Info -->
           <div class="bp-patient-info">
             <div class="bp-patient-name">{{ getDisplayName(record) }}</div>
             <div class="bp-patient-meta">
@@ -123,7 +104,6 @@
             </div>
           </div>
 
-          <!-- Right -->
           <div class="bp-patient-right">
             <span class="bp-status-badge"
               [class.badge-confirmed]="record.status === 2"
@@ -147,20 +127,35 @@
 
             <span class="bp-pid">Booking #{{ record.id }}</span>
 
-            <!-- 3 action buttons -->
             <div class="bp-actions">
-              <button class="bp-act bp-act-call" title="Call patient" (click)="openPhone(getPhone(record))">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.61 3.37 2 2 0 013.6 1.18h3a2 2 0 012 1.72 12 12 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 8.8a16 16 0 006 6l.98-.98a2 2 0 012.11-.45 12 12 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-                <span class="bp-act-label">Call</span>
+
+              <!-- ════ CALL BUTTON — now triggers Zoom meeting creation ════ -->
+              <button class="bp-act bp-act-call"
+                      title="Start video consultation"
+                      [disabled]="callLoadingPatientId === record.patientId"
+                      (click)="startCall(record)">
+                @if (callLoadingPatientId === record.patientId) {
+                  <!-- Spinner while meeting is being created -->
+                  <span class="bp-call-spinner"></span>
+                } @else {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <polygon points="23 7 16 12 23 17 23 7"/>
+                    <rect x="1" y="5" width="15" height="14" rx="2"/>
+                  </svg>
+                }
+                <span class="bp-act-label">{{ callLoadingPatientId === record.patientId ? 'Creating…' : 'Call' }}</span>
               </button>
+
               <button class="bp-act bp-act-rx" title="Write prescription" (click)="openRxDrawer(record)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="13" x2="12" y2="17"/><line x1="10" y1="15" x2="14" y2="15"/></svg>
                 <span class="bp-act-label">Prescribe</span>
               </button>
-              <button class="bp-act bp-act-hist" title="View history"  (click)="openHistoryDrawer(record)">
+
+              <button class="bp-act bp-act-hist" title="View history" (click)="openHistoryDrawer(record)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span class="bp-act-label">History</span>
               </button>
+
             </div>
           </div>
 
@@ -169,7 +164,6 @@
     </div>
   </div>
 
-  <!-- Empty page state -->
   <div class="bp-page-empty" *ngIf="bookings.length === 0">
     <div class="bp-empty-icon">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -182,12 +176,112 @@
 
 
 <!-- ════════════════════════════════════════════════════════════
-     CREATE PRESCRIPTION DRAWER
+     ZOOM MEETING MODAL
+     Appears after the backend creates the meeting.
+     Doctor can: open as host, copy patient link, send link by email.
+════════════════════════════════════════════════════════════ -->
+<div class="zm-overlay" [class.open]="meetingModalOpen" (click)="closeMeetingModal()">
+  <div class="zm-modal" [class.open]="meetingModalOpen" (click)="$event.stopPropagation()">
+
+    @if (currentMeeting) {
+
+      <!-- Header -->
+      <div class="zm-header">
+        <div class="zm-header-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="zm-title">Meeting Ready</h2>
+          <p class="zm-sub">Consultation with {{ meetingPatientName }}</p>
+        </div>
+        <button class="zm-close" (click)="closeMeetingModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Meeting info strip -->
+      <div class="zm-info-strip">
+        <div class="zm-info-item">
+          <span class="zm-info-label">Meeting ID</span>
+          <span class="zm-info-val">{{ currentMeeting.meetingId }}</span>
+        </div>
+        @if (currentMeeting.password) {
+          <div class="zm-info-item">
+            <span class="zm-info-label">Password</span>
+            <span class="zm-info-val">{{ currentMeeting.password }}</span>
+          </div>
+        }
+        <div class="zm-info-item">
+          <span class="zm-info-label">Topic</span>
+          <span class="zm-info-val">{{ currentMeeting.topic }}</span>
+        </div>
+      </div>
+
+      <!-- Patient join link box -->
+      <div class="zm-link-box">
+        <div class="zm-link-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
+          Patient join link — share this with {{ meetingPatientName }}
+        </div>
+        <div class="zm-link-row">
+          <span class="zm-link-url">{{ currentMeeting.joinUrl }}</span>
+          <button class="zm-copy-btn" (click)="copyJoinLink()">
+            @if (linkCopied) {
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Copied!
+            } @else {
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <rect x="9" y="9" width="13" height="13" rx="2"/>
+                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+              Copy link
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="zm-actions">
+
+        <!-- Primary: doctor opens the meeting as host -->
+        <button class="zm-btn-host" (click)="openHostMeeting()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2"/>
+          </svg>
+          Open as host (Doctor)
+        </button>
+
+        <!-- Secondary: send email to patient via backend -->
+        <button class="zm-btn-send" (click)="sendLinkToPatient()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22 6 12 13 2 6"/>
+          </svg>
+          Email link to patient
+        </button>
+
+        <button class="zm-btn-cancel" (click)="closeMeetingModal()">Close</button>
+      </div>
+
+    }
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     CREATE PRESCRIPTION DRAWER  (unchanged)
 ════════════════════════════════════════════════════════════ -->
 <div class="dr-overlay" [class.open]="rxDrawerOpen" (click)="closeRxDrawer()">
   <div class="dr-drawer" [class.open]="rxDrawerOpen" (click)="$event.stopPropagation()">
-
-    <!-- Header -->
     <div class="dr-header">
       <div class="dr-header-left">
         <div class="dr-header-icon rx-icon">
@@ -195,135 +289,84 @@
         </div>
         <div>
           <h2 class="dr-title">Write Prescription</h2>
-          <p class="dr-sub" *ngIf="activeRecord">
-            For {{ getDisplayName(activeRecord) }} &middot; Patient #{{ activeRecord.patientId }}
-          </p>
+          <p class="dr-sub" *ngIf="activeRecord">For {{ getDisplayName(activeRecord) }} &middot; Patient #{{ activeRecord.patientId }}</p>
         </div>
       </div>
       <button class="dr-close" type="button" (click)="closeRxDrawer()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-
-    <!-- Body -->
     <div class="dr-body" [formGroup]="rxForm" *ngIf="rxForm">
-
-      <!-- Patient pill -->
       <div class="dr-patient-pill" *ngIf="activeRecord">
-        <div class="dr-pill-avatar" [class.female]="getGender(activeRecord) === 2">
-          {{ getInitials(activeRecord.patient.user.userName) }}
-        </div>
+        <div class="dr-pill-avatar" [class.female]="getGender(activeRecord) === 2">{{ getInitials(activeRecord.patient.user.userName) }}</div>
         <div class="dr-pill-info">
           <div class="dr-pill-name">{{ getDisplayName(activeRecord) }}</div>
-          <div class="dr-pill-meta">
-            {{ getGenderLabel(getGender(activeRecord)) }}
-            &middot; {{ getPhone(activeRecord) }}
-            &middot; DOB: {{ formatDOB(activeRecord.patient.dateOfBirath) }}
-          </div>
+          <div class="dr-pill-meta">{{ getGenderLabel(getGender(activeRecord)) }} &middot; {{ getPhone(activeRecord) }} &middot; DOB: {{ formatDOB(activeRecord.patient.dateOfBirath) }}</div>
           <div class="dr-pill-address">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             {{ activeRecord.patient.address.street }}, {{ activeRecord.patient.address.city }}
           </div>
         </div>
       </div>
-
-      <!-- Diagnosis field -->
       <p class="dr-section-label">Diagnosis</p>
       <div class="dr-field">
-        <label class="dr-label">
-          Primary diagnosis / reason for visit
-          <span class="dr-required">*</span>
-        </label>
+        <label class="dr-label">Primary diagnosis / reason for visit <span class="dr-required">*</span></label>
         <div class="dr-input-wrap">
-          <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-          </svg>
-          <input class="dr-input" type="text"
-                 placeholder="e.g. Upper respiratory tract infection"
-                 formControlName="diagnosis" />
+          <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <input class="dr-input" type="text" placeholder="e.g. Upper respiratory tract infection" formControlName="diagnosis" />
         </div>
       </div>
-
-      <!-- Treatments -->
       <p class="dr-section-label" style="margin-top:16px">Treatments</p>
       <p class="dr-section-hint">Add one or more medications with dosage instructions</p>
-
       <div class="dr-treatments" formArrayName="treatments">
         @for (treatment of treatmentsArray.controls; track $index) {
           <div class="dr-treatment-row" [formGroupName]="$index">
             <div class="dr-treatment-num">{{ $index + 1 }}</div>
             <div class="dr-treatment-fields">
               <div class="dr-field">
-                <label class="dr-label">
-                  Medication name
-                  <span class="dr-required">*</span>
-                </label>
+                <label class="dr-label">Medication name <span class="dr-required">*</span></label>
                 <div class="dr-input-wrap">
-                  <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
-                    <path d="M9 12h6M12 9v6"/>
-                  </svg>
-                  <input class="dr-input" type="text"
-                         placeholder="e.g. Paracetamol 500mg"
-                         formControlName="medicationName" />
+                  <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/><path d="M9 12h6M12 9v6"/></svg>
+                  <input class="dr-input" type="text" placeholder="e.g. Paracetamol 500mg" formControlName="medicationName" />
                 </div>
               </div>
               <div class="dr-field">
                 <label class="dr-label">Dosage instructions / notes</label>
                 <div class="dr-input-wrap">
-                  <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-                    <line x1="8" y1="18" x2="21" y2="18"/>
-                    <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
-                    <line x1="3" y1="18" x2="3.01" y2="18"/>
-                  </svg>
-                  <input class="dr-input" type="text"
-                         placeholder="e.g. Take twice daily after meals"
-                         formControlName="notes" />
+                  <svg class="dr-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  <input class="dr-input" type="text" placeholder="e.g. Take twice daily after meals" formControlName="notes" />
                 </div>
               </div>
             </div>
-            <button class="dr-remove-btn" type="button"
-                    *ngIf="treatmentsArray.length > 1"
-                    (click)="removeTreatment($index)" title="Remove">
+            <button class="dr-remove-btn" type="button" *ngIf="treatmentsArray.length > 1" (click)="removeTreatment($index)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
         }
       </div>
-
       <button class="dr-add-btn" type="button" (click)="addTreatment()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add another medication
       </button>
-
       <div class="dr-error" *ngIf="rxError">{{ rxError }}</div>
-
     </div>
-
-    <!-- Footer -->
     <div class="dr-footer">
       <button class="dr-btn-cancel" type="button" (click)="closeRxDrawer()">Cancel</button>
       <button class="dr-btn-save" type="button" (click)="submitRx()" [disabled]="rxSaving">
         @if (rxSaving) { <span class="dr-spinner"></span> }
-        @else {
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        }
+        @else { <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg> }
         {{ rxSaving ? 'Saving…' : 'Save prescription' }}
       </button>
     </div>
-
   </div>
 </div>
 
 
 <!-- ════════════════════════════════════════════════════════════
-     PRESCRIPTION HISTORY DRAWER
+     PRESCRIPTION HISTORY DRAWER  (unchanged)
 ════════════════════════════════════════════════════════════ -->
 <div class="dr-overlay" [class.open]="historyDrawerOpen" (click)="closeHistoryDrawer()">
   <div class="dr-drawer dr-drawer-wide" [class.open]="historyDrawerOpen" (click)="$event.stopPropagation()">
-
-    <!-- Header -->
     <div class="dr-header">
       <div class="dr-header-left">
         <div class="dr-header-icon hist-icon">
@@ -331,46 +374,28 @@
         </div>
         <div>
           <h2 class="dr-title">Prescription History</h2>
-          <p class="dr-sub" *ngIf="activeRecord">
-            {{ getDisplayName(activeRecord) }}
-            &middot; {{ prescriptionHistory.length }} record{{ prescriptionHistory.length !== 1 ? 's' : '' }}
-          </p>
+          <p class="dr-sub" *ngIf="activeRecord">{{ getDisplayName(activeRecord) }} &middot; {{ prescriptionHistory.length }} record{{ prescriptionHistory.length !== 1 ? 's' : '' }}</p>
         </div>
       </div>
       <button class="dr-close" type="button" (click)="closeHistoryDrawer()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-
-    <!-- Body -->
     <div class="dr-body">
-
-      <!-- Patient pill -->
       <div class="dr-patient-pill" *ngIf="activeRecord">
-        <div class="dr-pill-avatar" [class.female]="getGender(activeRecord) === 2">
-          {{ getInitials(activeRecord.patient.user.userName) }}
-        </div>
+        <div class="dr-pill-avatar" [class.female]="getGender(activeRecord) === 2">{{ getInitials(activeRecord.patient.user.userName) }}</div>
         <div class="dr-pill-info">
           <div class="dr-pill-name">{{ getDisplayName(activeRecord) }}</div>
-          <div class="dr-pill-meta">
-            {{ getGenderLabel(getGender(activeRecord)) }}
-            &middot; {{ getPhone(activeRecord) }}
-            &middot; DOB: {{ formatDOB(activeRecord.patient.dateOfBirath) }}
-          </div>
+          <div class="dr-pill-meta">{{ getGenderLabel(getGender(activeRecord)) }} &middot; {{ getPhone(activeRecord) }} &middot; DOB: {{ formatDOB(activeRecord.patient.dateOfBirath) }}</div>
           <div class="dr-pill-address">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             {{ activeRecord.patient.address.city }}, {{ activeRecord.patient.address.country }}
           </div>
         </div>
       </div>
-
-      <!-- Loading -->
       <div class="dr-loading" *ngIf="historyLoading">
-        <span class="dr-spinner-large"></span>
-        <span>Loading prescriptions…</span>
+        <span class="dr-spinner-large"></span><span>Loading prescriptions…</span>
       </div>
-
-      <!-- Empty -->
       <div class="dr-hist-empty" *ngIf="!historyLoading && prescriptionHistory.length === 0">
         <div class="dr-hist-empty-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -378,13 +403,9 @@
         <p class="dr-hist-empty-title">No prescriptions yet</p>
         <p class="dr-hist-empty-sub">This patient has no prescription history</p>
       </div>
-
-      <!-- Records -->
       <div class="dr-hist-list" *ngIf="!historyLoading && prescriptionHistory.length > 0">
         @for (rx of prescriptionHistory; track rx.id) {
           <div class="dr-hist-card">
-
-            <!-- Card header: Rx number + prescribing doctor -->
             <div class="dr-hist-card-head">
               <div class="dr-hist-rx-num">Rx #{{ rx.id }}</div>
               <div class="dr-hist-doctor">
@@ -395,37 +416,24 @@
                 </div>
               </div>
             </div>
-
-            <!-- Diagnosis block -->
             <div class="dr-hist-diagnosis">
               <div class="dr-hist-diag-label">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                </svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                 Diagnosis
               </div>
-              
               <div class="dr-hist-diag-value" [class.dr-hist-diag-empty]="!rx.diagnosis">
-              {{rx.diagnosis||'No diagnosis recorded' }}  
+                {{ rx.diagnosis || 'No diagnosis recorded' }}
               </div>
             </div>
-
-            <!-- Treatments -->
             <div class="dr-hist-treatments">
               <div class="dr-hist-treatments-label">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                  <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
-                  <path d="M9 12h6M12 9v6"/>
-                </svg>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/><path d="M9 12h6M12 9v6"/></svg>
                 Medications ({{ rx.treatments.length }})
               </div>
               @for (t of rx.treatments; track t.id) {
                 <div class="dr-hist-treatment">
                   <div class="dr-hist-pill-icon">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                      <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
-                      <path d="M9 12h6M12 9v6"/>
-                    </svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/><path d="M9 12h6M12 9v6"/></svg>
                   </div>
                   <div class="dr-hist-treatment-info">
                     <span class="dr-hist-med-name">{{ t.medicationName }}</span>
@@ -435,14 +443,10 @@
                 </div>
               }
             </div>
-
           </div>
         }
       </div>
-
     </div>
-
-    <!-- Footer -->
     <div class="dr-footer">
       <button class="dr-btn-cancel" type="button" (click)="closeHistoryDrawer()">Close</button>
       <button class="dr-btn-save" type="button" (click)="openRxFromHistory()">
@@ -450,6 +454,5 @@
         New prescription
       </button>
     </div>
-
   </div>
 </div>
