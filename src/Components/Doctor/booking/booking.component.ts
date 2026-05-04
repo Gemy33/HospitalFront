@@ -203,65 +203,15 @@ export class BookingComponent implements OnInit {
    *
    * See ZoomController.cs for the backend implementation.
    */
-  startCall(record: BookingRecord): void {
-
-    // ── Cache hit: reuse meeting created earlier in this session ─────────
-    if (this.meetingCache.has(record.id)) {
-      this.activeRecord       = record;
-      this.currentMeeting     = this.meetingCache.get(record.id)!;
-      this.meetingPatientName = this.getDisplayName(record);
-      this.meetingModalOpen   = true;
-      return;
-    }
-
-    // ── Create new Zoom meeting via backend ───────────────────────────────
-    this.activeRecord         = record;
-    this.callLoadingPatientId = record.patientId;
-
-    const payload = {
-      topic:           `Consultation — Dr. & ${this.getDisplayName(record)}`,
-      startTime:       this.slotTime || new Date().toISOString(),
-      durationMinutes: 30,
-      patientEmail:    this.getEmail(record),
-      patientName:     this.getDisplayName(record),
-    };
-
-    // POST to YOUR ASP.NET backend — never call Zoom directly from Angular
-    this.http.post<MeetingInfo>(`${this.API_BASE}/Zoom/CreateMeeting`, payload)
-      .subscribe({
-        next: (meeting) => {
-          // Cache so clicking Call again reuses the same meeting link
-          this.meetingCache.set(record.id, meeting);
-
-          this.currentMeeting       = meeting;
-          this.meetingPatientName   = this.getDisplayName(record);
-          this.meetingModalOpen     = true;
-          this.callLoadingPatientId = null;
-
-          console.log('[Zoom] Meeting created successfully:', meeting);
-        },
-        error: (err) => {
-          console.error('[Zoom] Failed to create meeting:', err);
-          this.callLoadingPatientId = null;
-
-          // Fallback: Jitsi room — always works without credentials
-          const fallback = `https://meet.jit.si/MedLink-${record.id}-${record.patientId}`;
-          const meeting: MeetingInfo = {
-            joinUrl:   fallback,
-            hostUrl:   fallback,
-            meetingId: `jitsi-${record.id}`,
-            password:  '',
-            topic:     `Consultation with ${this.getDisplayName(record)}`,
-            startTime: new Date().toISOString(),
-          };
-          this.meetingCache.set(record.id, meeting);
-          this.currentMeeting     = meeting;
-          this.meetingPatientName = this.getDisplayName(record);
-          this.meetingModalOpen   = true;
-        },
-      });
+ 
+ meetingUrl(a: BookingRecord): string {
+  console.log("avl",a.doctorAvailabilityId)
+    return `https://meet.jit.si/MedFinder-Appointment-${a.doctorAvailabilityId}`;
   }
 
+  joinMeeting(a: BookingRecord): void {
+    window.open(this.meetingUrl(a), '_blank');
+  }
   /** Doctor joins as host — opens Zoom desktop/browser client */
   openHostMeeting(): void {
     if (this.currentMeeting?.hostUrl) {

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../Core/auth.service';
+import { DoctorService } from '../../../Core/doctor.service';
 
 export interface Doctor {
   name: string;
@@ -31,11 +32,7 @@ export class DoctorNavbarComponent implements OnInit, OnDestroy {
   // ── Inputs ──────────────────────────────────────────────────────────────────
 
   /** Doctor profile data passed from parent */
-  @Input() doctor: Doctor = {
-    name: 'Dr. Sarah Mitchell',
-    specialty: 'General Practitioner',
-    isOnline: true,
-  };
+   doctor: Doctor = {} as Doctor;
 
   /** Quick stats shown in the stats strip */
   @Input() stats: SidebarStats = {
@@ -60,12 +57,19 @@ export class DoctorNavbarComponent implements OnInit, OnDestroy {
   /** Zoom meeting URL generated from the API — injected via ZoomService in real usage */
   private zoomMeetingUrl = '';
 
-  constructor(private router: Router,private _authservice:AuthService) {}
+  constructor(private router: Router,private _authservice:AuthService,private _doctorService:DoctorService) {}
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
  DoctorId:string=this._authservice.Id;
   ngOnInit(): void {
-  
+      this._doctorService.getDoctorProfile(this.DoctorId).subscribe({
+        next:(res)=>{
+          this.doctor.name=res.name
+          this.doctor.specialty=res.speciality;
+        },
+        error:(err)=>console.log(err)
+
+      })
   }
 
   ngOnDestroy(): void {
@@ -142,7 +146,7 @@ export class DoctorNavbarComponent implements OnInit, OnDestroy {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('doctor_session');
     this.signedOut.emit();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth']);
   }
 
   // ── Private Helpers ──────────────────────────────────────────────────────────

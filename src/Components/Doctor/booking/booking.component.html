@@ -133,7 +133,7 @@
               <button class="bp-act bp-act-call"
                       title="Start video consultation"
                       [disabled]="callLoadingPatientId === record.patientId"
-                      (click)="startCall(record)">
+                      (click)="joinMeeting(record)">
                 @if (callLoadingPatientId === record.patientId) {
                   <!-- Spinner while meeting is being created -->
                   <span class="bp-call-spinner"></span>

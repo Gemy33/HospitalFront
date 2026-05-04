@@ -140,7 +140,9 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   }
 
   meetingUrl(a: IAppointment): string {
-    return `https://meet.jit.si/MedFinder-Appointment-${a.id}`;
+    console.log("patient",a.id);
+
+    return `https://meet.jit.si/MedFinder-Appointment-${a.doctorAvailabilityId}`;
   }
 
   joinMeeting(a: IAppointment): void {
