@@ -9,5 +9,5 @@ if (token) {
     return true; // ✅ allow navigation
   }
 
-  return router.createUrlTree(['/auth']); // ❌ redirect
+  return router.createUrlTree(['/auth']); 
 };

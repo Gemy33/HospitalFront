@@ -143,8 +143,8 @@ export class DoctorNavbarComponent implements OnInit, OnDestroy {
   signOut(): void {
     this.isInCall = false;
     // In production: this.authService.signOut().subscribe(() => { ... });
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('doctor_session');
+    localStorage.removeItem('token');
+    // localStorage.removeItem('doctor_session');
     this.signedOut.emit();
     this.router.navigate(['/auth']);
   }

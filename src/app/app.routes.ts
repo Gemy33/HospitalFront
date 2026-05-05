@@ -23,6 +23,7 @@ import { ChatComponent } from '../Components/chat/chat.component';
 
 import { DoctorDashboardComponent } from '../Components/Doctor/doctor-dashboard/doctor-dashboard.component';
 import { authGuard } from '../Core/guards/auth.guard';
+import { NotFoundComponent } from '../Components/not-found/not-found.component';
 
 
 
@@ -79,7 +80,7 @@ export const routes: Routes = [
       { path: '**', redirectTo: "dashboard" }
     ]
   },
- 
+  {path:'**' ,component:NotFoundComponent,title:"NotFound"}
 
 
 ];
