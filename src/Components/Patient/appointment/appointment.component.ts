@@ -3,8 +3,10 @@ import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { RouterModule } from '@angular/router';
-import { PatientService, IAppointment } from '../../../Core/patient.service';
+import { PatientService, IAppointment, Doctor } from '../../../Core/patient.service';
 import { AuthService } from '../../../Core/auth.service';
+import { DoctorService } from '../../../Core/doctor.service';
+import { ChatService } from '../../../Core/chat.service';
 
 @Component({
   selector: 'app-appointments',
@@ -22,6 +24,9 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
 
    patientId = 2004;
   private ticker: any;
+  prescriptionData: any = null;
+showSidebar = false;
+loadingPrescription = false;
 
   // ── Enum reference ──────────────────────────────────────────
   // Pending   = 0
@@ -58,6 +63,8 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     private appointmentSvc: PatientService,
     private router: Router,
     private authservice : AuthService,
+    private doctorservice:DoctorService,
+    private chatSvc: ChatService
   ) {}
 
   ngOnInit(): void {
@@ -221,7 +228,40 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     return `D${doctorId}`;
   }
 
-  viewPrescriptions(): void {
-    this.router.navigate(['/patient/prescription']);
-  }
+ viewPrescriptions(id: number): void {
+  this.loadingPrescription = true;
+  this.showSidebar = true;
+
+  this.doctorservice.getprescrionByBooking(id).subscribe({
+    next: (res: any) => {
+      this.prescriptionData = res;
+      this.loadingPrescription = false;
+    },
+    error: (err) => {
+      console.error('Failed to load prescriptions:', err);
+      this.loadingPrescription = false;
+    }
+  });
+}
+closeSidebar(): void {
+  this.showSidebar = false;
+}
+  startChat(apt: IAppointment): void {
+  this.chatSvc.createConversation(
+    apt.patientId,
+    apt.doctorAvailability.doctorId,
+    apt.id
+  ).subscribe({
+    next: (conv) => {
+      // Navigate to chat after conversation created
+      this.router.navigate(['/patient/chat']);
+    },
+    error: (err) => {
+      // Conversation might already exist — just navigate
+      this.router.navigate(['/patient/chat']);
+    }
+  });}
+  findDoctor(): void {
+  this.router.navigate(['/patient/find-doctor']);
+}
 }

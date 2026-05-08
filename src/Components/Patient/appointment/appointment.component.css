@@ -723,3 +723,61 @@
   .ap-day-num  { font-size: 20px; }
   .ap-detail-val { font-size: 12px; }
 }
+
+/* Sidebar (RIGHT SIDE) */
+.ap-sidebar {
+  position: fixed;
+  top: 0;
+  right: -350px;   /* start hidden on right */
+  width: 350px;
+  height: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 20px;
+  z-index: 1000;
+  transition: right 0.3s ease;
+  overflow-y: auto;
+}
+
+/* When open → slide in */
+.ap-sidebar.open {
+  right: 0;
+}
+/* Overlay */
+.ap-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 999;
+}
+
+/* Treatment */
+.ap-treatment {
+  margin-top: 15px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.ap-btn-chat {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  color: var(--blue);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+
+  &:hover {
+    background: var(--blue);
+    color: var(--bg);
+  }
+}

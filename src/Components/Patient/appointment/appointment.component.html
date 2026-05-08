@@ -64,7 +64,7 @@
         <path d="M16 2v4M8 2v4M3 10h18"/>
       </svg>
       <p>No appointments found.</p>
-      <button class="ap-btn-outline" (click)="viewPrescriptions()">
+      <button class="ap-btn-outline" (click)="findDoctor()">
         Browse Doctors
       </button>
     </div>
@@ -98,6 +98,7 @@
       [ngClass]="cardClass(apt)"
       [style.--ci]="i"
     >
+
 
       <!-- Live banner -->
       <div class="ap-live-banner" *ngIf="isLive(apt)">
@@ -290,7 +291,7 @@
             </button>
 
             <!-- Prescriptions shortcut -->
-            <button class="ap-btn-secondary" (click)="viewPrescriptions()">
+            <button class="ap-btn-secondary" (click)="viewPrescriptions(apt.id)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
                    width="15" height="15">
@@ -302,10 +303,64 @@
               Prescriptions
             </button>
 
+                <button
+  class="ap-btn-chat"
+  *ngIf="apt.status === 1 || apt.status === 2"
+  (click)="startChat(apt)"
+>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+       width="15" height="15">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  Chat with Doctor
+</button>
+
           </div>
         </div>
       </div>
+      <!-- Add this button inside .ap-actions, after the join meeting button -->
+
     </div>
 
   </div>
+  
 </div>
+
+<!-- ░░ Prescription Sidebar ░░ -->
+<div class="ap-sidebar" [class.open]="showSidebar">
+
+  <div class="ap-sidebar-header">
+    <h3>Prescription</h3>
+    <button (click)="closeSidebar()">✕</button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loadingPrescription" class="ap-sidebar-loading">
+    Loading...
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loadingPrescription && prescriptionData">
+
+    <p>
+      <strong>Doctor:</strong>
+      {{ prescriptionData.doctor?.name || 'Unknown' }}
+    </p>
+
+    <p>
+      <strong>Speciality:</strong>
+      {{ prescriptionData.doctor?.speciality || 'Unknown' }}
+    </p>
+
+    <div *ngFor="let t of prescriptionData.treatments" class="ap-treatment">
+      <p><strong>Medication:</strong> {{ t.medicationName }}</p>
+      <p><strong>Notes:</strong> {{ t.notes }}</p>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Overlay -->
+<div class="ap-overlay" *ngIf="showSidebar" (click)="closeSidebar()"></div>

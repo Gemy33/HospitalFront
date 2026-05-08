@@ -4,17 +4,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService, IConversation, IMessage } from '../../Core/chat.service';
 import { AuthService } from '../../Core/auth.service';
-import { IAppointment, PatientService } from '../../Core/patient.service';
-import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-chat',
+  selector: 'app-doctor-chat',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.css'],
+  templateUrl: './doctor-chat.component.html',
+  styleUrls: ['./doctor-chat.component.css'],
 })
-export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class DoctorChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   @ViewChild('msgEnd') msgEnd!: ElementRef;
 
@@ -24,46 +22,41 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   loadingMsgs    = signal(false);
   sending        = signal(false);
   text           = signal('');
-  patientId      = signal(0);
+  doctorId       = signal(0);
   errorConvs     = signal<string | null>(null);
   shouldScroll   = false;
 
   messages = computed(() => this.chatSvc.messages());
 
-  // Total unread across all conversations
   totalUnread = computed(() =>
     this.conversations().reduce((s, c) => s + c.unreadCount, 0)
   );
 
-  // Group conversations by doctor
-  groupedByDoctor = computed(() => {
+  // Group by patient
+  groupedByPatient = computed(() => {
     const map = new Map<number, IConversation[]>();
     for (const conv of this.conversations()) {
-      const list = map.get(conv.doctorId) ?? [];
+      const list = map.get(conv.patientId) ?? [];
       list.push(conv);
-      map.set(conv.doctorId, list);
+      map.set(conv.patientId, list);
     }
     return map;
   });
 
-  doctorIds = computed(() => Array.from(this.groupedByDoctor().keys()));
+  patientIds = computed(() => Array.from(this.groupedByPatient().keys()));
 
   constructor(
     public chatSvc: ChatService,
     private auth: AuthService,
-    private patientSvc: PatientService,
-    private router: Router
   ) {}
 
   ngOnInit(): void {
-    const userId = this.auth.getUserId()!;
-    this.patientSvc.getPatientProfileByUserId(userId).subscribe({
-      next: (p: any) => {
-        this.patientId.set(p.id);
-        this.loadConversations();
-        this.chatSvc.connect();
-      }
-    });
+    // Get doctorId from auth token claims
+    // Replace with however your auth service exposes doctorId
+    const doctorId = Number(this.auth.Id);
+    this.doctorId.set(doctorId);
+    this.loadConversations();
+    this.chatSvc.connect();
   }
 
   ngOnDestroy(): void {
@@ -80,17 +73,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-
   loadConversations(): void {
     this.loadingConvs.set(true);
     this.errorConvs.set(null);
-    this.chatSvc.getConversations(this.patientId()).subscribe({
+    this.chatSvc.getDoctorConversations(this.doctorId()).subscribe({
       next: data => {
-        console.log("patient id for chat ",this.patientId());
-        console.log("conversations ",data);
-
         this.conversations.set(data);
-
         this.loadingConvs.set(false);
       },
       error: () => {
@@ -115,7 +103,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         this.loadingMsgs.set(false);
         this.shouldScroll = true;
         this.chatSvc.joinConversation(conv.id);
-        this.chatSvc.markRead(conv.id, this.patientId());
+        // Doctor marks patient messages as read
+        this.chatSvc.markRead(conv.id, this.doctorId());
         this.conversations.update(list =>
           list.map(c => c.id === conv.id ? { ...c, unreadCount: 0 } : c)
         );
@@ -131,8 +120,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.sending.set(true);
     this.chatSvc.sendMessage(
       this.activeConv()!.id,
-      this.patientId(),
-      'Patient',
+      this.doctorId(),
+      'Doctor',          // ✅ senderRole is Doctor
       content,
     ).then(() => {
       this.text.set('');
@@ -160,7 +149,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     try { this.msgEnd.nativeElement.scrollIntoView({ behavior: 'smooth' }); } catch {}
   }
 
-  isMine(msg: IMessage): boolean { return msg.senderRole === 'Patient'; }
+  isMine(msg: IMessage): boolean { return msg.senderRole === 'Doctor'; }
 
   formatTime(iso: string): string {
     return new Date(iso).toLocaleTimeString('en-US', {
@@ -169,7 +158,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   formatDate(iso: string): string {
-    const d    = new Date(iso);
+    const d     = new Date(iso);
     const today = new Date();
     const diff  = Math.floor((today.getTime() - d.getTime()) / 86400000);
     if (diff === 0) return 'Today';
@@ -183,7 +172,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
            new Date(msgs[i].sentAt).toDateString();
   }
 
-  getConvsForDoctor(doctorId: number): IConversation[] {
-    return this.groupedByDoctor().get(doctorId) ?? [];
+  getConvsForPatient(patientId: number): IConversation[] {
+    return this.groupedByPatient().get(patientId) ?? [];
   }
 }

@@ -1,27 +1,29 @@
-.app-layout {
+.layout {
+  display: flex;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden;           /* Important */
+  background: #f4f1eb;
 }
-
-/* Sidebar fixed width */
 .sidebar {
-  width: 260px;
-  min-width: 260px;
-  height: 100vh;
-  position: sticky;
-  top: 0;
+  /* width: 300px; */
+  /* flex-shrink: 0; */
+  flex-shrink: 0;            /* Prevent shrinking */
+  overflow-y:auto;
+  border-right: 1px solid #e5e5e5;
 }
 
-/* When collapsed */
-.sidebar.collapsed {
-  width: 80px;
-  min-width: 80px;
-}
-
-/* Main content takes remaining space */
-.main-content {
+.content {
   flex: 1;
-  height: 100vh;
+  margin-left: 255px;
+
+
+  
+  
+
+
+  
+
   overflow-y: auto;
-  background: #f5f7fb;
+  padding: 0;                 /* Remove padding here */
+  background: #f4f1eb;
 }

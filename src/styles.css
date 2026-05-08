@@ -31,7 +31,7 @@ app-patient-sidebar {
 
 /* Content Area - Takes the rest of the page */
 .content-wrapper {
-  margin-left: 280px;           /* Same as sidebar width */
+   margin-left: 280px;          /* Same as sidebar width */
   flex: 1;
   min-height: 100vh;
   padding: 2rem;

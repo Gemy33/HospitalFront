@@ -78,6 +78,14 @@ export class DoctorService {
   );
 }
 
+getprescrionByBooking(bookingId: number): Observable<any> {
+  return this.http.get(
+    `${this.baseurl}/Doctor/Prescription/Booking/${bookingId}`
+  );
+}
+// get prescription by booking 
+
+
 getPatientPrescriptions(patientId: number): Observable<IPrescription[]> {
   return this.http.get<IPrescription[]>(
     `${this.baseurl}/Doctor/Prescriptions/${patientId}`

@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
+import { HttpTransportType, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
 export interface IMessage {
   id: number;
@@ -49,6 +50,11 @@ export class ChatService {
       `${this.baseUrl}/conversations/patient/${patientId}`);
   }
 
+  getDoctorConversations(doctorId: number): Observable<IConversation[]> {
+  return this.http.get<IConversation[]>(
+    `${this.baseUrl}/conversations/doctor/${doctorId}`
+  );
+}
   getMessages(conversationId: number): Observable<IMessage[]> {
     return this.http.get<IMessage[]>(
       `${this.baseUrl}/conversations/${conversationId}/messages`);
@@ -56,29 +62,49 @@ export class ChatService {
 
   // ── SignalR ───────────────────────────────────────────────────
 
-  connect(): Promise<void> {
-    this.hub = new signalR.HubConnectionBuilder()
-      .withUrl(this.hubUrl, {
-        accessTokenFactory: () => localStorage.getItem('token') ?? '',
-      })
-      .withAutomaticReconnect()
-      .build();
+connect(): Promise<void> {
+  this.hub = new HubConnectionBuilder()
+    .withUrl(this.hubUrl, {
+      // ✅ Remove the transport restriction — let SignalR auto-negotiate
+      accessTokenFactory: () => localStorage.getItem('token') ?? '',
+      withCredentials: true,
+    })
+    .withAutomaticReconnect([0, 2000, 5000, 10000])
+    .configureLogging(LogLevel.Information)
+    .build();
 
-    this.hub.on('ReceiveMessage', (msg: IMessage) => {
-      this.messages.update(list => [...list, msg]);
-    });
+  this.hub.on('ReceiveMessage', (msg: IMessage) => {
+    this.messages.update(list => [...list, msg]);
+  });
 
-    this.hub.on('MessagesRead', (conversationId: number) => {
-      this.messages.update(list =>
-        list.map(m => m.conversationId === conversationId
-          ? { ...m, isRead: true } : m)
-      );
-    });
+  this.hub.on('MessagesRead', (conversationId: number) => {
+    this.messages.update(list =>
+      list.map(m =>
+        m.conversationId === conversationId ? { ...m, isRead: true } : m
+      )
+    );
+  });
 
-    return this.hub.start().then(() => {
+  this.hub.onreconnected(() => {
+    console.log('SignalR reconnected');
+    this.connected.set(true);
+  });
+
+  this.hub.onclose(() => {
+    console.log('SignalR disconnected');
+    this.connected.set(false);
+  });
+
+  return this.hub.start()
+    .then(() => {
+      console.log('SignalR connected successfully');
       this.connected.set(true);
+    })
+    .catch(err => {
+      console.error('SignalR connection failed:', err);
+      this.connected.set(false);
     });
-  }
+}
 
   joinConversation(conversationId: number): Promise<void> {
     return this.hub.invoke('JoinConversation', conversationId);

@@ -23,6 +23,7 @@ import { ChatComponent } from '../Components/chat/chat.component';
 
 import { DoctorDashboardComponent } from '../Components/Doctor/doctor-dashboard/doctor-dashboard.component';
 import { authGuard } from '../Core/guards/auth.guard';
+import { DoctorChatComponent } from '../Components/doctor-chat/doctor-chat.component';
 
 
 
@@ -72,6 +73,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'profile', pathMatch: 'full' },
       { path: "dashboard", component: DoctorDashboardComponent },
       { path: 'profile/:id', component: DoctorProfileComponent },
+      { path: 'chat', component: DoctorChatComponent },
       { path: 'Availabilty', component: AvailabiltyComponent },
       { path: 'prescription', component: PrescriptionComponent },
       { path: 'booking/:AvailabilityId', component: BookingComponent },
