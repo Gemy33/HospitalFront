@@ -12,6 +12,7 @@ import { IBooking } from './Interfaces/Patient/ibooking';
 import { IAvailabilityItem } from './Interfaces/Doctor/iavailability-item';
 import { IAvailabilityResponse } from './Interfaces/Doctor/iavailability-response';
 import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
+import { DashboardStats } from '../Components/Doctor/doctor-dashboard/doctor-dashboard.component';
 
 @Injectable({
   providedIn: 'root'
@@ -46,6 +47,11 @@ export class DoctorService {
   );
 
 }
+  getDoctorDashboard(doctorId: number): Observable<DashboardStats> {
+    return this.http.get<DashboardStats>(
+      `${this.baseurl}/Doctor/${doctorId}`
+    );
+  }
 
  updateAvailability(data: any): Observable<any> {
   return this.http.put(

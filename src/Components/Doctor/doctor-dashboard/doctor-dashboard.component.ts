@@ -1,8 +1,10 @@
+
 // doctor-dashboard.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { DoctorService } from '../../../Core/doctor.service';
+import { AuthService } from '../../../Core/auth.service';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -58,6 +60,8 @@ export class DoctorDashboardComponent implements OnInit {
 
   private router        = inject(Router);
   private doctorService = inject(DoctorService);
+  private _authService=inject(AuthService);
+  doctorId:string=this._authService.Id;
 
   isLoading = true;
   doctorName = 'Doctor';
@@ -143,7 +147,12 @@ export class DoctorDashboardComponent implements OnInit {
     //   this.doctorService.getDashboardStats(),
     //   this.doctorService.getRecentBookings(),
     // ]).subscribe(([stats, bookings]) => { ... });
-
+   this.doctorService.getDoctorDashboard(Number(this.doctorId)).subscribe({
+    next:(res)=>{
+      console.log(res);
+  this.stats=res;
+},error:(err)=>console.log(err)
+   })
     // Simulate API delay then load mock data
     setTimeout(() => {
       this.loadMockData();
@@ -156,18 +165,18 @@ export class DoctorDashboardComponent implements OnInit {
   private loadMockData(): void {
     this.doctorName = 'Ahmed';
 
-    this.stats = {
-      totalPatients:      47,
-      totalPrescriptions: 134,
-      totalBookings:      89,
-      confirmedBookings:  62,
-      pendingBookings:    18,
-      cancelledBookings:  9,
-      totalRevenue:       13_750,
-      pendingRevenue:     2_700,
-      thisMonthRevenue:   3_200,
-      avgBookingPrice:    200,
-    };
+    // this.stats = {
+    //   totalPatients:      47,
+    //   totalPrescriptions: 134,
+    //   totalBookings:      89,
+    //   confirmedBookings:  62,
+    //   pendingBookings:    18,
+    //   cancelledBookings:  9,
+    //   totalRevenue:       13_750,
+    //   pendingRevenue:     2_700,
+    //   thisMonthRevenue:   3_200,
+    //   avgBookingPrice:    200,
+    // };
 
     this.recentBookings = [
       { id: 1010, patientName: 'Islam Ahmed',   patientInitials: 'IA', gender: 1, date: '2026-04-30', time: '08:30 AM', status: 0, price: 200 },
