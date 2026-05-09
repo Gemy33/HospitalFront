@@ -155,7 +155,10 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span class="bp-act-label">History</span>
               </button>
-
+                <button class="bp-act bp-act-hist" title="View history" (click)="openSummary(record.patientId)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span class="bp-act-label">History AI</span>
+              </button>
             </div>
           </div>
 
@@ -163,6 +166,32 @@
       }
     </div>
   </div>
+  <!-- ////////////////////////////// open ai history -->
+   <div class="overlay" *ngIf="isSummaryOpen">
+
+  <!-- Popup Card -->
+  <div class="summary-card">
+
+    <!-- Close Button -->
+    <button class="close-btn" (click)="closeSummary()">
+      ✕
+    </button>
+
+    <!-- Header -->
+    <div class="header">
+      <h2>Medical Summary</h2>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p>
+        {{ summaryData.summary }}
+      </p>
+    </div>
+
+  </div>
+
+</div>
 
   <div class="bp-page-empty" *ngIf="bookings.length === 0">
     <div class="bp-empty-icon">
