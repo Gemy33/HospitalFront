@@ -433,47 +433,79 @@
         <p class="dr-hist-empty-sub">This patient has no prescription history</p>
       </div>
       <div class="dr-hist-list" *ngIf="!historyLoading && prescriptionHistory.length > 0">
-        @for (rx of prescriptionHistory; track rx.id) {
-          <div class="dr-hist-card">
-            <div class="dr-hist-card-head">
-              <div class="dr-hist-rx-num">Rx #{{ rx.id }}</div>
-              <div class="dr-hist-doctor">
-                <div class="dr-hist-doc-avatar">{{ getInitials(rx.doctor?.name ?? 'DR') }}</div>
-                <div>
-                  <div class="dr-hist-doc-name">{{ formatDisplayName(rx.doctor?.name ?? 'Unknown') }}</div>
-                  <div class="dr-hist-doc-spec">{{ rx.doctor?.speciality }}</div>
-                </div>
-              </div>
-            </div>
-            <div class="dr-hist-diagnosis">
-              <div class="dr-hist-diag-label">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                Diagnosis
-              </div>
-              <div class="dr-hist-diag-value" [class.dr-hist-diag-empty]="!rx.diagnosis">
-                {{ rx.diagnosis || 'No diagnosis recorded' }}
-              </div>
-            </div>
-            <div class="dr-hist-treatments">
-              <div class="dr-hist-treatments-label">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/><path d="M9 12h6M12 9v6"/></svg>
-                Medications ({{ rx.treatments.length }})
-              </div>
-              @for (t of rx.treatments; track t.id) {
-                <div class="dr-hist-treatment">
-                  <div class="dr-hist-pill-icon">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/><path d="M9 12h6M12 9v6"/></svg>
-                  </div>
-                  <div class="dr-hist-treatment-info">
-                    <span class="dr-hist-med-name">{{ t.medicationName }}</span>
-                    <span class="dr-hist-med-notes">{{ t.notes }}</span>
-                  </div>
-                  <span class="dr-hist-treatment-id">#{{ t.id }}</span>
-                </div>
-              }
-            </div>
+       <!-- ── Replace your @for (rx of prescriptionHistory...) block with this ── -->
+
+@for (rx of prescriptionHistory; track rx.id) {
+  <div class="dr-hist-card">
+
+    <!-- Card header: Rx number + prescribing doctor -->
+    <div class="dr-hist-card-head">
+      <div class="dr-hist-rx-num">Rx #{{ rx.id }}</div>
+      <div class="dr-hist-doctor">
+        <div class="dr-hist-doc-avatar">{{ getInitials(rx.doctor?.name ?? 'DR') }}</div>
+        <div>
+          <div class="dr-hist-doc-name">{{ formatDisplayName(rx.doctor?.name ?? 'Unknown') }}</div>
+          <div class="dr-hist-doc-spec">{{ rx.doctor?.speciality }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnosis block (unchanged) -->
+    <div class="dr-hist-diagnosis">
+      <div class="dr-hist-diag-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        Diagnosis
+      </div>
+      <div class="dr-hist-diag-value" [class.dr-hist-diag-empty]="!rx.diagnosis">
+        {{ rx.diagnosis || 'No diagnosis recorded' }}
+      </div>
+    </div>
+
+    <!-- ── AI Explanation block — NEW ── -->
+    @if (rx.aiExplanation) {
+      <div class="dr-hist-ai-explanation">
+        <div class="dr-hist-ai-label">
+          <!-- Sparkle / AI icon -->
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/>
+          </svg>
+          AI Explanation
+        </div>
+        <p class="dr-hist-ai-text">{{ rx.aiExplanation }}</p>
+        <span class="dr-hist-ai-badge">AI · For reference only</span>
+      </div>
+    }
+
+    <!-- Treatments list (unchanged) -->
+    <div class="dr-hist-treatments">
+      <div class="dr-hist-treatments-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+          <path d="M9 12h6M12 9v6"/>
+        </svg>
+        Medications ({{ rx.treatments.length }})
+      </div>
+      @for (t of rx.treatments; track t.id) {
+        <div class="dr-hist-treatment">
+          <div class="dr-hist-pill-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/>
+              <path d="M9 12h6M12 9v6"/>
+            </svg>
           </div>
-        }
+          <div class="dr-hist-treatment-info">
+            <span class="dr-hist-med-name">{{ t.medicationName }}</span>
+            <span class="dr-hist-med-notes">{{ t.notes }}</span>
+          </div>
+          <span class="dr-hist-treatment-id">#{{ t.id }}</span>
+        </div>
+      }
+    </div>
+
+  </div>
+}
       </div>
     </div>
     <div class="dr-footer">

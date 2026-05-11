@@ -888,3 +888,70 @@
     opacity: 1;
   }
 }
+/* ══════════════════════════════════════════════════════════════
+   AI EXPLANATION BLOCK
+   Paste into booking.component.css after .dr-hist-diag-empty
+═══════════════════════════════════════════════════════════════ */
+
+/* Container — sits between diagnosis and treatments */
+.dr-hist-ai-explanation {
+  padding: 12px 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.07) 0%,
+    rgba(139, 92, 246, 0.07) 100%
+  );
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle left accent bar */
+.dr-hist-ai-explanation::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #3B82F6 0%, #8B5CF6 100%);
+}
+
+/* Label row */
+.dr-hist-ai-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #60A5FA;       /* blue-text — matches app system */
+}
+
+.dr-hist-ai-label svg {
+  stroke: #60A5FA;
+  flex-shrink: 0;
+}
+
+/* Explanation text */
+.dr-hist-ai-text {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0;
+  padding-left: 2px;
+}
+
+/* Disclaimer badge */
+.dr-hist-ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 2px;
+}
