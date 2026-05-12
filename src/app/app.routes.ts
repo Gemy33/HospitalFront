@@ -27,6 +27,7 @@ import { authGuard } from '../Core/guards/auth.guard';
 import { DoctorChatComponent } from '../Components/doctor-chat/doctor-chat.component';
 
 import { NotFoundComponent } from '../Components/not-found/not-found.component';
+import { AiSymptomChecker } from '../Components/Patient/ai-symptom-checker/ai-symptom-checker.component';
 
 
 
@@ -51,6 +52,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'profile', component: ProfileComponent },
+      {path:'ai',component:AiSymptomChecker},
       { path: 'prescription', component: PrescriptionsComponent },
       { path: 'pharmacies', component: PharmacyComponent },
       { path: "chat", component: ChatComponent },
