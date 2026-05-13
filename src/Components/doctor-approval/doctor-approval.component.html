@@ -15,11 +15,9 @@
     </div>
 
     <nav class="ad-sidenav">
-      <button
-        class="ad-nav-item"
-        [class.ad-nav-item--active]="activeTab() === 'overview'"
-        (click)="setTab('overview')"
-      >
+      <button class="ad-nav-item"
+              [class.ad-nav-item--active]="activeTab() === 'overview'"
+              (click)="setTab('overview')">
         <span class="ad-nav-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="1.8" stroke-linecap="round" width="18" height="18">
@@ -32,17 +30,14 @@
         <span class="ad-nav-label">Overview</span>
       </button>
 
-      <button
-        class="ad-nav-item"
-        [class.ad-nav-item--active]="activeTab() === 'doctors'"
-        (click)="setTab('doctors')"
-      >
+      <button class="ad-nav-item"
+              [class.ad-nav-item--active]="activeTab() === 'doctors'"
+              (click)="setTab('doctors')">
         <span class="ad-nav-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="1.8" stroke-linecap="round" width="18" height="18">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
         </span>
         <span class="ad-nav-label">Pending Doctors</span>
@@ -51,11 +46,9 @@
         </span>
       </button>
 
-      <button
-        class="ad-nav-item"
-        [class.ad-nav-item--active]="activeTab() === 'admins'"
-        (click)="setTab('admins')"
-      >
+      <button class="ad-nav-item"
+              [class.ad-nav-item--active]="activeTab() === 'admins'"
+              (click)="setTab('admins')">
         <span class="ad-nav-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="1.8" stroke-linecap="round" width="18" height="18">
@@ -74,8 +67,10 @@
     <div class="ad-page" *ngIf="activeTab() === 'overview'">
 
       <div class="ad-page-header">
-        <h1 class="ad-page-title">Dashboard Overview</h1>
-        <p class="ad-page-sub">System summary at a glance</p>
+        <div>
+          <h1 class="ad-page-title">Dashboard Overview</h1>
+          <p class="ad-page-sub">System summary at a glance</p>
+        </div>
       </div>
 
       <!-- Stat cards -->
@@ -91,13 +86,29 @@
             <span class="ad-stat-card-val">{{ stats().totalAdmins }}</span>
             <span class="ad-stat-card-lbl">Total Admins</span>
           </div>
-          <div class="ad-stat-card-trend">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2" width="14" height="14">
-              <path d="M3 3h18M3 9h18M3 15h18M3 21h18"/>
-            </svg>
-          </div>
         </div>
+            <div class="ad-stat-card ad-stat-card--purple">
+      
+  <div class="ad-stat-card-body">
+    <span class="ad-stat-card-val">
+      {{ 33 }}
+    </span>
+    <span class="ad-stat-card-lbl">
+      Total Doctors
+    </span>
+  </div>
+</div>
+
+<div class="ad-stat-card ad-stat-card--pink">
+  <div class="ad-stat-card-body">
+    <span class="ad-stat-card-val">
+      {{ 14 }}
+    </span>
+    <span class="ad-stat-card-lbl">
+      Total Patients
+    </span>
+  </div>
+</div>
 
         <div class="ad-stat-card ad-stat-card--amber">
           <div class="ad-stat-card-icon">
@@ -111,8 +122,7 @@
             <span class="ad-stat-card-val">{{ stats().pendingCount }}</span>
             <span class="ad-stat-card-lbl">Pending Approvals</span>
           </div>
-          <div class="ad-stat-card-trend ad-stat-card-trend--warn"
-               *ngIf="stats().pendingCount > 0">
+          <div class="ad-stat-card-trend--warn" *ngIf="stats().pendingCount > 0">
             Needs attention
           </div>
         </div>
@@ -125,11 +135,94 @@
             </svg>
           </div>
           <div class="ad-stat-card-body">
-            <span class="ad-stat-card-val">Active</span>
+            <span class="ad-stat-card-val">Online</span>
             <span class="ad-stat-card-lbl">System Status</span>
           </div>
-          <div class="ad-stat-card-trend ad-stat-card-trend--ok">Online</div>
         </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="ad-charts-row">
+
+        <!-- Donut chart — Admin gender split -->
+        <div class="ad-chart-card">
+          <div class="ad-chart-head">
+            <span class="ad-chart-title">Admin Gender Split</span>
+            <span class="ad-chart-sub">{{ stats().totalAdmins }} total</span>
+          </div>
+
+          <div class="ad-donut-wrap">
+            <svg viewBox="0 0 100 100" width="140" height="140"
+                 style="transform: rotate(-90deg)">
+              <!-- Background ring -->
+              <circle cx="50" cy="50" r="40"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.05)"
+                      stroke-width="14"/>
+              <!-- Male arc -->
+              <circle cx="50" cy="50" r="40"
+                      fill="none"
+                      stroke="#3b9eff"
+                      stroke-width="14"
+                      stroke-linecap="round"
+                      [attr.stroke-dasharray]="getDonutDash(getMalePercent())"
+                      stroke-dashoffset="0"
+                      class="ad-donut-arc"/>
+              <!-- Female arc -->
+              <circle cx="50" cy="50" r="40"
+                      fill="none"
+                      stroke="#ff80b5"
+                      stroke-width="14"
+                      stroke-linecap="round"
+                      [attr.stroke-dasharray]="getDonutDash(getFemalePercent())"
+                      [attr.stroke-dashoffset]="'-' + getDonutDash(getMalePercent()).split(' ')[0]"
+                      class="ad-donut-arc"/>
+            </svg>
+            <div class="ad-donut-center">
+              <span class="ad-donut-val">{{ stats().totalAdmins }}</span>
+              <span class="ad-donut-lbl">Admins</span>
+            </div>
+          </div>
+
+          <div class="ad-chart-legend">
+            <div class="ad-legend-item">
+              <span class="ad-legend-dot" style="background:#3b9eff"></span>
+              <span>Male</span>
+              <span class="ad-legend-val">{{ genderChartData().male }} ({{ getMalePercent() }}%)</span>
+            </div>
+            <div class="ad-legend-item">
+              <span class="ad-legend-dot" style="background:#ff80b5"></span>
+              <span>Female</span>
+              <span class="ad-legend-val">{{ genderChartData().female }} ({{ getFemalePercent() }}%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar chart — Pending doctors by speciality -->
+        <div class="ad-chart-card ad-chart-card--wide">
+          <div class="ad-chart-head">
+            <span class="ad-chart-title">Pending by Speciality</span>
+            <span class="ad-chart-sub">{{ stats().pendingCount }} doctors pending</span>
+          </div>
+
+          <div class="ad-bar-chart" *ngIf="doctorSpecialityData().length > 0">
+            <div class="ad-bar-row"
+                 *ngFor="let item of doctorSpecialityData()">
+              <span class="ad-bar-label">{{ item.name }}</span>
+              <div class="ad-bar-track">
+                <div class="ad-bar-fill"
+                     [style.width]="getBarWidth(item.count, getMaxSpecCount())">
+                </div>
+              </div>
+              <span class="ad-bar-count">{{ item.count }}</span>
+            </div>
+          </div>
+
+          <div class="ad-chart-empty" *ngIf="doctorSpecialityData().length === 0">
+            <p>No pending doctors</p>
+          </div>
+        </div>
+
       </div>
 
       <!-- Quick actions -->
@@ -160,7 +253,6 @@
           </button>
         </div>
       </div>
-
     </div>
 
     <!-- ══ PENDING DOCTORS ════════════════════════════════════ -->
@@ -174,15 +266,13 @@
         <button class="ad-refresh-btn" (click)="loadPendingDoctors()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" width="15" height="15">
-            <path d="M23 4v6h-6"/>
-            <path d="M1 20v-6h6"/>
+            <path d="M23 4v6h-6M1 20v-6h6"/>
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
           Refresh
         </button>
       </div>
 
-      <!-- Search -->
       <div class="ad-search-wrap">
         <svg class="ad-search-ico" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -190,29 +280,30 @@
           <circle cx="11" cy="11" r="7"/>
           <path d="m21 21-4.35-4.35"/>
         </svg>
-        <input
-          class="ad-input"
-          type="text"
-          placeholder="Search by name or speciality…"
-          [value]="doctorSearch()"
-          (input)="doctorSearch.set($any($event.target).value)"
-        />
+        <input class="ad-input" type="text"
+               placeholder="Search by name or speciality…"
+               [value]="doctorSearch()"
+               (input)="doctorSearch.set($any($event.target).value)"/>
       </div>
 
-      <!-- Loading -->
+      <!-- Error -->
+      <div class="ad-error-banner" *ngIf="errorDoctors()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" width="14" height="14">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4M12 16h.01"/>
+        </svg>
+        {{ errorDoctors() }}
+        <button (click)="errorDoctors.set(null)">✕</button>
+      </div>
+
       <div class="ad-loading" *ngIf="loadingDoctors()">
         <div class="ad-spinner"><span></span><span></span><span></span></div>
         <p>Loading pending doctors…</p>
       </div>
 
-      <!-- Error -->
-      <div class="ad-error" *ngIf="errorDoctors() && !loadingDoctors()">
-        <p>{{ errorDoctors() }}</p>
-        <button class="ad-btn-outline" (click)="loadPendingDoctors()">Retry</button>
-      </div>
-
-      <!-- Empty -->
-      <div class="ad-empty" *ngIf="!loadingDoctors() && !errorDoctors() && filteredDoctors().length === 0">
+      <div class="ad-empty"
+           *ngIf="!loadingDoctors() && filteredDoctors().length === 0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.3" stroke-linecap="round" width="50" height="50">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -221,20 +312,17 @@
         <p>No pending doctors found.</p>
       </div>
 
-      <!-- Doctor cards -->
-      <div class="ad-grid" *ngIf="!loadingDoctors() && !errorDoctors()">
-        <div
-          class="ad-doctor-card"
-          *ngFor="let doc of filteredDoctors(); let i = index"
-          [style.--ci]="i"
-        >
+      <div class="ad-grid" *ngIf="!loadingDoctors()">
+        <div class="ad-doctor-card"
+             *ngFor="let doc of filteredDoctors(); let i = index"
+             [style.--ci]="i">
           <div class="ad-doctor-head">
             <div class="ad-doctor-avatar">{{ getInitials(doc.name || 'D') }}</div>
             <div class="ad-doctor-meta">
               <span class="ad-doctor-name">{{ doc.name || 'Unknown' }}</span>
               <span class="ad-doctor-spec">{{ doc.speciality || '—' }}</span>
               <span class="ad-doctor-exp" *ngIf="doc.yearsOfExperience">
-                {{ doc.yearsOfExperience }} yrs experience
+                {{ doc.yearsOfExperience }} yrs
               </span>
             </div>
             <span class="ad-pending-chip">Pending</span>
@@ -243,33 +331,17 @@
           <p class="ad-doctor-bio" *ngIf="doc.bio">{{ doc.bio }}</p>
 
           <div class="ad-doctor-facts">
-            <span class="ad-fact">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.8" stroke-linecap="round" width="12" height="12">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              {{ genderLabel(doc.gender) }}
-            </span>
-            <span class="ad-fact" *ngIf="doc.phone">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   stroke-width="1.8" stroke-linecap="round" width="12" height="12">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07
-                         19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1
-                         4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0
-                         1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1
-                         2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-              </svg>
-              {{ doc.phone }}
-            </span>
+            <span class="ad-fact">{{ genderIcon(doc.gender) }} {{ genderLabel(doc.gender) }}</span>
+            <span class="ad-fact" *ngIf="doc.phone">📞 {{ doc.phone }}</span>
           </div>
 
-          <div class="ad-doctor-actions">
-            <button
-              class="ad-btn-approve"
-              [disabled]="approvingId() === doc.id"
-              (click)="approveDoctor(doc.id)"
-            >
+          <div class="ad-doctor-actions" >
+            <button class="ad-btn-approve"
+            (click)="openDoctorDetails(doc.id)"
+                    [disabled]="approvingId() === doc.id"
+                   (click)="approveDoctor(doc.id); $event.stopPropagation()"
+                    
+                    >
               <span *ngIf="approvingId() !== doc.id">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2.2" stroke-linecap="round" width="14" height="14">
@@ -286,7 +358,7 @@
       </div>
     </div>
 
-    <!-- ══ ADMINS ══════════════════════════════════════════════ -->
+    <!-- ══ ADMINS ═════════════════════════════════════════════ -->
     <div class="ad-page" *ngIf="activeTab() === 'admins'">
 
       <div class="ad-page-header">
@@ -304,7 +376,17 @@
         </button>
       </div>
 
-      <!-- Search -->
+      <!-- Error banner -->
+      <div class="ad-error-banner" *ngIf="errorAdmins()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" width="14" height="14">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4M12 16h.01"/>
+        </svg>
+        {{ errorAdmins() }}
+        <button (click)="errorAdmins.set(null)">✕</button>
+      </div>
+
       <div class="ad-search-wrap">
         <svg class="ad-search-ico" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -312,30 +394,19 @@
           <circle cx="11" cy="11" r="7"/>
           <path d="m21 21-4.35-4.35"/>
         </svg>
-        <input
-          class="ad-input"
-          type="text"
-          placeholder="Search admins…"
-          [value]="adminSearch()"
-          (input)="adminSearch.set($any($event.target).value)"
-        />
+        <input class="ad-input" type="text"
+               placeholder="Search admins…"
+               [value]="adminSearch()"
+               (input)="adminSearch.set($any($event.target).value)"/>
       </div>
 
-      <!-- Loading -->
       <div class="ad-loading" *ngIf="loadingAdmins()">
         <div class="ad-spinner"><span></span><span></span><span></span></div>
         <p>Loading admins…</p>
       </div>
 
-      <!-- Error -->
-      <div class="ad-error" *ngIf="errorAdmins() && !loadingAdmins()">
-        <p>{{ errorAdmins() }}</p>
-        <button class="ad-btn-outline" (click)="loadAdmins()">Retry</button>
-      </div>
-
-      <!-- Empty -->
       <div class="ad-empty"
-           *ngIf="!loadingAdmins() && !errorAdmins() && filteredAdmins().length === 0">
+           *ngIf="!loadingAdmins() && filteredAdmins().length === 0">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.3" stroke-linecap="round" width="50" height="50">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -343,9 +414,8 @@
         <p>No admins found.</p>
       </div>
 
-      <!-- Admin table -->
       <div class="ad-table-wrap"
-           *ngIf="!loadingAdmins() && !errorAdmins() && filteredAdmins().length > 0">
+           *ngIf="!loadingAdmins() && filteredAdmins().length > 0">
         <table class="ad-table">
           <thead>
             <tr>
@@ -357,10 +427,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr
-              *ngFor="let admin of filteredAdmins(); let i = index"
-              [style.--ri]="i"
-            >
+            <tr *ngFor="let admin of filteredAdmins(); let i = index"
+                [style.--ri]="i">
               <td>
                 <div class="ad-table-user">
                   <div class="ad-table-avatar">{{ getInitials(admin.name) }}</div>
@@ -381,26 +449,23 @@
                           (click)="openEdit(admin)" title="Edit">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" width="14" height="14">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14
-                               a2 2 0 0 0 2-2v-7"/>
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                     </svg>
                   </button>
-                  <button
-                    class="ad-icon-btn ad-icon-btn--delete"
-                    [disabled]="deletingId() === admin.id"
-                    (click)="deleteAdmin(admin.id!)"
-                    title="Delete"
-                  >
+                  <button class="ad-icon-btn ad-icon-btn--delete"
+                          [disabled]="deletingId() === admin.id"
+                          (click)="deleteAdmin(admin.id!)"
+                          title="Delete">
                     <svg *ngIf="deletingId() !== admin.id"
                          viewBox="0 0 24 24" fill="none" stroke="currentColor"
                          stroke-width="2" stroke-linecap="round" width="14" height="14">
                       <polyline points="3 6 5 6 21 6"/>
                       <path d="M19 6l-1 14H6L5 6"/>
-                      <path d="M10 11v6M14 11v6"/>
-                      <path d="M9 6V4h6v2"/>
+                      <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
                     </svg>
-                    <div class="ad-micro-spinner" *ngIf="deletingId() === admin.id"></div>
+                    <div class="ad-micro-spinner"
+                         *ngIf="deletingId() === admin.id"></div>
                   </button>
                 </div>
               </td>
@@ -409,6 +474,7 @@
         </table>
       </div>
     </div>
+
 
   </main>
 </div>
@@ -430,79 +496,49 @@
     </div>
 
     <div class="ad-modal-body">
+      <div class="ad-modal-err" *ngIf="errorModal()">{{ errorModal() }}</div>
 
-      <!-- Error -->
-      <div class="ad-modal-err" *ngIf="errorModal()">
-        {{ errorModal() }}
-      </div>
-
-      <!-- Name -->
       <div class="ad-form-group">
         <label class="ad-label">Full Name *</label>
-        <input
-          class="ad-input"
-          type="text"
-          placeholder="Enter full name"
-          [value]="modalForm().name"
-          (input)="updateForm('name', $any($event.target).value)"
-        />
+        <input class="ad-input" type="text" placeholder="Enter full name"
+               [value]="modalForm().name"
+               (input)="updateForm('name', $any($event.target).value)"/>
       </div>
 
-      <!-- Email -->
       <div class="ad-form-group">
         <label class="ad-label">Email Address *</label>
-        <input
-          class="ad-input"
-          type="email"
-          placeholder="admin@example.com"
-          [value]="modalForm().email"
-          (input)="updateForm('email', $any($event.target).value)"
-        />
+        <input class="ad-input" type="email" placeholder="admin@example.com"
+               [value]="modalForm().email"
+               (input)="updateForm('email', $any($event.target).value)"/>
       </div>
 
-      <!-- Password -->
       <div class="ad-form-group">
         <label class="ad-label">
           Password {{ modalMode() === 'edit' ? '(leave blank to keep current)' : '*' }}
         </label>
-        <input
-          class="ad-input"
-          type="password"
-          placeholder="Enter a secure password"
-          [value]="modalForm().password"
-          (input)="updateForm('password', $any($event.target).value)"
-        />
+        <input class="ad-input" type="password" placeholder="••••••••"
+               [value]="modalForm().password"
+               (input)="updateForm('password', $any($event.target).value)"/>
       </div>
 
-      <!-- Phone -->
       <div class="ad-form-group">
         <label class="ad-label">Phone Number</label>
-        <input
-          class="ad-input"
-          type="tel"
-          placeholder="+20 xxx xxx xxxx"
-          [value]="modalForm().phone"
-          (input)="updateForm('phone', $any($event.target).value)"
-        />
+        <input class="ad-input" type="tel" placeholder="+20 xxx xxx xxxx"
+               [value]="modalForm().phone"
+               (input)="updateForm('phone', $any($event.target).value)"/>
       </div>
 
-      <!-- Gender -->
       <div class="ad-form-group">
         <label class="ad-label">Gender</label>
         <div class="ad-gender-toggle">
-          <button
-            class="ad-gender-opt"
-            [class.ad-gender-opt--active]="modalForm().gender === Gender.Male"
-            (click)="updateForm('gender', Gender.Male)"
-          >♂ Male</button>
-          <button
-            class="ad-gender-opt"
-            [class.ad-gender-opt--active]="modalForm().gender === Gender.Female"
-            (click)="updateForm('gender', Gender.Female)"
-          >♀ Female</button>
+          <button class="ad-gender-opt"
+                  [class.ad-gender-opt--active]="modalForm().gender === Gender.Male"
+                  (click)="updateForm('gender', Gender.Male)">♂ Male</button>
+          <button class="ad-gender-opt"
+                  [class.ad-gender-opt--active]="modalForm().gender === Gender.Female"
+                  (click)="updateForm('gender', Gender.Female)">♀ Female</button>
         </div>
       </div>
-
     </div>
 
     <div class="ad-modal-foot">
@@ -516,6 +552,5 @@
         </span>
       </button>
     </div>
-
   </div>
 </div>

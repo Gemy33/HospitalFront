@@ -1,69 +1,60 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Added this
+import { Component, computed, OnInit, signal, effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AddAdmin, AdminService, Doctor, Gender } from '../../Core/admin.service';
+
 type Tab = 'overview' | 'doctors' | 'admins';
 type ModalMode = 'add' | 'edit';
+
 @Component({
   selector: 'app-doctor-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule], // Added CommonModule here
+  imports: [CommonModule, FormsModule],
   templateUrl: './doctor-approval.component.html',
   styleUrls: ['./doctor-approval.component.scss']
 })
-
-
-
-
-
-
-
-
-
 export class DoctorApprovalComponent implements OnInit {
 
-  // ── Tabs ────────────────────────────────────────────────────
   activeTab = signal<Tab>('overview');
 
-  // ── Data ────────────────────────────────────────────────────
-  admins          = signal([] as AddAdmin[]);
-  pendingDoctors  = signal([] as Doctor[]);
+  admins         = signal<AddAdmin[]>([]);
+  pendingDoctors = signal<Doctor[]>([]);
+  selectedDoctor = signal<Doctor | null>(null);
 
-  // ── Loading states ──────────────────────────────────────────
-  loadingAdmins   = signal(false);
-  loadingDoctors  = signal(false);
-  savingAdmin     = signal(false);
-  approvingId     = signal<number | null>(null);
-  deletingId      = signal<number | null>(null);
+showDoctorModal = signal(false);
 
-  // ── Errors ──────────────────────────────────────────────────
-  errorAdmins     = signal<string | null>(null);
-  errorDoctors    = signal<string | null>(null);
-  errorModal      = signal<string | null>(null);
+loadingDoctorDetails = signal(false);
 
-  // ── Modal ───────────────────────────────────────────────────
-  showModal   = signal(false);
-  modalMode   = signal<ModalMode>('add');
-  modalForm   = signal<AddAdmin>({
+  loadingAdmins  = signal(false);
+  loadingDoctors = signal(false);
+  savingAdmin    = signal(false);
+  approvingId    = signal<number | null>(null);
+  deletingId     = signal<number | null>(null);
+
+  errorAdmins    = signal<string | null>(null);
+  errorDoctors   = signal<string | null>(null);
+  errorModal     = signal<string | null>(null);
+
+  showModal  = signal(false);
+  modalMode  = signal<ModalMode>('add');
+  modalForm  = signal<AddAdmin>({
     name: '', email: '', password: '', phone: '', gender: Gender.Male
   });
 
-  // ── Search ──────────────────────────────────────────────────
   adminSearch  = signal('');
   doctorSearch = signal('');
 
   filteredAdmins = computed(() => {
-    const term = this.adminSearch().toLowerCase();
+    const term = this.adminSearch().toLowerCase().trim();
     return this.admins().filter(a =>
       !term ||
-
       a.name.toLowerCase().includes(term) ||
       a.email.toLowerCase().includes(term)
     );
   });
 
   filteredDoctors = computed(() => {
-    const term = this.doctorSearch().toLowerCase();
+    const term = this.doctorSearch().toLowerCase().trim();
     return this.pendingDoctors().filter(d =>
       !term ||
       (d.name ?? '').toLowerCase().includes(term) ||
@@ -71,11 +62,59 @@ export class DoctorApprovalComponent implements OnInit {
     );
   });
 
-  // ── Stats ───────────────────────────────────────────────────
   stats = computed(() => ({
-    totalAdmins:   this.admins().length,
-    pendingCount:  this.pendingDoctors().length,
+    totalAdmins:  this.admins().length,
+    pendingCount: this.pendingDoctors().length,
   }));
+
+  closeDoctorModal(): void {
+
+  this.showDoctorModal.set(false);
+
+  this.selectedDoctor.set(null);
+}
+  openDoctorDetails(id: number): void {
+
+  this.loadingDoctorDetails.set(true);
+
+  this.adminSvc.getDoctor(id).subscribe({
+
+    next: (doctor) => {
+
+      this.selectedDoctor.set(doctor);
+
+      this.showDoctorModal.set(true);
+
+      this.loadingDoctorDetails.set(false);
+    },
+
+    error: () => {
+
+      this.loadingDoctorDetails.set(false);
+
+      this.errorDoctors.set(
+        'Failed to load doctor details.'
+      );
+    }
+
+  });
+
+}
+  // ── Chart data ───────────────────────────────────────────────
+  genderChartData = computed(() => {
+    const male   = this.admins().filter(a => a.gender === Gender.Male).length;
+    const female = this.admins().filter(a => a.gender === Gender.Female).length;
+    return { male, female, total: male + female };
+  });
+
+  doctorSpecialityData = computed(() => {
+    const map = new Map<string, number>();
+    this.pendingDoctors().forEach(d => {
+      const spec = d.speciality ?? 'Unknown';
+      map.set(spec, (map.get(spec) ?? 0) + 1);
+    });
+    return Array.from(map.entries()).map(([name, count]) => ({ name, count }));
+  });
 
   readonly Gender = Gender;
 
@@ -86,14 +125,20 @@ export class DoctorApprovalComponent implements OnInit {
     this.loadPendingDoctors();
   }
 
-  // ── Loaders ─────────────────────────────────────────────────
+  // ── Loaders ──────────────────────────────────────────────────
 
   loadAdmins(): void {
     this.loadingAdmins.set(true);
     this.errorAdmins.set(null);
     this.adminSvc.getAllAdmins().subscribe({
-      next: data  => { this.admins.set(data); this.loadingAdmins.set(false); },
-      error: ()   => { this.errorAdmins.set('Failed to load admins.'); this.loadingAdmins.set(false); },
+      next: (data: AddAdmin[]) => {
+        this.admins.set(Array.isArray(data) ? data : []);
+        this.loadingAdmins.set(false);
+      },
+      error: () => {
+        this.errorAdmins.set('Failed to load admins.');
+        this.loadingAdmins.set(false);
+      },
     });
   }
 
@@ -101,34 +146,42 @@ export class DoctorApprovalComponent implements OnInit {
     this.loadingDoctors.set(true);
     this.errorDoctors.set(null);
     this.adminSvc.getPendingDoctors().subscribe({
-      next: data  => { this.pendingDoctors.set(data); this.loadingDoctors.set(false); },
-      error: ()   => { this.errorDoctors.set('Failed to load pending doctors.'); this.loadingDoctors.set(false); },
+      next: (data: Doctor[]) => {
+        this.pendingDoctors.set(Array.isArray(data) ? data : []);
+        this.loadingDoctors.set(false);
+      },
+      error: () => {
+        this.errorDoctors.set('Failed to load pending doctors.');
+        this.loadingDoctors.set(false);
+      },
     });
   }
-
-  // ── Tab ─────────────────────────────────────────────────────
 
   setTab(tab: Tab): void { this.activeTab.set(tab); }
 
-  // ── Approve doctor ──────────────────────────────────────────
+  // ── Approve ──────────────────────────────────────────────────
 
   approveDoctor(id: number): void {
-    console.log(id,"docId to approv");
-    
+      const confirmed = confirm(
+    'Are you sure you want to approve this doctor?'
+  );
+
+  if (!confirmed) return;
     this.approvingId.set(id);
     this.adminSvc.approveDoctor(id).subscribe({
-      next: (res) => {
-        console.log(res , "approve doctor");
-        
-        // this.pendingDoctors().update(list => list.filter(d => d.id !== id));
-        this.loadPendingDoctors();
+      next: () => {
+        // ✅ Remove from list immediately — no reload needed
+        this.pendingDoctors.update(list => list.filter(d => d.id !== id));
         this.approvingId.set(null);
       },
-      error: () => { this.approvingId.set(null); },
+      error: () => {
+        this.approvingId.set(null);
+        this.errorDoctors.set('Failed to approve doctor.');
+      },
     });
   }
 
-  // ── Admin modal ─────────────────────────────────────────────
+  // ── Modal ────────────────────────────────────────────────────
 
   openAdd(): void {
     this.modalForm.set({ name: '', email: '', password: '', phone: '', gender: Gender.Male });
@@ -144,7 +197,10 @@ export class DoctorApprovalComponent implements OnInit {
     this.showModal.set(true);
   }
 
-  closeModal(): void { this.showModal.set(false); }
+  closeModal(): void {
+    this.showModal.set(false);
+    this.errorModal.set(null);
+  }
 
   updateForm(field: keyof AddAdmin, value: any): void {
     this.modalForm.update(f => ({ ...f, [field]: value }));
@@ -152,7 +208,7 @@ export class DoctorApprovalComponent implements OnInit {
 
   saveAdmin(): void {
     const form = this.modalForm();
-    if (!form.name || !form.email) {
+    if (!form.name.trim() || !form.email.trim()) {
       this.errorModal.set('Name and email are required.');
       return;
     }
@@ -160,41 +216,96 @@ export class DoctorApprovalComponent implements OnInit {
     this.savingAdmin.set(true);
     this.errorModal.set(null);
 
-    const call = this.modalMode() === 'add'
-      ? this.adminSvc.addAdmin(form)
-      : this.adminSvc.updateAdmin(form);
-
-    call.subscribe({
-      next: () => {
-        this.savingAdmin.set(false);
-        this.showModal.set(false);
-        this.loadAdmins();
-      },
-      error: () => {
-        this.savingAdmin.set(false);
-        this.errorModal.set('Operation failed. Please try again.');
-      },
-    });
+    if (this.modalMode() === 'add') {
+      this.adminSvc.addAdmin(form).subscribe({
+        next: (created: any) => {
+          // ✅ Add new admin directly to list — no reload
+          const newAdmin: AddAdmin = {
+            ...form,
+            id: created?.id ?? Date.now(),
+          };
+          this.admins.update(list => [...list, newAdmin]);
+          this.savingAdmin.set(false);
+          this.showModal.set(false);
+        },
+        error: () => {
+          this.savingAdmin.set(false);
+          this.errorModal.set('Failed to create admin.');
+        },
+      });
+    } else {
+      this.adminSvc.updateAdmin(form).subscribe({
+        next: () => {
+          // ✅ Update admin in list directly — no reload
+          this.admins.update(list =>
+            list.map(a => a.id === form.id ? { ...form } : a)
+          );
+          this.savingAdmin.set(false);
+          this.showModal.set(false);
+        },
+        error: () => {
+          this.savingAdmin.set(false);
+          this.errorModal.set('Failed to update admin.');
+        },
+      });
+    }
   }
 
   deleteAdmin(id: number): void {
+      const confirmed = confirm(
+    'Are you sure you want to delete this admin?'
+  );
+
+  if (!confirmed) return;
+
     this.deletingId.set(id);
     this.adminSvc.deleteAdmin(id).subscribe({
       next: () => {
-        // this.admins.update(list => list.filter(a => a.id !== id));
-        this.loadAdmins();
+        // ✅ Remove from list directly — no reload
+        this.admins.update(list => list.filter(a => a.id !== id));
         this.deletingId.set(null);
       },
-      error: () => { this.deletingId.set(null); },
+      error: () => {
+        this.deletingId.set(null);
+        this.errorAdmins.set('Failed to delete admin.');
+      },
     });
   }
 
-  // ── Helpers ─────────────────────────────────────────────────
+  // ── Helpers ──────────────────────────────────────────────────
 
   getInitials(name: string): string {
+    if (!name?.trim()) return '?';
     return name.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join('');
   }
 
   genderLabel(g: Gender): string { return g === Gender.Female ? 'Female' : 'Male'; }
-  genderIcon(g: Gender):  string { return g === Gender.Female ? '♀' : '♂'; }
+  genderIcon(g: Gender): string  { return g === Gender.Female ? '♀' : '♂'; }
+
+  // ── Chart helpers ────────────────────────────────────────────
+
+  getBarWidth(count: number, max: number): string {
+    if (max === 0) return '0%';
+    return `${Math.round((count / max) * 100)}%`;
+  }
+
+  getMaxSpecCount(): number {
+    const data = this.doctorSpecialityData();
+    return data.length ? Math.max(...data.map(d => d.count)) : 1;
+  }
+
+  getMalePercent(): number {
+    const d = this.genderChartData();
+    return d.total === 0 ? 0 : Math.round((d.male / d.total) * 100);
+  }
+
+  getFemalePercent(): number {
+    const d = this.genderChartData();
+    return d.total === 0 ? 0 : Math.round((d.female / d.total) * 100);
+  }
+
+  getDonutDash(percent: number): string {
+    const c = 2 * Math.PI * 40; // circumference for r=40
+    return `${(percent / 100) * c} ${c}`;
+  }
 }

@@ -70,7 +70,7 @@ export class AdminService {
   // 🩺 DOCTOR MANAGEMENT
   // =========================
 
-  // Get All Doctor
+  // Get  Doctor
   getDoctor(id:number): Observable<Doctor> {
     return this.http.get<Doctor>(`${this.baseUrl}/Doctor/${id}`);
   }

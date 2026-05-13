@@ -243,25 +243,43 @@ loadingPrescription = false;
     }
   });
 }
+  findDoctor(): void {
+  this.router.navigate(['/patient/find-doctors']);
+}
 closeSidebar(): void {
   this.showSidebar = false;
 }
   startChat(apt: IAppointment): void {
-  this.chatSvc.createConversation(
-    apt.patientId,
-    apt.doctorAvailability.doctorId,
-    apt.id
-  ).subscribe({
-    next: (conv) => {
-      // Navigate to chat after conversation created
-      this.router.navigate(['/patient/chat']);
-    },
-    error: (err) => {
-      // Conversation might already exist — just navigate
-      this.router.navigate(['/patient/chat']);
-    }
-  });}
-  findDoctor(): void {
-  this.router.navigate(['/patient/find-doctor']);
-}
+
+    this.chatSvc.getConversations(this.patientId).subscribe({
+      next: (convs) => {
+        const existing = convs.find(c => c.appointmentId === apt.id);
+        if (existing) {
+          // Conversation already exists — just navigate
+          this.router.navigate(['/patient/chat']);
+          return;
+        }
+        else{
+          this.chatSvc.createConversation(
+            apt.patientId,
+            apt.doctorAvailability.doctorId,
+            apt.id
+          ).subscribe({
+            next: (conv) => {
+              // Navigate to chat after conversation created
+              this.router.navigate(['/patient/chat']);
+            },
+            error: (err) => {
+              // Conversation might already exist — just navigate
+              this.router.navigate(['/patient/chat']);
+            }
+          });
+          
+        }
+    }});
+
+    
+     
+  }
+
 }
