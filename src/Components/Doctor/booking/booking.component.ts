@@ -251,6 +251,39 @@ export class BookingComponent implements OnInit {
     this.currentMeeting   = null;
     this.linkCopied       = false;
   }
+  // #############################333333 summery
+   isSummaryOpen: boolean = false;
+
+  summaryData = {
+    summary: `Patient has a history of upper respiratory tract infections with mild fever and cough.
+Common medicines prescribed include Paracetamol, Vitamin C, and Cough Syrup.
+Chronic conditions include some not good things and bad things.
+Follow medication instructions accordingly.`
+  };
+
+  openSummary(patientid:number) {
+    this.isSummaryOpen = true;
+    
+
+    this.http.get<any>(
+      `http://localhost:5038/api/AiPatientSummary/${patientid}`
+    ).subscribe({
+      next: (res) => {
+        console.log(res);
+        this.summaryData = res;
+       
+      },
+      error: (err) => {
+        console.log(err);
+        
+      }
+    });
+  }
+
+  closeSummary() {
+    this.isSummaryOpen = false;
+  }
+  // ####################################
 
   // ── Prescription drawer ───────────────────────────────────────────────────
 
