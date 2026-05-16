@@ -1,6 +1,7 @@
 /* =============================================
    Doctor Sidebar — Clean & Compact Version
-   LIGHT THEME
+   LIGHT THEME — MediLink
+   Main Accent: #2BC4B2
    ============================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -8,32 +9,39 @@
 :host {
   --sidebar-width: 248px;
   --sidebar-collapsed-width: 68px;
-  
-  /* Light Theme Palette */
-  --bg:             #F8FAFC;
+
+  /* ── Light Palette ── */
+  --bg:             #F4FBFA;
   --bg-surface:     #FFFFFF;
-  --bg-hover:       #F1F5F9;
-  --bg-active:      rgba(59,130,246,0.08);
-  
-  --accent:         #3B82F6;
-  --accent-soft:    rgba(59,130,246,0.12);
-  --accent-zoom:    #2563EB;
-  
+  --bg-hover:       #ECFFFC;
+  --bg-active:      rgba(43,196,178,0.10);
+
+  /* ── Accent ── */
+  --accent:         #2BC4B2;
+  --accent-soft:    rgba(43,196,178,0.12);
+  --accent-zoom:    #149C8D;
+
+  /* ── Text ── */
   --text-primary:   #0F172A;
-  --text-secondary:#475569;
+  --text-secondary: #475569;
   --text-muted:     #64748B;
-  --border:         #E2E8F0;
-  --border-accent:  rgba(59,130,246,0.25);
-  
+
+  /* ── Borders ── */
+  --border:         #D8F3EF;
+  --border-accent:  rgba(43,196,178,0.25);
+
   --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   --radius: 10px;
-  
+
   --font-brand: 'Syne', sans-serif;
   --font-body: 'DM Sans', sans-serif;
 
   display: block;
 }
 
+/* ─────────────────────────────
+   Sidebar Container
+───────────────────────────── */
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;
@@ -45,19 +53,32 @@
   transition: width var(--transition);
   overflow: hidden;
   font-family: var(--font-body);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 4px 0 20px rgba(15, 23, 42, 0.06);
 }
 
 .sidebar::before {
   content: '';
   position: absolute;
-  left: 0; top: 0; bottom: 0;
+  left: 0;
+  top: 0;
+  bottom: 0;
   width: 3px;
-  background: linear-gradient(to bottom, transparent 0%, #3B82F6 35%, #60A5FA 70%, transparent 100%);
-  opacity: 0.6;
+
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #2BC4B2 35%,
+    #67E8F9 70%,
+    transparent 100%
+  );
+
+  opacity: 0.7;
   z-index: 1;
 }
 
+/* ─────────────────────────────
+   Header
+───────────────────────────── */
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -67,29 +88,39 @@
   flex-shrink: 0;
 }
 
-.logo-wrap { 
-  display: flex; 
-  align-items: center; 
-  gap: 10px; 
-  flex-shrink: 0; 
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .logo-icon {
-  width: 36px; 
+  width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+
+  background: linear-gradient(
+    135deg,
+    #2BC4B2 0%,
+    #149C8D 100%
+  );
+
   border-radius: 9px;
-  display: flex; 
-  align-items: center; 
+
+  display: flex;
+  align-items: center;
   justify-content: center;
+
   color: #fff;
-  box-shadow: 0 0 12px rgba(59,130,246,0.3);
+
+  box-shadow: 0 0 14px rgba(43,196,178,0.28);
+
   flex-shrink: 0;
 }
 
 .logo-text {
   font-family: var(--font-brand);
-  font-size: 18px; 
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.3px;
@@ -97,127 +128,167 @@
 }
 
 .sidebar-header button {
-  width: 28px; 
+  width: 28px;
   height: 28px;
+
   border-radius: 7px;
+
   background: var(--bg-surface);
   border: 1px solid var(--border);
+
   color: var(--text-secondary);
-  display: flex; 
-  align-items: center; 
+
+  display: flex;
+  align-items: center;
   justify-content: center;
-  cursor: pointer; 
+
+  cursor: pointer;
   flex-shrink: 0;
+
   transition: all var(--transition);
 }
 
-.sidebar-header button:hover { 
-  background: var(--bg-hover); 
-  color: var(--text-primary); 
+.sidebar-header button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-accent);
 }
 
-/* Doctor Card */
+/* ─────────────────────────────
+   Doctor Card
+───────────────────────────── */
 .doctor-card {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
-  display: flex; 
-  align-items: center; 
+
+  display: flex;
+  align-items: center;
   gap: 12px;
+
   flex-shrink: 0;
 }
 
-.avatar-ring { 
-  position: relative; 
-  flex-shrink: 0; 
+.avatar-ring {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .avatar {
-  width: 44px; 
+  width: 44px;
   height: 44px;
+
   border-radius: 50%;
-  background: linear-gradient(135deg, #E0F2FE 0%, #DBEAFE 100%);
-  border: 2px solid #3B82F6;
-  display: flex; 
-  align-items: center; 
+
+  background: linear-gradient(
+    135deg,
+    #E6FFFB 0%,
+    #DDF8F4 100%
+  );
+
+  border: 2px solid var(--accent);
+
+  display: flex;
+  align-items: center;
   justify-content: center;
+
   overflow: hidden;
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+
+  box-shadow: 0 0 0 3px rgba(43,196,178,0.12);
 }
 
-.avatar img { 
-  width: 100%; 
-  height: 100%; 
-  object-fit: cover; 
-  border-radius: 50%; 
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .avatar span {
   font-family: var(--font-brand);
-  font-size: 14px; 
+  font-size: 14px;
   font-weight: 700;
-  color: #1E40AF;
+
+  color: #149C8D;
+
   letter-spacing: 0.5px;
 }
 
 .status-dot {
   position: absolute;
-  bottom: 1px; 
+  bottom: 1px;
   right: 1px;
-  width: 11px; 
+
+  width: 11px;
   height: 11px;
+
   border-radius: 50%;
+
   background: var(--text-muted);
+
   border: 2px solid var(--bg-surface);
+
   transition: background var(--transition);
 }
 
 .status-dot.online {
   background: #10B981;
-  box-shadow: 0 0 6px rgba(16,185,129,0.6);
+  box-shadow: 0 0 6px rgba(16,185,129,0.55);
 }
 
-.doctor-info { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 2px; 
-  min-width: 0; 
+.doctor-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .doctor-name {
-  font-size: 14px; 
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-  white-space: nowrap; 
-  overflow: hidden; 
+
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0; 
+
+  margin: 0;
   line-height: 1.3;
 }
 
 .doctor-specialty {
-  font-size: 11.5px; 
+  font-size: 11.5px;
   color: var(--text-secondary);
-  white-space: nowrap; 
-  overflow: hidden; 
+
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0; 
+
+  margin: 0;
   line-height: 1.3;
 }
 
 .badge-status {
-  display: inline-flex; 
+  display: inline-flex;
   align-items: center;
+
   margin-top: 5px;
   padding: 2px 9px;
+
   border-radius: 20px;
-  font-size: 10px; 
+
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.6px; 
+
+  letter-spacing: 0.6px;
   text-transform: uppercase;
-  background: #F1F5F9;
+
+  background: #F8FAFC;
   color: var(--text-muted);
+
   border: 1px solid var(--border);
+
   width: fit-content;
+
   transition: all var(--transition);
 }
 
@@ -227,107 +298,155 @@
   border: 1px solid #A7F3D0;
 }
 
-/* Navigation */
+/* ─────────────────────────────
+   Navigation
+───────────────────────────── */
 .sidebar-nav {
   flex: 1;
   padding: 8px;
-  display: flex; 
+
+  display: flex;
   flex-direction: column;
+
   overflow: hidden;
 }
 
 .nav-item {
-  display: flex; 
-  align-items: center; 
+  display: flex;
+  align-items: center;
   gap: 11px;
+
   padding: 9px 10px;
+
   border-radius: var(--radius);
+
   color: var(--text-secondary);
   text-decoration: none;
+
   font-size: 13.5px;
+
   margin-bottom: 3px;
+
   transition: all var(--transition);
+
   position: relative;
   cursor: pointer;
 }
 
-.nav-item:hover { 
-  background: var(--bg-hover); 
-  color: var(--text-primary); 
+.nav-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .nav-item.active {
   background: var(--bg-active);
   color: var(--accent);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .nav-item.active::after {
   content: '';
+
   position: absolute;
-  left: 0; 
+  left: 0;
   top: 50%;
+
   transform: translateY(-50%);
-  width: 3px; 
+
+  width: 3px;
   height: 55%;
+
   background: var(--accent);
+
   border-radius: 0 3px 3px 0;
 }
 
 .nav-icon {
-  width: 36px; 
+  width: 36px;
   height: 36px;
-  display: flex; 
-  align-items: center; 
+
+  display: flex;
+  align-items: center;
   justify-content: center;
-  border-radius: 8px; 
+
+  border-radius: 8px;
+
   flex-shrink: 0;
   color: inherit;
+
+  transition: all var(--transition);
 }
 
-.nav-label { 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
+.nav-item.active .nav-icon {
+  background: rgba(43,196,178,0.12);
 }
 
-/* Stats Strip */
+.nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─────────────────────────────
+   Stats Strip
+───────────────────────────── */
 .stats-strip {
   padding: 10px 12px;
+
   border-top: 1px solid var(--border);
+
   flex-shrink: 0;
-  display: flex; 
+
+  display: flex;
   gap: 6px;
 }
 
 .stat-chip {
   flex: 1;
+
   background: var(--bg-surface);
+
   border: 1px solid var(--border);
+
   border-radius: 8px;
+
   padding: 8px 6px;
-  display: flex; 
+
+  display: flex;
   flex-direction: column;
-  align-items: center; 
+  align-items: center;
   gap: 2px;
+
+  transition: all var(--transition);
+}
+
+.stat-chip:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-1px);
 }
 
 .stat-num {
-  font-size: 16px; 
+  font-size: 16px;
   font-weight: 700;
+
   color: var(--accent);
+
   font-family: var(--font-brand);
+
   line-height: 1;
 }
 
 .stat-lbl {
-  font-size: 10px; 
+  font-size: 10px;
   color: var(--text-muted);
-  text-transform: uppercase; 
+
+  text-transform: uppercase;
   letter-spacing: 0.4px;
 }
 
-/* Footer */
+/* ─────────────────────────────
+   Footer
+───────────────────────────── */
 .sidebar-footer {
   padding: 8px;
   border-top: 1px solid var(--border);
@@ -336,21 +455,29 @@
 
 .signout-btn {
   width: 100%;
+
   padding: 9px 10px;
+
   border-radius: var(--radius);
-  background: transparent; 
+
+  background: transparent;
   border: none;
+
   color: var(--text-muted);
+
   font-family: var(--font-body);
   font-size: 13.5px;
+
   cursor: pointer;
-  display: flex; 
-  align-items: center; 
+
+  display: flex;
+  align-items: center;
   gap: 11px;
+
   transition: all var(--transition);
 }
 
-.signout-btn:hover { 
-  background: rgba(239,68,68,0.08); 
-  color: #EF4444; 
+.signout-btn:hover {
+  background: rgba(239,68,68,0.08);
+  color: #EF4444;
 }
