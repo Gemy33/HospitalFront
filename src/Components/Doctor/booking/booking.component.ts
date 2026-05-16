@@ -7,6 +7,7 @@ import { HttpClient } from '@angular/common/http';
 import { DoctorService } from '../../../Core/doctor.service';
 import { IPrescription } from '../../../Core/Interfaces/Doctor/iprescription';
 import { AuthService } from '../../../Core/auth.service';
+import { ChatService } from '../../../Core/chat.service';
 
 // ══════════════════════════════════════════════════════════════════════════════
 // INTERFACES
@@ -82,6 +83,13 @@ export class BookingComponent implements OnInit {
   historyDrawerOpen    = false;
   historyLoading       = false;
   prescriptionHistory: IPrescription[] = [];
+  // chat
+    // Add these properties to the class
+chatDrawerOpen  = false;
+chatPatientName = '';
+chatLoading     = false;
+chatError       = '';
+activeChatRecord: BookingRecord | null = null;
 
   // ── Zoom / call state ─────────────────────────────────────────────────────
   callLoadingPatientId: number | null = null;  // which card is showing spinner
@@ -101,6 +109,7 @@ export class BookingComponent implements OnInit {
     private http:           HttpClient,
     private _doctorservice: DoctorService,
     private _authService:   AuthService,
+    private chatSvc:        ChatService
   ) {}
 
   ngOnInit(): void {
@@ -114,6 +123,50 @@ export class BookingComponent implements OnInit {
     });
   }
 
+  // chat
+
+
+// Add this method
+openChat(record: BookingRecord): void {
+  this.activeChatRecord = record;
+  this.chatPatientName  = this.getDisplayName(record);
+  this.chatLoading      = true;
+  this.chatError        = '';
+  this.chatDrawerOpen   = true;
+  document.body.style.overflow = 'hidden';
+
+  // Get doctorId from auth token
+  const doctorId = Number(this._authService.Id);
+
+  // Create or get existing conversation
+  this.chatSvc.createConversation(
+    record.patientId,
+    doctorId,
+    record.id          // appointmentId = booking id
+  ).subscribe({
+    next: (conv) => {
+      this.chatLoading = false;
+      // Navigate to doctor chat page with conversation pre-selected
+      this.router.navigate(['/doctor/chat'], {
+        queryParams: { conversationId: conv.id }
+      });
+      this.closeChatDrawer();
+    },
+    error: () => {
+      // Conversation may already exist — navigate anyway
+      this.chatLoading = false;
+      this.router.navigate(['/doctor/chat']);
+      this.closeChatDrawer();
+    }
+  });
+}
+
+closeChatDrawer(): void {
+  this.chatDrawerOpen = false;
+  document.body.style.overflow = '';
+  this.activeChatRecord = null;
+  this.chatError = '';
+}
   // ── Filter ────────────────────────────────────────────────────────────────
 
   setFilter(mode: FilterMode): void { this.filterMode = mode; this.applyFilter(); }

@@ -151,6 +151,26 @@
                 <span class="bp-act-label">Prescribe</span>
               </button>
 
+              
+              <!-- i need to add chat here for doctor -->
+              <!-- Replace the existing chat button with this -->
+<button class="bp-act bp-act-chat"
+        title="Chat with patient"
+        [disabled]="chatLoading && activeChatRecord?.patientId === record.patientId"
+        (click)="openChat(record)">
+  <span class="bp-call-spinner"
+        *ngIf="chatLoading && activeChatRecord?.patientId === record.patientId">
+  </span>
+  <svg *ngIf="!(chatLoading && activeChatRecord?.patientId === record.patientId)"
+       width="14" height="14" viewBox="0 0 24 24" fill="none"
+       stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+  </svg>
+  <span class="bp-act-label">
+    {{ chatLoading && activeChatRecord?.patientId === record.patientId ? 'Opening…' : 'Chat' }}
+  </span>
+</button>
+
               <button class="bp-act bp-act-hist" title="View history" (click)="openHistoryDrawer(record)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 <span class="bp-act-label">History</span>

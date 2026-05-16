@@ -28,6 +28,7 @@ import { DoctorChatComponent } from '../Components/doctor-chat/doctor-chat.compo
 
 import { NotFoundComponent } from '../Components/not-found/not-found.component';
 import { AiSymptomChecker } from '../Components/Patient/ai-symptom-checker/ai-symptom-checker.component';
+import { AdminLoginComponent } from '../Components/admin-login/admin-login.component';
 
 
 
@@ -38,6 +39,12 @@ export const routes: Routes = [
   { path: '', redirectTo: 'auth', pathMatch: 'full' },
 
   { path: 'auth', component: AuthComponent },
+  {
+  path: 'admin-login',
+  loadComponent: () =>
+    import('../Components/admin-login/admin-login.component')
+      .then(m => m.AdminLoginComponent)
+},
 
   { path: 'payment-success', component: PaymentSuccessComponent },
   { path: 'payment-cancelled', loadComponent: () => import('../Components/Patient/payment-cancelled/payment-cancelled.component').then(m => m.PaymentCancelledComponent) },

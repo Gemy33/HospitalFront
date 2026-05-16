@@ -1,0 +1,247 @@
+<div class="ch-root">
+
+    <!-- ░░ Chat pane ░░ -->
+  <div class="ch-chat-pane" [class.ch-chat-pane--active]="!!activeConv()">
+
+    <!-- No conversation selected -->
+    <div class="ch-no-conv" *ngIf="!activeConv()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.2" stroke-linecap="round" width="56" height="56">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14
+                 a2 2 0 0 1 2 2z"/>
+      </svg>
+      <p>Select a conversation to start messaging</p>
+    </div>
+
+    <!-- Active conversation -->
+    <ng-container *ngIf="activeConv()">
+
+      <!-- Chat header -->
+      <div class="ch-chat-header">
+        <button class="ch-mobile-back" (click)="clearActive()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" width="16" height="16">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+        </button>
+
+        <div class="ch-chat-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" width="18" height="18">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="ch-online-dot"></span>
+        </div>
+
+        <div class="ch-chat-header-info">
+          <span class="ch-chat-header-name">
+            Patient #{{ activeConv()!.patientId }}
+          </span>
+          <span class="ch-chat-header-sub">{{ activeConv()!.title }}</span>
+        </div>
+
+        <div class="ch-conn-chip"
+             [class.ch-conn-chip--off]="!chatSvc.connected()">
+          <span class="ch-conn-dot"></span>
+          {{ chatSvc.connected() ? 'Live' : 'Connecting…' }}
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="ch-messages">
+
+        <div class="ch-msg-loading" *ngIf="loadingMsgs()">
+          <div class="ch-spinner"><span></span><span></span><span></span></div>
+        </div>
+
+        <div class="ch-msg-empty"
+             *ngIf="!loadingMsgs() && messages().length === 0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.3" stroke-linecap="round" width="36" height="36">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14
+                     a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>No messages yet. Start the conversation.</p>
+        </div>
+
+        <ng-container *ngIf="!loadingMsgs()">
+          <ng-container *ngFor="let msg of messages(); let i = index">
+
+            <div class="ch-date-sep"
+                 *ngIf="showDateSeparator(messages(), i)">
+              <span>{{ formatDate(msg.sentAt) }}</span>
+            </div>
+
+            <div class="ch-msg"
+                 [class.ch-msg--mine]="isMine(msg)"
+                 [class.ch-msg--theirs]="!isMine(msg)">
+
+              <div class="ch-msg-avatar" *ngIf="!isMine(msg)">Pt</div>
+
+              <div class="ch-msg-bubble-wrap">
+                <div class="ch-msg-bubble">{{ msg.content }}</div>
+                <div class="ch-msg-meta">
+                  <span class="ch-msg-time">{{ formatTime(msg.sentAt) }}</span>
+                  <span class="ch-msg-tick" *ngIf="isMine(msg)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" width="12" height="12"
+                         [style.color]="msg.isRead ? 'var(--blue)' : 'var(--t3)'">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+
+            </div>
+
+          </ng-container>
+        </ng-container>
+
+        <div #msgEnd></div>
+      </div>
+
+      <!-- Input -->
+      <div class="ch-input-area">
+        <textarea
+          class="ch-textarea"
+          placeholder="Reply to patient… (Enter to send)"
+          [value]="text()"
+          (input)="text.set($any($event.target).value)"
+          (keydown)="onEnter($event)"
+          rows="1"
+        ></textarea>
+        <button
+          class="ch-send-btn"
+          [class.ch-send-btn--ready]="text().trim().length > 0"
+          [disabled]="!text().trim() || sending()"
+          (click)="send()"
+        >
+          <svg *ngIf="!sending()" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round" width="18" height="18">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          <div class="ch-send-spinner" *ngIf="sending()"></div>
+        </button>
+      </div>
+
+    </ng-container>
+  </div>
+  <!-- ░░ List pane ░░ -->
+  <div class="ch-list-pane" [class.ch-list-pane--hidden]="!!activeConv()">
+
+    <div class="ch-list-header">
+      <div class="ch-list-title-row">
+        <div class="ch-list-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" width="18" height="18">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14
+                     a2 2 0 0 1 2 2z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="ch-list-title">Patient Messages</h2>
+          <p class="ch-list-sub">{{ conversations().length }} conversations</p>
+        </div>
+      </div>
+      <span class="ch-unread-badge" *ngIf="totalUnread() > 0">
+        {{ totalUnread() }}
+      </span>
+    </div>
+
+    <!-- Loading -->
+    <div class="ch-loading" *ngIf="loadingConvs()">
+      <div class="ch-spinner"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- Error -->
+    <div class="ch-error" *ngIf="errorConvs() && !loadingConvs()">
+      <p>{{ errorConvs() }}</p>
+      <button class="ch-btn-outline" (click)="loadConversations()">Retry</button>
+    </div>
+
+    <!-- Empty -->
+    <div class="ch-empty"
+         *ngIf="!loadingConvs() && !errorConvs() && conversations().length === 0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.3" stroke-linecap="round" width="44" height="44">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14
+                 a2 2 0 0 1 2 2z"/>
+      </svg>
+      <p>No patient messages yet.</p>
+      <span class="ch-empty-hint">
+        Start a chat from a patient's booking page.
+      </span>
+    </div>
+
+    <!-- Grouped by patient -->
+    <div class="ch-conv-list"
+         *ngIf="!loadingConvs() && !errorConvs() && conversations().length > 0">
+
+      <ng-container *ngFor="let patientId of patientIds()">
+
+        <!-- Patient group header -->
+        <div class="ch-group-header">
+          <div class="ch-group-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" width="14" height="14">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <span class="ch-group-name">Patient #{{ patientId }}</span>
+          <span class="ch-group-count">
+            {{ getConvsForPatient(patientId).length }}
+          </span>
+        </div>
+
+        <!-- Conversations under this patient -->
+        <div
+          class="ch-conv-item"
+          *ngFor="let conv of getConvsForPatient(patientId); let i = index"
+          [class.ch-conv-item--active]="activeConv()?.id === conv.id"
+          [style.--ci]="i"
+          (click)="openConversation(conv)"
+        >
+          <div class="ch-conv-appt-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" width="13" height="13">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+          </div>
+
+          <div class="ch-conv-info">
+            <div class="ch-conv-top">
+              <span class="ch-conv-title">{{ conv.title }}</span>
+              <span class="ch-conv-time" *ngIf="conv.lastMessage">
+                {{ formatTime(conv.lastMessage.sentAt) }}
+              </span>
+            </div>
+            <div class="ch-conv-bottom">
+              <span class="ch-conv-preview" *ngIf="conv.lastMessage">
+                <span class="ch-conv-who"
+                      *ngIf="conv.lastMessage.senderRole === 'Doctor'">
+                  You:&nbsp;
+                </span>
+                {{ conv.lastMessage.content }}
+              </span>
+              <span class="ch-conv-preview ch-conv-preview--empty"
+                    *ngIf="!conv.lastMessage">
+                No messages yet
+              </span>
+              <span class="ch-unread-dot" *ngIf="conv.unreadCount > 0">
+                {{ conv.unreadCount }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+  </div>
+
+  
+</div>
