@@ -82,6 +82,7 @@ export class PrescriptionsComponent implements OnInit {
     this.error.set(null);
     this.doctorSvc.getPatientPrescriptions(this.patientId).subscribe({
       next:  data => {
+        console.log("baby")
         console.log('Loaded prescriptions:', data);
          this.prescriptions.set(data); this.loading.set(false); },
       error: ()   => { this.error.set('Failed to load prescriptions.'); this.loading.set(false); },

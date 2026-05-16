@@ -74,6 +74,12 @@ export class PatientNavbarComponent {
       
       svgPath: 'M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z',
     },
+      {
+    label: 'AI',
+    hint: 'What do you feel?',
+    route: '/patient/ai',
+    svgPath: 'M12 2a3 3 0 0 0-3 3v1H7a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v2H7a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h2v1a3 3 0 0 0 6 0v-1h2a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-1v-2h1a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2V5a3 3 0 0 0-3-3zm-1 5h2v2h-2V7zm0 6h2v2h-2v-2z',
+  },
   ];
 
   initials = computed(() =>
