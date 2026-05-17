@@ -11,34 +11,33 @@
   --sidebar-collapsed-width: 68px;
 
   /* ── Light Palette ── */
-  --bg:             #F4FBFA;
+  --bg:             #ffffff;
   --bg-surface:     #FFFFFF;
-  --bg-hover:       #ECFFFC;
-  --bg-active:      rgba(43,196,178,0.10);
+  --bg-hover:       #E8FCF8;
+  --bg-active:      rgba(43,196,178,0.14);
 
   /* ── Accent ── */
   --accent:         #2BC4B2;
-  --accent-soft:    rgba(43,196,178,0.12);
-  --accent-zoom:    #149C8D;
+  --accent-soft:    rgba(43,196,178,0.14);
+  --accent-zoom:    #169D8E;
 
   /* ── Text ── */
   --text-primary:   #0F172A;
-  --text-secondary: #475569;
+  --text-secondary: #334155;
   --text-muted:     #64748B;
 
   /* ── Borders ── */
-  --border:         #D8F3EF;
-  --border-accent:  rgba(43,196,178,0.25);
+  --border:         #D7F5F0;
+  --border-accent:  rgba(43,196,178,0.30);
 
   --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  --radius: 10px;
+  --radius: 12px;
 
   --font-brand: 'Syne', sans-serif;
   --font-body: 'DM Sans', sans-serif;
 
   display: block;
 }
-
 /* ─────────────────────────────
    Sidebar Container
 ───────────────────────────── */

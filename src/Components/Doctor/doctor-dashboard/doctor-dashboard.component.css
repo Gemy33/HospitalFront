@@ -3,14 +3,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 :host {
-  --bg:          #F6FFFE;
+  --bg:          #ffffff;
   --surface:     #ffffff;
   --surface-2:   #f8fafc;
   --surface-3:   #eef3f9;
   --border:      #dbe5f0;
   --border-2:    #c7d6e6;
 
-  --blue:        #2563EB;
+  --blue:        #3b74f0;
   --blue-soft:   #DBEAFE;
   --blue-text:   #1D4ED8;
 
@@ -112,7 +112,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--blue) 0%, #8B5CF6 50%, var(--teal) 100%);
+  background: linear-gradient(90deg, var(--blue) 0%, #1DAC9C 50%, var(--teal) 100%);
 }
 
 .dash-hero-content { position: relative; z-index: 1; }
