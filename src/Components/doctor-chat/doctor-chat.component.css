@@ -355,8 +355,8 @@
 
 .ch-online-dot {
   position: absolute;
-  bottom: -3px;
-  right: -3px;
+  /* bottom: -3px;
+  right: -3px; */
   width: 10px;
   height: 10px;
   border-radius: 50%;

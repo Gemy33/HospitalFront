@@ -1,6 +1,6 @@
 import { Component, computed, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../Core/auth.service';
 import { PatientService } from '../../../Core/patient.service';
 
@@ -86,7 +86,7 @@ export class PatientNavbarComponent {
     this.patientName.trim().split(/\s+/).slice(0, 2)
       .map(w => w[0].toUpperCase()).join('')
   );
-  constructor(private authservice : AuthService , private patientservice : PatientService) {
+  constructor(private authservice : AuthService , private patientservice : PatientService , private router : Router) {
     
   }
 
@@ -108,6 +108,10 @@ export class PatientNavbarComponent {
 
   logout(): void { 
     this.authservice.logout();
+    // need to make reload to or redirct ot auth
+    this.router.navigate(['/auth']);
+
+    
     
     console.log('logout');
     

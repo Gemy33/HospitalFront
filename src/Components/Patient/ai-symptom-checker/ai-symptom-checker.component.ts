@@ -99,8 +99,8 @@ export class AiSymptomChecker {
 
   navigateToFindDoctor(): void {
     // Pass the recommended speciality as a query param so FindDoctor can pre-filter
-    this.router.navigate(['/patient/find-doctor'], {
-      queryParams: { speciality: this.result?.speciality ?? '' },
+    this.router.navigate(['/patient/find-doctors'], {
+      
     });
   }
 

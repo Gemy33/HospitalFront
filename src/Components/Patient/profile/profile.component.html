@@ -143,21 +143,35 @@
     </div>
 
     <!-- ── Stats Row ──────────────────────────────────────── -->
-    <div class="pp-stats-row">
-      <div class="pp-stat-card">
-        <span class="pp-stat-icon">🗓</span>
-        <div class="pp-stat-text">
-          <span class="pp-stat-value">0</span>
-          <span class="pp-stat-label">{{totalappointments()}}</span>
-        </div>
-      </div>
-      <div class="pp-stat-card">
-        <span class="pp-stat-icon">💊</span>
-        <div class="pp-stat-text">
-          <span class="pp-stat-value">0</span>
-          <span class="pp-stat-label">{{totalprecriptions()}}</span>
-        </div>
-      </div>
+  <div class="pp-stats-row">
+  <div class="pp-stat-card">
+    <span class="pp-stat-icon">🗓</span>
+
+    <div class="pp-stat-text">
+      <span class="pp-stat-value">
+        {{ totalappointments() }}
+      </span>
+
+      <span class="pp-stat-label">
+        Appointments
+      </span>
+    </div>
+  </div>
+
+  <div class="pp-stat-card">
+    <span class="pp-stat-icon">💊</span>
+
+    <div class="pp-stat-text">
+      <span class="pp-stat-value">
+        {{ totalprecriptions() }}
+      </span>
+
+      <span class="pp-stat-label">
+        Prescriptions
+      </span>
+    </div>
+  </div>
+
       <div class="pp-stat-card">
         <span class="pp-stat-icon">🩺</span>
         <div class="pp-stat-text">

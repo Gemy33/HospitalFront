@@ -39,8 +39,8 @@ export class ProfileComponent implements OnInit {
 
   constructor(private patientService: PatientService, private doctorservie : DoctorService, private authservice : AuthService) {}
 
-  totalprecriptions = signal(0);
-  totalappointments = signal(0);
+  totalprecriptions = signal(3);
+  totalappointments = signal(4);
 
  
 
@@ -49,57 +49,61 @@ export class ProfileComponent implements OnInit {
        
 
     this.loadProfile();
+    
   }
 
-  loadProfile(): void {
-    this.isLoading.set(true);
-    this.error.set(null);
-    var userId = this.authservice.getUserId();
-    if (!userId) {
-      this.error.set('User not authenticated. Please log in.');
+ loadProfile(): void {
+  this.isLoading.set(true);
+  this.error.set(null);
+
+  const userId = this.authservice.getUserId();
+
+  if (!userId) {
+    this.error.set('User not authenticated. Please log in.');
+    this.isLoading.set(false);
+    return;
+  }
+
+  this.patientService.getPatientProfileByUserId(userId).subscribe({
+    next: (data) => {
+
+      this.patientId = data.id;
+
+      console.log("patient id from profile load", this.patientId);
+
+      this.profile.set(data);
+
+      // LOAD APPOINTMENTS AFTER patientId IS READY
+      this.patientService.getAppointments(this.patientId).subscribe({
+        next: (appointments) => {
+          console.log(appointments, "appointments");
+          this.totalappointments.set(appointments.length);
+        },
+        error: () => {
+          this.error.set('Failed to load appointments.');
+        }
+      });
+
+      // LOAD PRESCRIPTIONS AFTER patientId IS READY
+      this.doctorservie.getPatientPrescriptions(this.patientId).subscribe({
+        next: (list) => {
+          console.log(list, "prescriptions");
+          this.totalprecriptions.set(list.length);
+        },
+        error: () => {
+          console.log('Failed to load prescriptions.');
+        }
+      });
+
       this.isLoading.set(false);
-      return;
-    }
-    this.patientService.getPatientProfileByUserId(userId).subscribe({
-      next: (data) => {
-        this.patientId = data.id; // Update patientId based on profile data
-        console.log("patient id from profile load", this.patientId);
-        console.log(data);
-        
-        this.profile.set(data);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load profile. Please try again.');
-        this.isLoading.set(false);
-      },
-    });
-    this.doctorservie.getPatientPrescriptions(this.patientId).subscribe({
-    next: (list) => {
-      console.log("ID list", this.patientId);
+    },
 
-      this.totalprecriptions.set(list.length);
-      console.log("total prescriptions", this.totalprecriptions());
-    },
     error: () => {
-      console.log('Failed to load prescriptions. Please try again.');
+      this.error.set('Failed to load profile. Please try again.');
+      this.isLoading.set(false);
     },
-  })
- this.patientService.getAppointments(this.patientId).subscribe({
-    next: (list) => {
-      console.log(list);
-      
-      console.log("ID list", this.patientId);
-      this.totalappointments.set(list.length);
-      console.log("total appointments", this.totalappointments());
-    }
-    ,
-    error: () => {
-      console.log('Failed to load appointments. Please try again.');
-    },
-  })
-
-  }
+  });
+}
 
   getGenderLabel(gender: number): string {
     return gender === 0 ? 'Male' : 'Female';

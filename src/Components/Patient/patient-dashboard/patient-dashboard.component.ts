@@ -106,6 +106,9 @@ export class PatientDashboardComponent implements OnInit {
     });
   }
 
+  today(): string {
+    return new Date().toISOString();
+  }
   formatDayNum(iso: string): string {
     return new Date(iso).getDate().toString();
   }
