@@ -90,7 +90,7 @@ export class DoctorProfileComponent implements OnInit {
 
   loadProfile(): void {
     this.isLoading = true;
-    const doctorId = this.route.snapshot.paramMap.get('id');
+    const doctorId =this._authservice.getDoctorId();
     this._doctorservice.getDoctorProfile(doctorId).subscribe({
       next: (data) => {
         console.log(data);

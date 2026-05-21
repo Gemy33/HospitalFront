@@ -51,6 +51,10 @@ export class AuthService {
       })
     );
   }
+  getDoctorId(): string | null {
+  const decoded = this.decodeToken();
+  return decoded?.DoctorId || null;
+}
 
   // ========================
   // 📦 TOKEN METHODS

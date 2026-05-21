@@ -61,7 +61,7 @@ export class DoctorDashboardComponent implements OnInit {
   private router        = inject(Router);
   private doctorService = inject(DoctorService);
   private _authService=inject(AuthService);
-  doctorId:string=this._authService.Id;
+  doctorId:string|null=this._authService.getDoctorId();
 
   isLoading = true;
   doctorName = 'Doctor';

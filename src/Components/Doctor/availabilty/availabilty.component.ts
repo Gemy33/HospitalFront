@@ -63,7 +63,7 @@ export type ToastType  = 'success' | 'error';
 })
 export class AvailabiltyComponent implements OnInit {
 
-  private readonly DOCTOR_ID = Number(this._authservice.Id);
+  private readonly DOCTOR_ID = Number(this._authservice.getDoctorId());
   private readonly BASE_URL  = '/api/availability';
 
   isLoading         = true;
@@ -106,6 +106,7 @@ export class AvailabiltyComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSlots();
+    console.log("availability doctor id ==>",this.DOCTOR_ID)
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────

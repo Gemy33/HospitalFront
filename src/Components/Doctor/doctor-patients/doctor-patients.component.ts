@@ -148,7 +148,7 @@ export class DoctorPatientsComponent implements OnInit {
   loadPatients(): void {
     this.isLoading = true;
    
-    this.doctorService.getDoctorPatientsWithHisPrescriptions(Number(this._authService.Id
+    this.doctorService.getDoctorPatientsWithHisPrescriptions(Number(this._authService.getDoctorId()
 
     )).subscribe({
       next: (res: ApiPrescriptionRecord[]) => {
