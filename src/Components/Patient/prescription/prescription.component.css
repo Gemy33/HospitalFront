@@ -1,44 +1,70 @@
-/* ── Tokens — identical to find-doctor / availability ──────── */
-:host {
-  --bg:        #0d1117;
-  --surface:   #161b25;
-  --surface-2: #1c2333;
-  --border:    rgba(255,255,255,0.07);
-  --border-2:  rgba(255,255,255,0.12);
-  --blue:      #3b9eff;
-  --blue-bg:   rgba(59,158,255,0.09);
-  --blue-bd:   rgba(59,158,255,0.22);
-  --green:     #34d399;
-  --green-bg:  rgba(52,211,153,0.09);
-  --green-bd:  rgba(52,211,153,0.20);
-  --amber:     #fbbf24;
-  --amber-bg:  rgba(251,191,36,0.09);
-  --amber-bd:  rgba(251,191,36,0.20);
-  --red:       #f87171;
-  --red-bg:    rgba(248,113,113,0.09);
-  --t1:        #e6edf3;
-  --t2:        #7d8ea1;
-  --t3:        #3d4f62;
-  --font:      'Sora', system-ui, sans-serif;
-  --radius:    12px;
-  --radius-sm: 8px;
-}
+/* prescription.component.css
+   Theme: Dark navy — matches booking / my-patients / dashboard
+   ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
 
-/* ── Root ─────────────────────────────────────────────────── */
+:host {
+  /* ── Base ── */
+  --bg:        #0B1426;
+  --surface:   #111827;
+  --surface-2: #0D1829;
+  --surface-3: #131f33;
+  --border:    #1E2D45;
+  --border-2:  #263A56;
+
+  /* ── Accent colours ── */
+  --blue:      #3B82F6;
+  --blue-bg:   rgba(59,130,246,0.09);
+  --blue-bd:   rgba(59,130,246,0.22);
+  --blue-text: #60A5FA;
+
+  --green:     #10B981;
+  --green-bg:  rgba(16,185,129,0.09);
+  --green-bd:  rgba(16,185,129,0.20);
+  --green-txt: #34D399;
+
+  --amber:     #F59E0B;
+  --amber-bg:  rgba(245,158,11,0.09);
+  --amber-bd:  rgba(245,158,11,0.20);
+  --amber-txt: #FBB040;
+
+  --purple:    #8B5CF6;
+  --purple-bg: rgba(139,92,246,0.09);
+  --purple-bd: rgba(139,92,246,0.20);
+  --purple-txt:#A78BFA;
+
+  --red:       #EF4444;
+  --red-bg:    rgba(239,68,68,0.09);
+  --red-txt:   #F87171;
+
+  /* ── Text ── */
+  --t1: #F1F5F9;
+  --t2: #94A3B8;
+  --t3: #64748B;
+
+  --font:      'Sora', system-ui, sans-serif;
+  --radius:    12px;
+  --radius-sm: 8px;
+
+  display: block;
+  background: var(--bg);
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--t1);
+}
+
+/* ── Root shell ────────────────────────────────────────────── */
 .rx-root {
   min-height: 100vh;
   background: var(--bg);
-  font-family: var(--font);
-  color: var(--t1);
   padding-bottom: 80px;
   background-image:
     radial-gradient(ellipse 70% 35% at 50% 0%,
-      rgba(59,158,255,0.06) 0%, transparent 60%);
+      rgba(59,130,246,0.06) 0%, transparent 60%);
 }
 
-/* ── Topbar ───────────────────────────────────────────────── */
+/* ── Topbar ────────────────────────────────────────────────── */
 .rx-topbar {
   display: flex;
   align-items: center;
@@ -63,7 +89,7 @@
   border-radius: 13px;
   background: var(--blue-bg);
   border: 1px solid var(--blue-bd);
-  color: var(--blue);
+  color: var(--blue-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,7 +110,7 @@
   margin: 0;
 }
 
-/* Stats chips — matches find-doctor status bar style */
+/* Stats strip */
 .rx-stats-row {
   display: flex;
   align-items: center;
@@ -124,7 +150,7 @@
   background: var(--border);
 }
 
-/* ── Filter controls — matches find-doctor search bar ──────── */
+/* ── Filter controls ───────────────────────────────────────── */
 .rx-controls {
   display: flex;
   align-items: center;
@@ -167,7 +193,7 @@
 
 .rx-input:focus {
   border-color: var(--blue-bd);
-  box-shadow: 0 0 0 3px rgba(59,158,255,0.10);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
 }
 
 .rx-input::placeholder { color: var(--t3); }
@@ -188,11 +214,11 @@
 
 .rx-clear-btn:hover {
   background: var(--red-bg);
-  color: var(--red);
-  border-color: rgba(248,113,113,0.22);
+  color: var(--red-txt);
+  border-color: rgba(239,68,68,0.25);
 }
 
-/* ── Loading — same spinner as availability ─────────────────── */
+/* ── Loading ───────────────────────────────────────────────── */
 .rx-loading {
   display: flex;
   flex-direction: column;
@@ -233,14 +259,10 @@
   text-align: center;
 }
 
-.rx-error-state { color: var(--red); }
-
-.rx-empty-state {
-  color: var(--t2);
-  svg { opacity: 0.3; }
-  p   { margin: 0; font-size: 14px; }
-}
-
+.rx-error-state { color: var(--red-txt); }
+.rx-empty-state { color: var(--t2); }
+.rx-empty-state svg { opacity: 0.3; }
+.rx-empty-state p,
 .rx-error-state p { margin: 0; font-size: 14px; }
 
 .rx-retry-btn {
@@ -267,7 +289,7 @@
   padding: 0 28px;
 }
 
-/* ── Single card — matches find-doctor fd-card style ────────── */
+/* ── Single card ───────────────────────────────────────────── */
 .rx-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -286,7 +308,7 @@
 
 .rx-card--expanded {
   border-color: var(--blue-bd) !important;
-  box-shadow: 0 0 0 1px rgba(59,158,255,0.06) !important;
+  box-shadow: 0 0 0 1px rgba(59,130,246,0.06) !important;
 }
 
 /* ── Card header ───────────────────────────────────────────── */
@@ -300,9 +322,9 @@
   transition: background 0.18s;
 }
 
-.rx-card-head:hover { background: var(--surface-2); }
+.rx-card-head:hover { background: var(--surface-3); }
 
-/* Avatar — same style as find-doctor fd-avatar-initials */
+/* Avatar */
 .rx-avatar {
   flex-shrink: 0;
   width: 46px;
@@ -310,7 +332,7 @@
   border-radius: 11px;
   background: var(--blue-bg);
   border: 1px solid var(--blue-bd);
-  color: var(--blue);
+  color: var(--blue-text);
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.4px;
@@ -332,33 +354,28 @@
   font-weight: 600;
   color: var(--t1);
   margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.rx-head-gender { font-size: 13px; color: var(--t3); }
-
 .rx-head-spec {
   font-size: 12px;
   font-weight: 500;
-  color: var(--blue);
+  color: var(--blue-text);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.rx-head-exp {
+.rx-head-meta {
   font-size: 11px;
   color: var(--t3);
   margin: 0;
 }
 
-/* Right meta — matches find-doctor fd-card-footer style */
+/* Right side */
 .rx-head-right {
   display: flex;
   align-items: center;
@@ -366,14 +383,13 @@
   flex-shrink: 0;
 }
 
-/* Badge — matches fd-speciality-tag */
 .rx-meds-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--green);
+  color: var(--green-txt);
   background: var(--green-bg);
   border: 1px solid var(--green-bd);
   border-radius: 20px;
@@ -395,7 +411,96 @@
 
 .rx-chevron--flipped { transform: rotate(180deg); }
 
-/* ── Treatments section ────────────────────────────────────── */
+/* ── Section label ─────────────────────────────────────────── */
+.rx-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.rx-label-diag {
+  color: var(--purple-txt);
+}
+.rx-label-diag svg { stroke: var(--purple-txt); }
+
+.rx-label-ai {
+  color: var(--blue-text);
+}
+.rx-label-ai svg { stroke: var(--blue-text); }
+
+.rx-label-meds {
+  color: var(--amber-txt);
+}
+.rx-label-meds svg { stroke: var(--amber-txt); }
+
+/* ── Diagnosis block ───────────────────────────────────────── */
+.rx-diagnosis {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  background: rgba(139,92,246,0.06);
+  position: relative;
+}
+
+.rx-diagnosis::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--purple);
+  border-radius: 0 2px 2px 0;
+}
+
+.rx-diagnosis-text {
+  font-size: 13.5px;
+  color: var(--t1);
+  line-height: 1.65;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ── AI Explanation block ──────────────────────────────────── */
+.rx-ai-block {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  background: linear-gradient(135deg,
+    rgba(59,130,246,0.06) 0%,
+    rgba(139,92,246,0.05) 100%
+  );
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rx-ai-block::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--blue) 0%, var(--purple) 100%);
+  border-radius: 0 2px 2px 0;
+}
+
+.rx-ai-text {
+  font-size: 13px;
+  color: var(--t2);
+  line-height: 1.7;
+  margin: 0;
+  font-weight: 300;
+}
+
+.rx-ai-badge {
+  font-size: 10px;
+  color: var(--t3);
+  font-style: italic;
+}
+
+/* ── Treatments ────────────────────────────────────────────── */
 .rx-treatments {
   border-top: 1px solid var(--border);
 }
@@ -404,7 +509,7 @@
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 14px 18px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--border);
   transition: background 0.18s;
   animation: rx-in 0.25s ease both;
@@ -414,7 +519,6 @@
 .rx-treatment:last-child { border-bottom: none; }
 .rx-treatment:hover { background: var(--surface-2); }
 
-/* Pill icon — amber accent */
 .rx-pill-ico {
   flex-shrink: 0;
   width: 34px;
@@ -422,7 +526,7 @@
   border-radius: var(--radius-sm);
   background: var(--amber-bg);
   border: 1px solid var(--amber-bd);
-  color: var(--amber);
+  color: var(--amber-txt);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -437,29 +541,10 @@
   min-width: 0;
 }
 
-.rx-med-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--t1);
-}
-
-.rx-med-notes {
-  font-size: 12.5px;
-  color: var(--t2);
-  line-height: 1.55;
-}
-
-.rx-med-date {
-  font-size: 11px;
-  color: var(--t3);
-}
-
-.rx-t-id {
-  font-size: 11px;
-  color: var(--t3);
-  align-self: center;
-  flex-shrink: 0;
-}
+.rx-med-name  { font-size: 14px; font-weight: 600; color: var(--t1); }
+.rx-med-notes { font-size: 12.5px; color: var(--t2); line-height: 1.55; }
+.rx-med-date  { font-size: 11px; color: var(--t3); }
+.rx-t-id      { font-size: 11px; color: var(--t3); align-self: center; flex-shrink: 0; }
 
 /* ── Bio row ───────────────────────────────────────────────── */
 .rx-bio {
@@ -468,16 +553,16 @@
   gap: 10px;
   padding: 12px 18px;
   border-top: 1px solid var(--border);
-  background: rgba(59,158,255,0.03);
+  background: rgba(59,130,246,0.03);
   font-size: 12.5px;
   color: var(--t2);
   line-height: 1.6;
   animation: rx-in 0.2s ease both;
 }
 
-.rx-bio svg { flex-shrink: 0; margin-top: 2px; color: var(--blue); }
+.rx-bio svg { flex-shrink: 0; margin-top: 2px; stroke: var(--blue-text); }
 
-/* ── Animations ────────────────────────────────────────────── */
+/* ── Animation ─────────────────────────────────────────────── */
 @keyframes rx-in {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -485,11 +570,11 @@
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .rx-topbar   { padding: 22px 16px 18px; }
-  .rx-controls { padding: 0 16px; }
-  .rx-list     { padding: 0 16px; }
+  .rx-topbar    { padding: 22px 16px 18px; }
+  .rx-controls  { padding: 0 16px; }
+  .rx-list      { padding: 0 16px; }
   .rx-stats-row { padding: 10px 14px; gap: 12px; }
-  .rx-stat-num { font-size: 16px; }
+  .rx-stat-num  { font-size: 16px; }
   .rx-page-title { font-size: 18px; }
-  .rx-rx-id    { display: none; }
+  .rx-rx-id     { display: none; }
 }

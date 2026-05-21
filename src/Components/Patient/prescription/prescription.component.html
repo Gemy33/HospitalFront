@@ -1,3 +1,4 @@
+<!-- prescription.component.html -->
 <div class="rx-root">
 
   <!-- ░░ Header ░░ -->
@@ -13,8 +14,8 @@
         </svg>
       </div>
       <div>
-        <h1 class="rx-page-title">Prescriptions</h1>
-        <p class="rx-page-sub">Your medication history</p>
+        <h1 class="rx-page-title">My Prescriptions</h1>
+        <p class="rx-page-sub">Your complete medication history</p>
       </div>
     </div>
 
@@ -39,6 +40,7 @@
   <!-- ░░ Filters ░░ -->
   <div class="rx-controls"
        *ngIf="!loading() && !error() && prescriptions().length > 0">
+
     <div class="rx-field">
       <span class="rx-field-ico">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -47,13 +49,10 @@
           <path d="m21 21-4.35-4.35"/>
         </svg>
       </span>
-      <input
-        class="rx-input"
-        type="text"
-        placeholder="Search medication or notes…"
-        [value]="searchTerm()"
-        (input)="searchTerm.set($any($event.target).value)"
-      />
+      <input class="rx-input" type="text"
+             placeholder="Search medication, notes or diagnosis…"
+             [value]="searchTerm()"
+             (input)="searchTerm.set($any($event.target).value)" />
     </div>
 
     <div class="rx-field">
@@ -64,20 +63,17 @@
           <circle cx="12" cy="7" r="4"/>
         </svg>
       </span>
-      <input
-        class="rx-input"
-        type="text"
-        placeholder="Filter by doctor or speciality…"
-        [value]="filterDoctor()"
-        (input)="filterDoctor.set($any($event.target).value)"
-      />
+      <input class="rx-input" type="text"
+             placeholder="Filter by doctor or speciality…"
+             [value]="filterDoctor()"
+             (input)="filterDoctor.set($any($event.target).value)" />
     </div>
 
-    <button
-      class="rx-clear-btn"
-      *ngIf="searchTerm() || filterDoctor()"
-      (click)="clearFilters()"
-    >✕ Clear</button>
+    <button class="rx-clear-btn"
+            *ngIf="searchTerm() || filterDoctor()"
+            (click)="clearFilters()">
+      ✕ Clear
+    </button>
   </div>
 
   <!-- ░░ Loading ░░ -->
@@ -123,31 +119,33 @@
   </div>
 
   <!-- ░░ Cards ░░ -->
-  <div class="rx-list"  *ngIf="!loading() && !error() && filtered().length > 0">
+  <div class="rx-list" *ngIf="!loading() && !error() && filtered().length > 0">
 
-    <div
-      class="rx-card" (click)="openDetail(rx.id)"
-      *ngFor="let rx of filtered(); let i = index"
-      [class.rx-card--expanded]="isExpanded(rx.id)"
-      [style.--ci]="i"
-    >
+    <div class="rx-card"
+         *ngFor="let rx of filtered(); let i = index"
+         [class.rx-card--expanded]="isExpanded(rx.id)"
+         [style.--ci]="i">
 
-      <!-- ── Card header (clickable) ── -->
+      <!-- ── Card header ── -->
       <div class="rx-card-head" (click)="toggleExpand(rx.id)">
 
+        <!-- Doctor avatar -->
         <div class="rx-avatar">{{ getInitials(rx.doctor?.name) }}</div>
 
+        <!-- Doctor info -->
         <div class="rx-head-info">
           <p class="rx-head-name">
-            {{ rx.doctor?.name ?? 'Unknown Doctor' }}
-            <span class="rx-head-gender">{{ getGenderIcon(rx.doctor?.gender ?? 0) }}</span>
+            Dr. {{ formatDisplayName(rx.doctor?.name) }}
           </p>
           <p class="rx-head-spec">{{ rx.doctor?.speciality ?? '—' }}</p>
-          <p class="rx-head-exp" *ngIf="rx.doctor?.yearsOfExperience">
+          <p class="rx-head-meta" *ngIf="rx.doctor?.yearsOfExperience">
+            {{ genderLabel(rx.doctor!.gender) }}
+            &nbsp;·&nbsp;
             {{ rx.doctor!.yearsOfExperience }} yrs experience
           </p>
         </div>
 
+        <!-- Right badges -->
         <div class="rx-head-right">
           <span class="rx-meds-badge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -167,40 +165,87 @@
         </div>
       </div>
 
-      <!-- ── Treatments ── -->
-      <div class="rx-treatments" *ngIf="isExpanded(rx.id)">
-        <div
-          class="rx-treatment"
-          *ngFor="let t of rx.treatments; let ti = index"
-          [style.--ti]="ti"
-        >
-          <div class="rx-pill-ico">
+      <!-- ── Expanded body ── -->
+      @if (isExpanded(rx.id)) {
+
+        <!-- Diagnosis block -->
+        @if (hasDiagnosis(rx)) {
+          <div class="rx-diagnosis">
+            <div class="rx-section-label rx-label-diag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" width="13" height="13">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+              Diagnosis
+            </div>
+            <p class="rx-diagnosis-text">{{ rx.diagnosis }}</p>
+          </div>
+        }
+
+        <!-- AI Explanation block -->
+        @if (hasAiExplanation(rx)) {
+          <div class="rx-ai-block">
+            <div class="rx-section-label rx-label-ai">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   width="13" height="13">
+                <path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/>
+              </svg>
+              AI Explanation
+            </div>
+            <p class="rx-ai-text">{{ rx.aiExplanation }}</p>
+            <span class="rx-ai-badge">AI · For reference only</span>
+          </div>
+        }
+
+        <!-- Treatments -->
+        <div class="rx-treatments">
+          <div class="rx-section-label rx-label-meds" style="padding: 12px 18px 4px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-                 width="15" height="15">
+                 stroke-width="2" stroke-linecap="round" width="13" height="13">
               <rect x="2" y="6" width="20" height="12" rx="6"/>
               <path d="M12 6v12"/>
             </svg>
+            Medications ({{ rx.treatments.length }})
           </div>
-          <div class="rx-treatment-body">
-            <span class="rx-med-name">{{ t.medicationName }}</span>
-            <span class="rx-med-notes">{{ t.notes }}</span>
-            <span class="rx-med-date">Prescribed {{ formatDate(t.createdAt) }}</span>
+
+          <div class="rx-treatment"
+               *ngFor="let t of rx.treatments; let ti = index"
+               [style.--ti]="ti">
+            <div class="rx-pill-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                   width="15" height="15">
+                <rect x="2" y="6" width="20" height="12" rx="6"/>
+                <path d="M12 6v12"/>
+              </svg>
+            </div>
+            <div class="rx-treatment-body">
+              <span class="rx-med-name">{{ t.medicationName }}</span>
+              <span class="rx-med-notes">{{ t.notes }}</span>
+              <span class="rx-med-date" *ngIf="formatDate(t.createdAt) !== '—'">
+                Prescribed {{ formatDate(t.createdAt) }}
+              </span>
+            </div>
+            <span class="rx-t-id">#{{ t.id }}</span>
           </div>
-          <span class="rx-t-id">#{{ t.id }}</span>
         </div>
-      </div>
 
-      <!-- ── Doctor bio ── -->
-      <div class="rx-bio" *ngIf="isExpanded(rx.id) && rx.doctor?.bio">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="1.8" stroke-linecap="round" width="13" height="13">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 16v-4M12 8h.01"/>
-        </svg>
-        <span>{{ rx.doctor!.bio }}</span>
-      </div>
+        <!-- Doctor bio -->
+        @if (rx.doctor?.bio) {
+          <div class="rx-bio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" width="13" height="13">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            <span>{{ rx.doctor!.bio }}</span>
+          </div>
+        }
 
-    </div>
-  </div>
+      }
+
+    </div><!-- /rx-card -->
+  </div><!-- /rx-list -->
+
 </div>
