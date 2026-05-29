@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { Routes } from '@angular/router';
 import { PatientLayoutComponent } from './../Layouts/patient-layout/patient-layout.component';
 import { DoctorLayoutComponent } from '../Layouts/doctor-layout/doctor-layout.component';
@@ -29,6 +30,7 @@ import { DoctorChatComponent } from '../Components/doctor-chat/doctor-chat.compo
 import { NotFoundComponent } from '../Components/not-found/not-found.component';
 import { AiSymptomChecker } from '../Components/Patient/ai-symptom-checker/ai-symptom-checker.component';
 import { AdminLoginComponent } from '../Components/admin-login/admin-login.component';
+import { AskAgentComponent } from '../Components/ask-agent/ask-agent.component';
 
 
 
@@ -66,6 +68,8 @@ export const routes: Routes = [
       { path: 'appointments', component: AppointmentsComponent },
       { path: 'find-doctors', component: FindDoctorComponent },
       { path: 'dashboard', component: PatientDashboardComponent },
+      
+      {path :'askagent',component:AskAgentComponent,title:'Agent'},
       {
         path: 'doctor/:doctorId/availability',
         component: DoctorAvailabilityComponent
@@ -91,6 +95,7 @@ export const routes: Routes = [
       { path: 'prescription', component: PrescriptionComponent },
       { path: 'booking/:AvailabilityId', component: BookingComponent },
       { path: 'patients', component: DoctorPatientsComponent },
+      {path :'askagent',component:AskAgentComponent,title:'Agent'},
       { path: '**', redirectTo: "dashboard" }
     ]
   },

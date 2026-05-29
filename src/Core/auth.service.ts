@@ -42,7 +42,7 @@ export class AuthService {
 
     return this._http.post<any>(url, info).pipe(
       tap((res) => {
-        // ⚠️ adjust based on your backend response
+        //  adjust based on your backend response
         const token = res.token || res.accessToken;
 
         if (token) {
