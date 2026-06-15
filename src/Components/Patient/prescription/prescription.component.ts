@@ -7,7 +7,12 @@ import { DoctorService } from '../../../Core/doctor.service';
 import { AuthService } from '../../../Core/auth.service';
 import { PatientService } from '../../../Core/patient.service';
 
-// ── Interfaces — matching real API response exactly ───────────────────────────
+// ─────────────────────────────────────────────────────────────
+// ★  PUT YOUR OPENROUTER KEY HERE
+// ─────────────────────────────────────────────────────────────
+const OPENROUTER_KEY = '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';
+
+// ── Interfaces — matching real API response exactly ───────────
 
 export interface PrescriptionDoctor {
   id:                number;
@@ -35,11 +40,20 @@ export interface Prescription {
   patientId:     number;
   doctor:        PrescriptionDoctor | null;
   treatments:    PrescriptionTreatment[];
-  diagnosis:     string;        // ✅ top-level field in real response
-  aiExplanation: string;        // ✅ top-level field in real response
+  diagnosis:     string;
+  aiExplanation: string;
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// AI prediction result shape
+interface Disease {
+  name:        string;
+  risk:        'high' | 'medium' | 'low';
+  probability: number;   // 0–100
+  reason:      string;
+  prevention:  string;
+}
+
+// ── Component ─────────────────────────────────────────────────
 
 @Component({
   selector:    'app-prescriptions',
@@ -57,12 +71,11 @@ export class PrescriptionsComponent implements OnInit {
 
   patientId = 0;
 
-  // ── Search / filter ──────────────────────────────────────────────────────
+  // ── Search / filter ────────────────────────────────────────
 
   searchTerm   = signal('');
   filterDoctor = signal('');
 
-  /** Filter by medication name, notes, diagnosis or AI explanation */
   filtered = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const doc  = this.filterDoctor().toLowerCase().trim();
@@ -76,7 +89,7 @@ export class PrescriptionsComponent implements OnInit {
         (p.aiExplanation ?? '').toLowerCase().includes(term);
 
       const matchesDoc = !doc ||
-        (p.doctor?.name      ?? '').toLowerCase().includes(doc) ||
+        (p.doctor?.name       ?? '').toLowerCase().includes(doc) ||
         (p.doctor?.speciality ?? '').toLowerCase().includes(doc);
 
       return matchesMed && matchesDoc;
@@ -91,6 +104,16 @@ export class PrescriptionsComponent implements OnInit {
     [...new Set(this.prescriptions().map(p => p.doctor?.name).filter(Boolean))]
   );
 
+  // ── AI Prediction state ────────────────────────────────────
+
+  showAiPanel = false;
+  aiLoading   = false;
+  aiError     = '';
+  predictions: Disease[] = [];
+  aiSummary   = '';
+
+  // ── Constructor ────────────────────────────────────────────
+
   constructor(
     private doctorSvc:      DoctorService,
     private router:         Router,
@@ -98,7 +121,7 @@ export class PrescriptionsComponent implements OnInit {
     private patientService: PatientService,
   ) {}
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
+  // ── Lifecycle ──────────────────────────────────────────────
 
   ngOnInit(): void {
     const userId = this.authService.getUserId();
@@ -118,17 +141,14 @@ export class PrescriptionsComponent implements OnInit {
     });
   }
 
-  // ── Data ──────────────────────────────────────────────────────────────────
+  // ── Data ───────────────────────────────────────────────────
 
   load(): void {
     this.loading.set(true);
     this.error.set(null);
 
-    // GET /api/Prescription/patient/{patientId}
-    // Response is Prescription[] — diagnosis & aiExplanation are top-level
     this.doctorSvc.getPatientPrescriptions(this.patientId).subscribe({
       next: (data: any[]) => {
-        // Map to ensure all fields are present even if API omits optional ones
         const mapped: Prescription[] = data.map(p => ({
           id:            p.id,
           doctorId:      p.doctorId,
@@ -148,7 +168,7 @@ export class PrescriptionsComponent implements OnInit {
     });
   }
 
-  // ── UI helpers ────────────────────────────────────────────────────────────
+  // ── UI helpers ─────────────────────────────────────────────
 
   toggleExpand(id: number): void {
     const s = new Set(this.expanded());
@@ -171,14 +191,12 @@ export class PrescriptionsComponent implements OnInit {
 
   getInitials(name: string | null | undefined): string {
     if (!name) return '?';
-    // Handle camelCase usernames: "omar.test" → "OT", "IslamAhmed" → "IA"
     const clean = name.replace(/[._-]/g, ' ');
     return clean.trim().split(/[\s]+/).slice(0, 2).map(w => w[0].toUpperCase()).join('');
   }
 
   formatDisplayName(name: string | null | undefined): string {
     if (!name) return 'Unknown Doctor';
-    // "omar.test" → "Omar Test"  |  "IslamAhmed" → "Islam Ahmed"
     return name
       .replace(/[._-]/g, ' ')
       .replace(/([A-Z])/g, ' $1')
@@ -205,5 +223,132 @@ export class PrescriptionsComponent implements OnInit {
 
   hasDiagnosis(rx: Prescription): boolean {
     return !!rx.diagnosis && rx.diagnosis.trim().length > 0;
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // ★  AI DISEASE PREDICTION — OpenRouter
+  // ════════════════════════════════════════════════════════════
+
+  async predictDiseases(): Promise<void> {
+    if (this.prescriptions().length === 0) return;
+
+    this.showAiPanel = true;
+    this.aiLoading   = true;
+    this.aiError     = '';
+    this.predictions = [];
+    this.aiSummary   = '';
+
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${OPENROUTER_KEY}`,
+    'Content-Type': 'application/json',
+    'HTTP-Referer': window.location.origin,
+    'X-Title': 'MedScript',
+  },
+  body: JSON.stringify({
+    model: 'meta-llama/llama-3.1-8b-instruct',
+    messages: [
+      {
+        role: 'system',
+        content:
+          'You are a clinical AI assistant. Respond ONLY with a raw JSON object — no markdown, no backticks, no extra text.',
+      },
+      {
+        role: 'user',
+        content: this.buildPrompt(),
+      },
+    ],
+  }),
+});
+
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`OpenRouter ${res.status}: ${body}`);
+      }
+
+      const data = await res.json();
+      const raw  = data.choices?.[0]?.message?.content ?? '';
+      this.parseResponse(raw);
+
+    } catch (err: any) {
+      this.aiError = err?.message ?? 'Failed to connect to OpenRouter. Check your API key.';
+    } finally {
+      this.aiLoading = false;
+    }
+  }
+
+  closeAiPanel(): void {
+    this.showAiPanel = false;
+    this.predictions = [];
+    this.aiSummary   = '';
+    this.aiError     = '';
+  }
+
+  // ── Build prompt from all prescriptions ───────────────────
+
+  private buildPrompt(): string {
+    const lines: string[] = [];
+
+    this.prescriptions().forEach((p, idx) => {
+      lines.push(`Prescription ${idx + 1} (Doctor: ${p.doctor?.name ?? 'unknown'}, Speciality: ${p.doctor?.speciality ?? 'unknown'}):`);
+      p.treatments.forEach(t => {
+        lines.push(`  • ${t.medicationName} — ${t.notes}`);
+      });
+      if (p.diagnosis) {
+        lines.push(`  Diagnosis: ${p.diagnosis}`);
+      }
+    });
+
+    return `
+The patient has the following prescription history across ${this.prescriptions().length} prescription(s):
+
+${lines.join('\n')}
+
+Based on this medication and diagnosis history, identify 3 to 5 diseases or health conditions this patient is likely to develop in the future.
+
+Respond ONLY with this exact JSON structure — no markdown, no backticks, nothing outside the JSON:
+{
+  "summary": "2-sentence plain-language summary of the patient overall health outlook",
+  "diseases": [
+    {
+      "name": "Disease name",
+      "risk": "high" | "medium" | "low",
+      "probability": <integer between 5 and 85>,
+      "reason": "One sentence explaining why the medication history suggests this condition",
+      "prevention": "One concrete action the patient can take to reduce this risk"
+    }
+  ]
+}
+`.trim();
+  }
+
+  // ── Parse AI JSON response ────────────────────────────────
+
+  private parseResponse(raw: string): void {
+    try {
+      const clean  = raw.replace(/```json|```/gi, '').trim();
+      const parsed = JSON.parse(clean);
+
+      this.aiSummary = parsed.summary ?? '';
+
+      this.predictions = (parsed.diseases ?? []).map((d: any) => ({
+        name:        String(d.name        ?? 'Unknown condition'),
+        risk:        ['high', 'medium', 'low'].includes(d.risk) ? d.risk : 'medium',
+        probability: Math.min(100, Math.max(0, parseInt(d.probability) || 50)),
+        reason:      String(d.reason      ?? ''),
+        prevention:  String(d.prevention  ?? ''),
+      }));
+
+      if (this.predictions.length === 0) {
+        throw new Error('No diseases returned');
+      }
+
+    } catch {
+      this.aiError     = 'AI returned an unexpected format. Please try again.';
+      this.predictions = [];
+      this.aiSummary   = '';
+    }
   }
 }
