@@ -31,6 +31,7 @@ import { NotFoundComponent } from '../Components/not-found/not-found.component';
 import { AiSymptomChecker } from '../Components/Patient/ai-symptom-checker/ai-symptom-checker.component';
 import { AdminLoginComponent } from '../Components/admin-login/admin-login.component';
 import { AskAgentComponent } from '../Components/ask-agent/ask-agent.component';
+import { TreatmentAnalyticsComponent } from '../Components/admin-login/treatment-analytics/treatment-analytics.component';
 
 
 
@@ -52,6 +53,7 @@ export const routes: Routes = [
   { path: 'payment-cancelled', loadComponent: () => import('../Components/Patient/payment-cancelled/payment-cancelled.component').then(m => m.PaymentCancelledComponent) },
 
   { path: 'admin', component: DoctorApprovalComponent },
+  {path:'Analytics',component:TreatmentAnalyticsComponent},
 
   // ✅ PATIENT (Protected)
   {

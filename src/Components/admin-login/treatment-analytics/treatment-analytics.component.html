@@ -1,0 +1,298 @@
+<!-- treatment-analytics.component.html -->
+<div class="ta-root">
+
+  <!-- ░░ Topbar ░░ -->
+  <header class="ta-header">
+    <div class="ta-header-left">
+      <div class="ta-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="20" height="20">
+          <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/>
+        </svg>
+      </div>
+      <div>
+        <p class="ta-eyebrow">Admin Panel</p>
+        <h1 class="ta-title">Treatment Analytics</h1>
+      </div>
+    </div>
+
+    <div class="ta-header-right">
+      <div class="ta-search-wrap">
+        <svg class="ta-search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" width="14" height="14">
+          <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input class="ta-search" type="text" placeholder="Search medications…"
+               [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" />
+      </div>
+
+      <select class="ta-select" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+        <option value="demand">Sort: Highest Demand</option>
+        <option value="name">Sort: A → Z</option>
+        <option value="prescriptions">Sort: Most Prescriptions</option>
+      </select>
+
+      <button class="ta-btn-refresh" (click)="load()" [disabled]="loading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" width="14" height="14">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- ░░ KPI Strip ░░ -->
+  <section class="ta-kpi-strip" *ngIf="!loading && !error">
+    <div class="ta-kpi" *ngFor="let k of kpis">
+      <div class="ta-kpi-icon" [style.background]="k.iconBg" [style.color]="k.iconColor">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="17" height="17">
+          <path [attr.d]="k.icon"/>
+        </svg>
+      </div>
+      <div class="ta-kpi-body">
+        <span class="ta-kpi-val">{{ k.value }}</span>
+        <span class="ta-kpi-lbl">{{ k.label }}</span>
+      </div>
+      <span class="ta-kpi-trend" [class.up]="k.trendUp" [class.down]="!k.trendUp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" width="11" height="11">
+          <path [attr.d]="k.trendUp ? 'M18 15l-6-6-6 6' : 'M6 9l6 6 6-6'"/>
+        </svg>
+        {{ k.trend }}
+      </span>
+    </div>
+  </section>
+
+  <!-- ░░ Main Grid ░░ -->
+  <div class="ta-grid" *ngIf="!loading && !error">
+
+    <!-- ── Left col ── -->
+    <div class="ta-col-main">
+
+      <!-- Demand Bar Chart -->
+      <div class="ta-card">
+        <div class="ta-card-head">
+          <div>
+            <h2 class="ta-card-title">Medication Demand</h2>
+            <p class="ta-card-sub">Prescriptions per medication across all records</p>
+          </div>
+          <div class="ta-legend-row">
+            <span class="ta-legend-dot" style="background:#3B82F6"></span>
+            <span class="ta-legend-lbl">Count</span>
+            <span class="ta-legend-dot high-dot"></span>
+            <span class="ta-legend-lbl">High demand</span>
+          </div>
+        </div>
+        <div class="ta-chart-wrap">
+          <div class="ta-bar-group"
+               *ngFor="let item of chartData; let i = index"
+               [style.--delay]="i * 35 + 'ms'">
+            <div class="ta-bar-label" [title]="item.medicationName">{{ item.shortName }}</div>
+            <div class="ta-bar-track">
+              <div class="ta-bar-fill"
+                   [class.bar-high]="item.isHighDemand"
+                   [class.bar-medium]="item.isMediumDemand"
+                   [class.bar-low]="!item.isHighDemand && !item.isMediumDemand"
+                   [style.width.%]="item.pct">
+              </div>
+              <span class="ta-bar-count">{{ item.count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Treatments Table -->
+      <div class="ta-card ta-card--table">
+        <div class="ta-card-head">
+          <div>
+            <h2 class="ta-card-title">All Treatments</h2>
+            <p class="ta-card-sub">{{ filtered.length }} of {{ allStats.length }} medications</p>
+          </div>
+          <div class="ta-filter-tabs">
+            <button class="ta-ftab" [class.active]="filterDemand==='all'"    (click)="setDemandFilter('all')">All</button>
+            <button class="ta-ftab" [class.active]="filterDemand==='high'"   (click)="setDemandFilter('high')">High</button>
+            <button class="ta-ftab" [class.active]="filterDemand==='medium'" (click)="setDemandFilter('medium')">Medium</button>
+            <button class="ta-ftab" [class.active]="filterDemand==='low'"    (click)="setDemandFilter('low')">Low</button>
+          </div>
+        </div>
+
+        <div class="ta-table-wrap">
+          <table class="ta-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Medication Name</th>
+                <th>Prescriptions</th>
+                <th>Market Share</th>
+                <th>Demand</th>
+                <th>Top Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of filtered; let i = index"
+                  class="ta-tr"
+                  [class.ta-tr--high]="s.isHighDemand"
+                  [style.--ri]="i">
+                <td class="ta-td-rank">{{ i + 1 }}</td>
+                <td class="ta-td-name">
+                  <span class="ta-med-dot"
+                        [class.dot-high]="s.isHighDemand"
+                        [class.dot-medium]="s.isMediumDemand"
+                        [class.dot-low]="!s.isHighDemand && !s.isMediumDemand">
+                  </span>
+                  {{ s.medicationName }}
+                </td>
+                <td class="ta-td-count">{{ s.count }}</td>
+                <td class="ta-td-share">
+                  <div class="ta-share-track">
+                    <div class="ta-share-fill"
+                         [class.sfill-high]="s.isHighDemand"
+                         [class.sfill-medium]="s.isMediumDemand"
+                         [class.sfill-low]="!s.isHighDemand && !s.isMediumDemand"
+                         [style.width.%]="s.pct">
+                    </div>
+                  </div>
+                  <span class="ta-share-pct">{{ s.pct | number:'1.1-1' }}%</span>
+                </td>
+                <td class="ta-td-demand">
+                  <span class="ta-demand-badge"
+                        [class.badge-high]="s.isHighDemand"
+                        [class.badge-medium]="s.isMediumDemand"
+                        [class.badge-low]="!s.isHighDemand && !s.isMediumDemand">
+                    {{ s.demandLabel }}
+                  </span>
+                </td>
+                <td class="ta-td-note">{{ s.topNote }}</td>
+              </tr>
+              <tr *ngIf="filtered.length === 0">
+                <td colspan="6" class="ta-td-empty">No medications match your filters.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Right col ── -->
+    <div class="ta-col-side">
+
+      <!-- Top 5 high demand -->
+      <div class="ta-card ta-card--compact">
+        <div class="ta-card-head">
+          <h2 class="ta-card-title">🔥 Top Demand</h2>
+        </div>
+        <div class="ta-rank-list">
+          <div class="ta-rank-item" *ngFor="let s of topHighDemand; let i = index">
+            <span class="ta-rank-num"
+                  [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+              {{ i + 1 }}
+            </span>
+            <div class="ta-rank-body">
+              <span class="ta-rank-name">{{ s.medicationName }}</span>
+              <div class="ta-rank-bar-track">
+                <div class="ta-rank-bar-fill" [style.width.%]="s.pct"></div>
+              </div>
+            </div>
+            <span class="ta-rank-count">{{ s.count }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demand split donut -->
+      <div class="ta-card ta-card--compact">
+        <div class="ta-card-head">
+          <h2 class="ta-card-title">Demand Split</h2>
+        </div>
+        <div class="ta-donut-wrap">
+          <svg viewBox="0 0 120 120" class="ta-donut-svg">
+            <circle class="ta-donut-seg seg-high"
+                    cx="60" cy="60" r="45"
+                    [attr.stroke-dasharray]="donut.high + ' ' + (283 - donut.high)"
+                    stroke-dashoffset="0"/>
+            <circle class="ta-donut-seg seg-medium"
+                    cx="60" cy="60" r="45"
+                    [attr.stroke-dasharray]="donut.medium + ' ' + (283 - donut.medium)"
+                    [attr.stroke-dashoffset]="'-' + donut.high"/>
+            <circle class="ta-donut-seg seg-low"
+                    cx="60" cy="60" r="45"
+                    [attr.stroke-dasharray]="donut.low + ' ' + (283 - donut.low)"
+                    [attr.stroke-dashoffset]="'-' + (donut.high + donut.medium)"/>
+            <text x="60" y="56" class="ta-donut-big">{{ allStats.length }}</text>
+            <text x="60" y="70" class="ta-donut-small">Drugs</text>
+          </svg>
+          <div class="ta-donut-legend">
+            <div class="ta-dl-row">
+              <span class="ta-dl-dot dot-h"></span>
+              <span class="ta-dl-lbl">High</span>
+              <span class="ta-dl-val">{{ demandCounts.high }}</span>
+            </div>
+            <div class="ta-dl-row">
+              <span class="ta-dl-dot dot-m"></span>
+              <span class="ta-dl-lbl">Medium</span>
+              <span class="ta-dl-val">{{ demandCounts.medium }}</span>
+            </div>
+            <div class="ta-dl-row">
+              <span class="ta-dl-dot dot-l"></span>
+              <span class="ta-dl-lbl">Low</span>
+              <span class="ta-dl-val">{{ demandCounts.low }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Common notes -->
+      <div class="ta-card ta-card--compact">
+        <div class="ta-card-head">
+          <h2 class="ta-card-title">Common Instructions</h2>
+          <p class="ta-card-sub">Most frequent usage notes</p>
+        </div>
+        <div class="ta-notes-list">
+          <div class="ta-note-item" *ngFor="let n of topNotes; let i = index">
+            <span class="ta-note-rank">{{ i + 1 }}</span>
+            <span class="ta-note-text">{{ n.note }}</span>
+            <span class="ta-note-count">×{{ n.count }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low activity alert -->
+      <div class="ta-card ta-card--alert" *ngIf="underused.length > 0">
+        <div class="ta-card-head">
+          <h2 class="ta-card-title">⚠ Low Activity</h2>
+          <p class="ta-card-sub">Single-prescription medications</p>
+        </div>
+        <div class="ta-underused-list">
+          <span class="ta-underused-chip" *ngFor="let u of underused">
+            {{ u.medicationName }}
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ░░ Loading ░░ -->
+  <div class="ta-loading" *ngIf="loading">
+    <div class="ta-loading-bars">
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <p>Loading treatment data…</p>
+  </div>
+
+  <!-- ░░ Error ░░ -->
+  <div class="ta-error" *ngIf="error && !loading">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" width="32" height="32">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 8v4M12 16h.01"/>
+    </svg>
+    <p>{{ error }}</p>
+    <button class="ta-btn-refresh" (click)="load()">Retry</button>
+  </div>
+
+</div>

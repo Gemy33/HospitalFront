@@ -2,6 +2,7 @@ import { Component, computed, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AddAdmin, AdminService, Doctor, Gender } from '../../Core/admin.service';
+import { RouterLink } from '@angular/router';
 
 type Tab = 'overview' | 'doctors' | 'admins';
 type ModalMode = 'add' | 'edit';
@@ -9,7 +10,7 @@ type ModalMode = 'add' | 'edit';
 @Component({
   selector: 'app-doctor-approval',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,RouterLink],
   templateUrl: './doctor-approval.component.html',
   styleUrls: ['./doctor-approval.component.scss']
 })
