@@ -1,22 +1,27 @@
 /* ── Tokens ────────────────────────────────────────────────── */
 :host {
-  --bg:        #0d1117;
-  --surface:   #161b25;
-  --surface-2: #1c2333;
-  --border:    rgba(255,255,255,0.07);
-  --border-2:  rgba(255,255,255,0.13);
-  --blue:      #3b9eff;
-  --blue-bg:   rgba(59,158,255,0.09);
-  --blue-bd:   rgba(59,158,255,0.22);
-  --red:       #f87171;
-  --red-bg:    rgba(248,113,113,0.09);
-  --red-bd:    rgba(248,113,113,0.22);
-  --t1:        #e6edf3;
-  --t2:        #7d8ea1;
-  --t3:        #3d4f62;
-  --font:      'Sora', system-ui, sans-serif;
-  --radius:    14px;
-  --radius-sm:  9px;
+  --bg:        #f8fafc;
+  --surface:   #ffffff;
+  --surface-2: #f1f5f9;
+
+  --border:    rgba(15,23,42,.08);
+  --border-2:  rgba(15,23,42,.14);
+
+  --blue:      #2563eb;
+  --blue-bg:   rgba(37,99,235,.08);
+  --blue-bd:   rgba(37,99,235,.20);
+
+  --red:       #dc2626;
+  --red-bg:    rgba(220,38,38,.08);
+  --red-bd:    rgba(220,38,38,.18);
+
+  --t1:        #0f172a;
+  --t2:        #475569;
+  --t3:        #94a3b8;
+
+  --font: 'Sora', system-ui, sans-serif;
+  --radius: 14px;
+  --radius-sm: 9px;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
@@ -47,8 +52,11 @@
 .al-orb--1 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle,
-    rgba(59,158,255,0.08) 0%, transparent 70%);
+ background: radial-gradient(
+    circle,
+    rgba(37,99,235,.12) 0%,
+    transparent 70%
+  );
   top: -150px;
   left: -100px;
 }
@@ -56,8 +64,11 @@
 .al-orb--2 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle,
-    rgba(52,211,153,0.05) 0%, transparent 70%);
+ background: radial-gradient(
+    circle,
+    rgba(16,185,129,.10) 0%,
+    transparent 70%
+  );
   bottom: -100px;
   right: -80px;
 }
@@ -75,7 +86,9 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+   box-shadow:
+    0 10px 30px rgba(15,23,42,.08),
+    0 2px 8px rgba(15,23,42,.04);
   animation: al-in 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 
@@ -204,8 +217,8 @@
 .al-input {
   width: 100%;
   box-sizing: border-box;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
   border-radius: var(--radius-sm);
   color: var(--t1);
   font-family: var(--font);
