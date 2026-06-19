@@ -5,9 +5,10 @@ import {
   FormBuilder, FormGroup, FormArray, Validators
 } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { OPENROUTER_KEY_ai } from '../../../Core/openRouterKey';
 
 
-const OPENROUTER_KEY = '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';
+const OPENROUTER_KEY = OPENROUTER_KEY_ai;
 
 type ActiveTab = 'create' | 'all' | 'find';
 

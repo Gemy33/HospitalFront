@@ -1,0 +1,497 @@
+<!-- prescription-analytics.component.html -->
+<div class="pa-root">
+
+  <!-- ░░ Header ░░ -->
+  <header class="pa-header">
+    <div class="pa-header-left">
+      <div class="pa-header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+             width="20" height="20">
+          <path d="M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2z"/>
+          <path d="M15 9v10a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2z"/>
+          <path d="M9 5v2M15 5v2M9 3h6"/>
+        </svg>
+      </div>
+      <div>
+        <p class="pa-eyebrow">Admin Intelligence</p>
+        <h1 class="pa-title">Prescription Analytics</h1>
+      </div>
+    </div>
+
+    <div class="pa-header-right">
+      <!-- Time range selector -->
+      <div class="pa-range-tabs">
+        <button class="pa-rtab"
+                [class.pa-rtab--active]="timeRange === 'all'"
+                (click)="setTimeRange('all')">All Time</button>
+        <button class="pa-rtab"
+                [class.pa-rtab--active]="timeRange === 'year'"
+                (click)="setTimeRange('year')">Last Year</button>
+        <button class="pa-rtab"
+                [class.pa-rtab--active]="timeRange === 'month'"
+                (click)="setTimeRange('month')">Last Month</button>
+      </div>
+
+      <button class="pa-btn-refresh" (click)="load()" [disabled]="loading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.2" stroke-linecap="round" width="14" height="14">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- ░░ Loading ░░ -->
+  <div class="pa-loading" *ngIf="loading">
+    <div class="pa-loading-bars">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <p>Loading prescription data…</p>
+  </div>
+
+  <!-- ░░ Error ░░ -->
+  <div class="pa-error" *ngIf="error && !loading">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" width="28" height="28">
+      <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+    </svg>
+    <p>{{ error }}</p>
+    <button class="pa-btn-outline" (click)="load()">Retry</button>
+  </div>
+
+  <!-- ░░ Main content ░░ -->
+  <div class="pa-content" *ngIf="!loading && !error">
+
+    <!-- ── KPI Strip ── -->
+    <section class="pa-kpi-strip">
+      <div class="pa-kpi" *ngFor="let k of kpis">
+        <div class="pa-kpi-icon" [style.background]="k.bg" [style.color]="k.color">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+               width="18" height="18">
+            <path [attr.d]="k.icon"/>
+          </svg>
+        </div>
+        <div class="pa-kpi-body">
+          <span class="pa-kpi-val">{{ k.value }}</span>
+          <span class="pa-kpi-lbl">{{ k.label }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Row 1: Top diseases + Gender split ── -->
+    <div class="pa-row pa-row--2col">
+
+      <!-- Top Diagnoses -->
+      <div class="pa-card">
+        <div class="pa-card-head">
+          <div>
+            <h2 class="pa-card-title">Top Diagnoses</h2>
+            <p class="pa-card-sub">Most frequent conditions across all prescriptions</p>
+          </div>
+        </div>
+        <div class="pa-bar-list">
+          <div class="pa-bar-item"
+               *ngFor="let d of topDiagnoses; let i = index"
+               [style.--bi]="i">
+            <div class="pa-bar-meta">
+              <span class="pa-bar-rank">{{ (i+1).toString().padStart(2,'0') }}</span>
+              <span class="pa-bar-name">{{ d.name }}</span>
+              <span class="pa-bar-count">{{ d.count }}</span>
+            </div>
+            <div class="pa-bar-track">
+              <div class="pa-bar-fill"
+                   [style.width.%]="d.pct"
+                   [class.pa-bf--1]="i===0"
+                   [class.pa-bf--2]="i===1"
+                   [class.pa-bf--3]="i===2"
+                   [class.pa-bf--rest]="i>2">
+              </div>
+            </div>
+          </div>
+          <div class="pa-empty-inline" *ngIf="topDiagnoses.length === 0">No diagnosis data.</div>
+        </div>
+      </div>
+
+      <!-- Gender Split -->
+      <div class="pa-card pa-card--split">
+        <div class="pa-card-head">
+          <h2 class="pa-card-title">Patient Gender Split</h2>
+          <p class="pa-card-sub">Prescriptions by gender</p>
+        </div>
+        <div class="pa-donut-section">
+          <div class="pa-donut-wrap">
+            <svg viewBox="0 0 120 120" width="130" height="130"
+                 style="transform:rotate(-90deg)">
+              <circle cx="60" cy="60" r="48" fill="none"
+                      stroke="rgba(0,0,0,0.06)" stroke-width="16"/>
+              <circle cx="60" cy="60" r="48" fill="none"
+                      stroke="#3B82F6" stroke-width="16"
+                      stroke-linecap="round"
+                      [attr.stroke-dasharray]="genderDonut.maleDash + ' ' + genderDonut.rest"
+                      stroke-dashoffset="0"/>
+              <circle cx="60" cy="60" r="48" fill="none"
+                      stroke="#EC4899" stroke-width="16"
+                      stroke-linecap="round"
+                      [attr.stroke-dasharray]="genderDonut.femaleDash + ' ' + genderDonut.rest"
+                      [attr.stroke-dashoffset]="'-' + genderDonut.maleDash"/>
+            </svg>
+            <div class="pa-donut-center">
+              <span class="pa-donut-big">{{ genderStats.total }}</span>
+              <span class="pa-donut-lbl">Total</span>
+            </div>
+          </div>
+          <div class="pa-gender-legend">
+            <div class="pa-gl-row">
+              <span class="pa-gl-dot" style="background:#3B82F6"></span>
+              <span class="pa-gl-label">Male</span>
+              <span class="pa-gl-val">{{ genderStats.male }} ({{ genderStats.malePct }}%)</span>
+            </div>
+            <div class="pa-gl-row">
+              <span class="pa-gl-dot" style="background:#EC4899"></span>
+              <span class="pa-gl-label">Female</span>
+              <span class="pa-gl-val">{{ genderStats.female }} ({{ genderStats.femalePct }}%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gender × disease breakdown -->
+        <div class="pa-gender-diseases" *ngIf="genderDiseases.male.length || genderDiseases.female.length">
+          <div class="pa-gd-col">
+            <p class="pa-gd-title" style="color:#3B82F6">♂ Male Top Conditions</p>
+            <div class="pa-gd-item" *ngFor="let d of genderDiseases.male">
+              <span class="pa-gd-name">{{ d.name }}</span>
+              <span class="pa-gd-cnt">{{ d.count }}</span>
+            </div>
+          </div>
+          <div class="pa-gd-divider"></div>
+          <div class="pa-gd-col">
+            <p class="pa-gd-title" style="color:#EC4899">♀ Female Top Conditions</p>
+            <div class="pa-gd-item" *ngFor="let d of genderDiseases.female">
+              <span class="pa-gd-name">{{ d.name }}</span>
+              <span class="pa-gd-cnt">{{ d.count }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Row 2: Age distribution + Top medications ── -->
+    <div class="pa-row pa-row--2col">
+
+      <!-- Age Group Distribution -->
+      <div class="pa-card">
+        <div class="pa-card-head">
+          <h2 class="pa-card-title">Disease by Age Group</h2>
+          <p class="pa-card-sub">Common conditions per age bracket</p>
+        </div>
+        <div class="pa-age-grid">
+          <div class="pa-age-band" *ngFor="let ag of ageBands">
+            <div class="pa-age-header">
+              <span class="pa-age-range">{{ ag.label }}</span>
+              <span class="pa-age-count">{{ ag.total }} patients</span>
+            </div>
+            <div class="pa-age-diseases">
+              <span class="pa-age-chip" *ngFor="let d of ag.topDiseases">
+                {{ d.name }}
+                <span class="pa-age-chip-n">×{{ d.count }}</span>
+              </span>
+              <span class="pa-age-empty" *ngIf="ag.topDiseases.length === 0">No data</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Medications -->
+      <div class="pa-card">
+        <div class="pa-card-head">
+          <h2 class="pa-card-title">Top Medications</h2>
+          <p class="pa-card-sub">Most prescribed drugs in this period</p>
+        </div>
+        <div class="pa-med-list">
+          <div class="pa-med-item" *ngFor="let m of topMedications; let i = index">
+            <span class="pa-med-num"
+                  [class.gold]="i===0" [class.silver]="i===1" [class.bronze]="i===2">
+              {{ i + 1 }}
+            </span>
+            <div class="pa-med-body">
+              <span class="pa-med-name">{{ m.name }}</span>
+              <div class="pa-med-track">
+                <div class="pa-med-fill" [style.width.%]="m.pct"></div>
+              </div>
+            </div>
+            <span class="pa-med-count">{{ m.count }}</span>
+          </div>
+          <div class="pa-empty-inline" *ngIf="topMedications.length === 0">No medication data.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Row 3: City/Address map + Monthly trend ── -->
+    <div class="pa-row pa-row--2col">
+
+      <!-- Geographic distribution -->
+      <div class="pa-card">
+        <div class="pa-card-head">
+          <h2 class="pa-card-title">Geographic Distribution</h2>
+          <p class="pa-card-sub">Prescriptions by city with top condition</p>
+        </div>
+        <div class="pa-city-list">
+          <div class="pa-city-item" *ngFor="let c of cityStats; let i = index"
+               [style.--ci]="i">
+            <div class="pa-city-left">
+              <span class="pa-city-dot"></span>
+              <div>
+                <span class="pa-city-name">{{ c.city }}, {{ c.country }}</span>
+                <span class="pa-city-top">Top: {{ c.topDisease }}</span>
+              </div>
+            </div>
+            <div class="pa-city-right">
+              <span class="pa-city-count">{{ c.count }}</span>
+              <div class="pa-city-bar-wrap">
+                <div class="pa-city-bar" [style.width.%]="c.pct"></div>
+              </div>
+            </div>
+          </div>
+          <div class="pa-empty-inline" *ngIf="cityStats.length === 0">No geographic data.</div>
+        </div>
+      </div>
+
+      <!-- Specialty breakdown -->
+      <div class="pa-card">
+        <div class="pa-card-head">
+          <h2 class="pa-card-title">Doctor Speciality Breakdown</h2>
+          <p class="pa-card-sub">Which specialities issue most prescriptions</p>
+        </div>
+        <div class="pa-spec-list">
+          <div class="pa-spec-item" *ngFor="let s of specialityStats; let i = index">
+            <div class="pa-spec-meta">
+              <span class="pa-spec-name">{{ s.name }}</span>
+              <span class="pa-spec-pct">{{ s.pct | number:'1.0-0' }}%</span>
+            </div>
+            <div class="pa-spec-track">
+              <div class="pa-spec-fill" [style.width.%]="s.pct"
+                   [style.background]="s.color">
+              </div>
+            </div>
+            <span class="pa-spec-count">{{ s.count }} Rx</span>
+          </div>
+          <div class="pa-empty-inline" *ngIf="specialityStats.length === 0">No data.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AI Forecast Panel ── -->
+    <div class="pa-ai-section">
+
+      <!-- Trigger card (before analysis) -->
+      <div class="pa-ai-trigger" *ngIf="!aiLoading && !aiResult && !aiError">
+        <div class="pa-ai-trigger-left">
+          <div class="pa-ai-orb">
+            <div class="pa-ai-orb-core">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.5" stroke-linecap="round" width="22" height="22">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            </div>
+            <div class="pa-ai-ring r1"></div>
+            <div class="pa-ai-ring r2"></div>
+          </div>
+          <div>
+            <h3 class="pa-ai-trigger-title">AI Disease Forecast</h3>
+            <p class="pa-ai-trigger-sub">
+              Analyze {{ filteredPrescriptions.length }} prescriptions with AI to predict
+              future disease trends, risk populations, and prevention priorities.
+            </p>
+            <div class="pa-ai-pills">
+              <span>Future Trends</span>
+              <span>Risk Groups</span>
+              <span>Prevention Tips</span>
+              <span>At-Risk Ages</span>
+            </div>
+          </div>
+        </div>
+        <button class="pa-btn-ai" (click)="runAiForecast()"
+                [disabled]="filteredPrescriptions.length === 0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" width="15" height="15">
+            <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+          Run AI Forecast
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div class="pa-ai-loading" *ngIf="aiLoading">
+        <div class="pa-ai-spinner-orb">
+          <div class="pa-ai-orb-core big">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.4" stroke-linecap="round" width="28" height="28">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+          </div>
+          <div class="pa-ai-ring r1"></div>
+          <div class="pa-ai-ring r2"></div>
+          <div class="pa-ai-ring r3"></div>
+        </div>
+        <p class="pa-ai-loading-text">
+          Forecasting disease trends
+          <span class="pa-dots"><span></span><span></span><span></span></span>
+        </p>
+        <p class="pa-ai-loading-sub">Analyzing {{ filteredPrescriptions.length }} prescriptions across {{ cityStats.length }} cities</p>
+      </div>
+
+      <!-- Error -->
+      <div class="pa-ai-error" *ngIf="aiError && !aiLoading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" width="16" height="16">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+        </svg>
+        <div>
+          <strong>AI analysis failed</strong>
+          <p>{{ aiError }}</p>
+        </div>
+        <button class="pa-btn-outline" (click)="runAiForecast()">Retry</button>
+        <button class="pa-btn-outline" (click)="resetAi()">Dismiss</button>
+      </div>
+
+      <!-- AI Results -->
+      <div class="pa-ai-results" *ngIf="aiResult && !aiLoading">
+        <div class="pa-ai-results-header">
+          <div class="pa-ai-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" width="11" height="11">
+              <path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            AI Health Forecast
+          </div>
+          <p class="pa-ai-results-meta">
+            Based on {{ filteredPrescriptions.length }} prescriptions ·
+            {{ timeRange === 'all' ? 'All time' : timeRange === 'year' ? 'Last 12 months' : 'Last 30 days' }}
+          </p>
+          <button class="pa-btn-outline pa-btn-sm" (click)="resetAi()">
+            ✕ Close
+          </button>
+        </div>
+
+        <!-- Summary -->
+        <div class="pa-ai-summary" *ngIf="aiResult.summary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+               width="14" height="14">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>{{ aiResult.summary }}</p>
+        </div>
+
+        <!-- Future diseases grid -->
+        <div class="pa-ai-block" *ngIf="aiResult.futureDiseases?.length">
+          <h4 class="pa-ai-block-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" width="13" height="13">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Predicted Future Diseases
+          </h4>
+          <div class="pa-disease-grid">
+            <div class="pa-disease-card"
+                 *ngFor="let d of aiResult.futureDiseases; let i = index"
+                 [class.pa-dc--high]="d.risk==='high'"
+                 [class.pa-dc--medium]="d.risk==='medium'"
+                 [class.pa-dc--low]="d.risk==='low'"
+                 [style.--di]="i">
+              <div class="pa-dc-top">
+                <span class="pa-dc-num">{{ (i+1).toString().padStart(2,'0') }}</span>
+                <span class="pa-dc-risk"
+                      [class.r-high]="d.risk==='high'"
+                      [class.r-medium]="d.risk==='medium'"
+                      [class.r-low]="d.risk==='low'">
+                  {{ d.risk }} risk
+                </span>
+              </div>
+              <h5 class="pa-dc-name">{{ d.name }}</h5>
+              <p class="pa-dc-reason">{{ d.reason }}</p>
+              <div class="pa-dc-prob-row">
+                <div class="pa-dc-track">
+                  <div class="pa-dc-fill"
+                       [class.pf-high]="d.risk==='high'"
+                       [class.pf-medium]="d.risk==='medium'"
+                       [class.pf-low]="d.risk==='low'"
+                       [style.width.%]="d.probability">
+                  </div>
+                </div>
+                <span class="pa-dc-pct">{{ d.probability }}%</span>
+              </div>
+              <div class="pa-dc-tip" *ngIf="d.prevention">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" width="10" height="10">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {{ d.prevention }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- At-risk groups -->
+        <div class="pa-ai-block" *ngIf="aiResult.atRiskGroups?.length">
+          <h4 class="pa-ai-block-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" width="13" height="13">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            At-Risk Population Groups
+          </h4>
+          <div class="pa-risk-group-list">
+            <div class="pa-rg-item" *ngFor="let g of aiResult.atRiskGroups">
+              <div class="pa-rg-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" width="14" height="14">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div class="pa-rg-body">
+                <span class="pa-rg-label">{{ g.group }}</span>
+                <span class="pa-rg-desc">{{ g.description }}</span>
+              </div>
+              <span class="pa-rg-urgency"
+                    [class.urg-high]="g.urgency==='high'"
+                    [class.urg-medium]="g.urgency==='medium'"
+                    [class.urg-low]="g.urgency==='low'">
+                {{ g.urgency }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prevention priorities -->
+        <div class="pa-ai-block" *ngIf="aiResult.preventionPriorities?.length">
+          <h4 class="pa-ai-block-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" width="13" height="13">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+            </svg>
+            Prevention Priorities
+          </h4>
+          <div class="pa-prev-list">
+            <div class="pa-prev-item" *ngFor="let p of aiResult.preventionPriorities; let i=index">
+              <span class="pa-prev-num">{{ i+1 }}</span>
+              <span class="pa-prev-text">{{ p }}</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="pa-ai-disclaimer">
+          ⚕ AI-generated forecast for administrative insight only. Not a substitute for clinical judgment.
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /pa-content -->
+</div>

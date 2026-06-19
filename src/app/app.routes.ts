@@ -32,6 +32,7 @@ import { AiSymptomChecker } from '../Components/Patient/ai-symptom-checker/ai-sy
 import { AdminLoginComponent } from '../Components/admin-login/admin-login.component';
 import { AskAgentComponent } from '../Components/ask-agent/ask-agent.component';
 import { TreatmentAnalyticsComponent } from '../Components/admin-login/treatment-analytics/treatment-analytics.component';
+import { PrescriptionAnalyticsComponent } from '../Components/admin-login/prescription-analytics/prescription-analytics.component';
 
 
 
@@ -54,6 +55,7 @@ export const routes: Routes = [
 
   { path: 'admin', component: DoctorApprovalComponent },
   {path:'Analytics',component:TreatmentAnalyticsComponent},
+  {path:"PAnalytics",component:PrescriptionAnalyticsComponent},
 
   // ✅ PATIENT (Protected)
   {

@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
+import { OPENROUTER_KEY_ai } from '../../Core/openRouterKey';
 
 // ── Interfaces ─────────────────────────────────────────────────────────────────
 
@@ -54,9 +55,9 @@ export class AskAgentComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   // ── OpenRouter config ───────────────────────────────────────────────────────
   // Replace API_KEY with your own key
-  private readonly API_KEY   = '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';
+  private readonly API_KEY   = OPENROUTER_KEY_ai;
   private readonly API_URL   = 'https://openrouter.ai/api/v1/chat/completions';
-  private readonly MODEL     = 'openai/gpt-3.5-turbo';
+  private readonly MODEL     = 'openai/gpt-oss-20b:free';
   private readonly MAX_TOKENS = 1024;
 
   // ── System prompt ───────────────────────────────────────────────────────────
