@@ -11,7 +11,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { cwd } from 'node:process';
 import { Token } from '@angular/compiler';
 
@@ -21,7 +21,7 @@ export type AuthTab  = 'login' | 'register';
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule,RouterLink],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.css',
 })

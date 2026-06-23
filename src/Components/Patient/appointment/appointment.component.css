@@ -781,3 +781,355 @@
     color: var(--bg);
   }
 }
+/* ══════════════════════════════════════════════
+   PRESCRIPTION SIDEBAR  — add to existing CSS
+══════════════════════════════════════════════ */
+
+/* Overlay */
+.ap-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+}
+
+/* Sidebar panel */
+.ap-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  max-width: 100vw;
+  height: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--border-2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.5);
+  /* start off screen */
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ap-sidebar.open {
+  transform: translateX(0);
+}
+
+/* ── Sidebar header ── */
+.ap-sb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface-2);
+}
+
+.ap-sb-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ap-sb-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ap-sb-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--t1);
+  margin: 0 0 2px;
+  letter-spacing: -0.2px;
+}
+
+.ap-sb-sub {
+  font-size: 11.5px;
+  color: var(--t2);
+  margin: 0;
+}
+
+.ap-sb-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--t2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.ap-sb-close:hover {
+  background: var(--red-bg);
+  color: var(--red);
+  border-color: var(--red-bd);
+}
+
+/* ── Loading ── */
+.ap-sb-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 52px 24px;
+  color: var(--t2);
+  font-size: 13.5px;
+  flex: 1;
+}
+
+/* ── Empty ── */
+.ap-sb-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 52px 24px;
+  color: var(--t2);
+  font-size: 13.5px;
+  text-align: center;
+  flex: 1;
+}
+
+.ap-sb-empty svg { opacity: 0.3; }
+.ap-sb-empty p   { margin: 0; }
+
+/* ── Scrollable body ── */
+.ap-sb-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.ap-sb-body::-webkit-scrollbar       { width: 4px; }
+.ap-sb-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── Doctor card ── */
+.ap-sb-doctor-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.ap-sb-doc-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  color: var(--blue);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ap-sb-doc-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ap-sb-doc-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ap-sb-doc-spec {
+  font-size: 12px;
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.ap-sb-rx-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid var(--green-bd);
+  border-radius: 20px;
+  padding: 3px 9px;
+  flex-shrink: 0;
+}
+
+/* ── Section ── */
+.ap-sb-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ap-sb-section-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--t3);
+  margin: 0;
+}
+
+.ap-sb-section-label svg { flex-shrink: 0; }
+
+/* ── Diagnosis box ── */
+.ap-sb-diagnosis-box {
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-left: 3px solid #8b5cf6;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  color: var(--t1);
+  line-height: 1.65;
+}
+
+/* ── AI box ── */
+.ap-sb-ai-box {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: var(--t2);
+  line-height: 1.65;
+}
+
+.ap-sb-ai-label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: var(--blue);
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-bd);
+  border-radius: 4px;
+  padding: 2px 5px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Treatments list ── */
+.ap-sb-treatments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ap-sb-treatment {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  transition: border-color 0.15s;
+  animation: ap-in 0.28s ease both;
+  animation-delay: calc(var(--ti, 0) * 50ms);
+}
+
+.ap-sb-treatment:hover {
+  border-color: var(--border-2);
+}
+
+.ap-sb-med-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-bd);
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ap-sb-med-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ap-sb-med-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--t1);
+}
+
+.ap-sb-med-notes {
+  font-size: 12px;
+  color: var(--t2);
+  line-height: 1.5;
+}
+
+.ap-sb-med-num {
+  font-size: 11px;
+  color: var(--t3);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── No treatments ── */
+.ap-sb-no-treatments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--t2);
+  font-size: 13px;
+  text-align: center;
+}
+
+.ap-sb-no-treatments svg { opacity: 0.3; }
+.ap-sb-no-treatments p   { margin: 0; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .ap-sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border-2); }
+}

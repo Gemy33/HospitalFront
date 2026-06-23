@@ -55,6 +55,7 @@
          RIGHT PANEL
     ═══════════════════════════════════ -->
     <section class="panel-right">
+       
 
       <!-- Tabs -->
       <div class="tabs">
@@ -129,6 +130,11 @@
             <div class="forgot-row">
               <a href="#" class="forgot-link">Forgot password?</a>
             </div>
+            <div style="text-align:center;margin-bottom:20px">
+  <a routerLink="/admin-login" class="forgot-link">
+    Login as Admin
+  </a>
+</div>
 
             <button type="submit" class="btn-submit"
               [class.btn-submit--doctor]="loginRole === 'doctor'"

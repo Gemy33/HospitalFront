@@ -64,9 +64,7 @@
         <path d="M16 2v4M8 2v4M3 10h18"/>
       </svg>
       <p>No appointments found.</p>
-      <button class="ap-btn-outline" (click)="findDoctor()">
-        Browse Doctors
-      </button>
+      <button class="ap-btn-outline" (click)="findDoctor()">Browse Doctors</button>
     </div>
 
     <!-- Legend -->
@@ -92,13 +90,10 @@
     </div>
 
     <!-- Cards -->
-    <div
-      class="ap-card"
-      *ngFor="let apt of all(); let i = index"
-      [ngClass]="cardClass(apt)"
-      [style.--ci]="i"
-    >
-
+    <div class="ap-card"
+         *ngFor="let apt of all(); let i = index"
+         [ngClass]="cardClass(apt)"
+         [style.--ci]="i">
 
       <!-- Live banner -->
       <div class="ap-live-banner" *ngIf="isLive(apt)">
@@ -111,8 +106,7 @@
            *ngIf="isSoon(apt) && !isLive(apt) && apt.status !== 3">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" width="13" height="13">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 6v6l4 2"/>
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
         </svg>
         Starting in {{ countdown(apt) }}
       </div>
@@ -131,8 +125,7 @@
       <div class="ap-pending-banner" *ngIf="apt.status === 0 && !isPast(apt)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" width="13" height="13">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 6v6l4 2"/>
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
         </svg>
         Awaiting payment confirmation
       </div>
@@ -141,8 +134,7 @@
       <div class="ap-cancelled-banner" *ngIf="apt.status === 3">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" width="13" height="13">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M15 9l-6 6M9 9l6 6"/>
+          <circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/>
         </svg>
         Appointment cancelled
       </div>
@@ -152,30 +144,21 @@
 
         <!-- Date column -->
         <div class="ap-date-col">
-          <span class="ap-day-name">
-            {{ formatDay(apt.doctorAvailability.availableFrom) }}
-          </span>
-          <span class="ap-day-num">
-            {{ formatDayNum(apt.doctorAvailability.availableFrom) }}
-          </span>
-          <span class="ap-month">
-            {{ formatMonth(apt.doctorAvailability.availableFrom) }}
-          </span>
+          <span class="ap-day-name">{{ formatDay(apt.doctorAvailability.availableFrom) }}</span>
+          <span class="ap-day-num">{{ formatDayNum(apt.doctorAvailability.availableFrom) }}</span>
+          <span class="ap-month">{{ formatMonth(apt.doctorAvailability.availableFrom) }}</span>
         </div>
 
         <!-- Main info -->
         <div class="ap-info">
 
-          <!-- Top row: doctor + status chip -->
           <div class="ap-info-top">
             <div class="ap-doc-row">
               <div class="ap-doc-avatar">
                 {{ getDoctorInitials(apt.doctorAvailability.doctorId) }}
               </div>
               <div class="ap-doc-text">
-                <span class="ap-doc-name">
-                  Doctor #{{ apt.doctorAvailability.doctorId }}
-                </span>
+                <span class="ap-doc-name">Doctor #{{ apt.doctorAvailability.doctorId }}</span>
                 <span class="ap-doc-type">In-Clinic Consultation</span>
               </div>
             </div>
@@ -184,9 +167,7 @@
             </span>
           </div>
 
-          <!-- Details -->
           <div class="ap-details">
-
             <div class="ap-detail-row">
               <span class="ap-detail-label">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -205,19 +186,15 @@
               <span class="ap-detail-label">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="1.8" stroke-linecap="round" width="13" height="13">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
+                  <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
                 </svg>
                 Time
               </span>
               <span class="ap-detail-val ap-detail-val--blue">
                 {{ formatTime(apt.doctorAvailability.availableFrom) }}
                 <span class="ap-time-sep">→</span>
-                {{ endTime(apt.doctorAvailability.availableFrom,
-                           apt.doctorAvailability.sessionDurationMinutes) }}
-                <span class="ap-duration">
-                  ({{ apt.doctorAvailability.sessionDurationMinutes }} min)
-                </span>
+                {{ endTime(apt.doctorAvailability.availableFrom, apt.doctorAvailability.sessionDurationMinutes) }}
+                <span class="ap-duration">({{ apt.doctorAvailability.sessionDurationMinutes }} min)</span>
               </span>
             </div>
 
@@ -235,132 +212,210 @@
               </span>
             </div>
 
-            <!-- Countdown — only for confirmed future appointments -->
             <div class="ap-detail-row"
                  *ngIf="apt.status === 1 && minutesUntilStart(apt) > 0 && !isLive(apt)">
               <span class="ap-detail-label">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="1.8" stroke-linecap="round" width="13" height="13">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 6v6l4 2"/>
+                  <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
                 </svg>
                 Starts in
               </span>
-              <span class="ap-detail-val"
-                    [class.ap-detail-val--amber]="isSoon(apt)">
+              <span class="ap-detail-val" [class.ap-detail-val--amber]="isSoon(apt)">
                 {{ countdown(apt) }}
               </span>
             </div>
-
           </div>
 
           <!-- Actions -->
           <div class="ap-actions">
 
-            <!-- Join meeting button -->
-            <button
-              class="ap-btn-join"
-              [class.ap-btn-join--ready]="isLive(apt)"
-              [disabled]="!isLive(apt)"
-              (click)="joinMeeting(apt)"
-            >
+            <button class="ap-btn-join"
+                    [class.ap-btn-join--ready]="isLive(apt)"
+                    [disabled]="!isLive(apt)"
+                    (click)="joinMeeting(apt)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                    width="16" height="16">
-                <path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.723v6.554
-                         a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h8
-                         a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <path d="M15 10l4.553-2.276A1 1 0 0 1 21 8.723v6.554a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
               </svg>
-
-              <!-- Pending — waiting for payment -->
               <span *ngIf="apt.status === 0">Awaiting Payment</span>
-
-              <!-- Confirmed future — show countdown -->
-              <span *ngIf="apt.status === 1 && !isLive(apt) && minutesUntilStart(apt) > 0">
-                Join in {{ countdown(apt) }}
-              </span>
-
-              <!-- Live — join now -->
+              <span *ngIf="apt.status === 1 && !isLive(apt) && minutesUntilStart(apt) > 0">Join in {{ countdown(apt) }}</span>
               <span *ngIf="isLive(apt)">Join Meeting</span>
-
-              <!-- Completed or cancelled — unavailable -->
               <span *ngIf="apt.status === 2 || apt.status === 3">Unavailable</span>
-
-              <!-- Confirmed but past (edge case) -->
               <span *ngIf="apt.status === 1 && isPast(apt) && !isLive(apt)">Unavailable</span>
             </button>
 
-            <!-- Prescriptions shortcut -->
             <button class="ap-btn-secondary" (click)="viewPrescriptions(apt.id)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
                    width="15" height="15">
-                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10
-                         a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
                 <rect x="9" y="3" width="6" height="4" rx="2"/>
                 <path d="M9 12h6M9 16h4"/>
               </svg>
               Prescriptions
             </button>
 
-                <button
-  class="ap-btn-chat"
-  *ngIf="apt.status === 1 || apt.status === 2"
-  (click)="startChat(apt)"
->
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-       stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-       width="15" height="15">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-  Chat with Doctor
-</button>
+            <button class="ap-btn-chat"
+                    *ngIf="apt.status === 1 || apt.status === 2"
+                    (click)="startChat(apt)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                   width="15" height="15">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              Chat
+            </button>
 
           </div>
         </div>
       </div>
-      <!-- Add this button inside .ap-actions, after the join meeting button -->
 
     </div>
-
   </div>
-  
 </div>
 
-<!-- ░░ Prescription Sidebar ░░ -->
+<!-- ════════════════════════════════════════════
+     PRESCRIPTION SIDEBAR
+════════════════════════════════════════════ -->
+<div class="ap-overlay" *ngIf="showSidebar" (click)="closeSidebar()"></div>
+
 <div class="ap-sidebar" [class.open]="showSidebar">
 
-  <div class="ap-sidebar-header">
-    <h3>Prescription</h3>
-    <button (click)="closeSidebar()">✕</button>
+  <!-- Sidebar header -->
+  <div class="ap-sb-header">
+    <div class="ap-sb-header-left">
+      <div class="ap-sb-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="16" height="16">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="2"/>
+          <path d="M9 12h6M9 16h4"/>
+        </svg>
+      </div>
+      <div>
+        <h3 class="ap-sb-title">Prescription</h3>
+        <p class="ap-sb-sub">Appointment details</p>
+      </div>
+    </div>
+    <button class="ap-sb-close" (click)="closeSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.5" stroke-linecap="round" width="14" height="14">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loadingPrescription" class="ap-sidebar-loading">
-    Loading...
+  <!-- Loading state -->
+  <div class="ap-sb-loading" *ngIf="loadingPrescription">
+    <div class="ap-spinner"><span></span><span></span><span></span></div>
+    <p>Loading prescription…</p>
   </div>
 
-  <!-- Content -->
-  <div *ngIf="!loadingPrescription && prescriptionData">
+  <!-- No data -->
+  <div class="ap-sb-empty" *ngIf="!loadingPrescription && !prescriptionData">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.3" stroke-linecap="round" width="40" height="40">
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+      <rect x="9" y="3" width="6" height="4" rx="2"/>
+    </svg>
+    <p>No prescription found for this appointment.</p>
+  </div>
 
-    <p>
-      <strong>Doctor:</strong>
-      {{ prescriptionData.doctor?.name || 'Unknown' }}
-    </p>
+  <!-- Prescription content -->
+  <div class="ap-sb-body" *ngIf="!loadingPrescription && prescriptionData">
 
-    <p>
-      <strong>Speciality:</strong>
-      {{ prescriptionData.doctor?.speciality || 'Unknown' }}
-    </p>
+    <!-- Doctor card -->
+    <div class="ap-sb-doctor-card">
+      <div class="ap-sb-doc-avatar">
+        {{ prescriptionData.doctor?.name ? prescriptionData.doctor.name.charAt(0).toUpperCase() : 'D' }}
+      </div>
+      <div class="ap-sb-doc-info">
+        <span class="ap-sb-doc-name">
+          Dr. {{ prescriptionData.doctor?.name || 'Unknown Doctor' }}
+        </span>
+        <span class="ap-sb-doc-spec">
+          {{ prescriptionData.doctor?.speciality || 'Specialist' }}
+        </span>
+      </div>
+      <span class="ap-sb-rx-badge">Rx #{{ prescriptionData.id }}</span>
+    </div>
 
-    <div *ngFor="let t of prescriptionData.treatments" class="ap-treatment">
-      <p><strong>Medication:</strong> {{ t.medicationName }}</p>
-      <p><strong>Notes:</strong> {{ t.notes }}</p>
+    <!-- Diagnosis -->
+    <div class="ap-sb-section" *ngIf="prescriptionData.diagnosis">
+      <p class="ap-sb-section-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" width="12" height="12">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
+        Diagnosis
+      </p>
+      <div class="ap-sb-diagnosis-box">
+        {{ prescriptionData.diagnosis }}
+      </div>
+    </div>
+
+    <!-- AI Explanation -->
+    <div class="ap-sb-section"
+         *ngIf="prescriptionData.aiExplanation && prescriptionData.aiExplanation !== 'NO Available Explanation limit exceeded'">
+      <p class="ap-sb-section-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" width="12" height="12">
+          <path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/>
+        </svg>
+        AI Explanation
+      </p>
+      <div class="ap-sb-ai-box">
+        <span class="ap-sb-ai-label">AI</span>
+        {{ prescriptionData.aiExplanation }}
+      </div>
+    </div>
+
+    <!-- Treatments -->
+    <div class="ap-sb-section" *ngIf="prescriptionData.treatments?.length > 0">
+      <p class="ap-sb-section-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" width="12" height="12">
+          <rect x="2" y="6" width="20" height="12" rx="6"/>
+          <path d="M12 6v12"/>
+        </svg>
+        Medications ({{ prescriptionData.treatments.length }})
+      </p>
+      <div class="ap-sb-treatments">
+        <div class="ap-sb-treatment"
+             *ngFor="let t of prescriptionData.treatments; let i = index"
+             [style.--ti]="i">
+          <div class="ap-sb-med-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                 width="14" height="14">
+              <rect x="2" y="6" width="20" height="12" rx="6"/>
+              <path d="M12 6v12"/>
+            </svg>
+          </div>
+          <div class="ap-sb-med-body">
+            <span class="ap-sb-med-name">{{ t.medicationName }}</span>
+            <span class="ap-sb-med-notes">{{ t.notes }}</span>
+          </div>
+          <span class="ap-sb-med-num">#{{ i + 1 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- No treatments fallback -->
+    <div class="ap-sb-section"
+         *ngIf="!prescriptionData.treatments || prescriptionData.treatments.length === 0">
+      <div class="ap-sb-no-treatments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.5" stroke-linecap="round" width="28" height="28">
+          <rect x="2" y="6" width="20" height="12" rx="6"/>
+          <path d="M12 6v12"/>
+        </svg>
+        <p>No medications listed for this prescription.</p>
+      </div>
     </div>
 
   </div>
-
 </div>
-
-<!-- Overlay -->
-<div class="ap-overlay" *ngIf="showSidebar" (click)="closeSidebar()"></div>

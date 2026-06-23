@@ -60,33 +60,32 @@
        
       <button
   class="ad-nav-item"
-  routerLink="/Analytics"
-  [class.ad-nav-item--active]="activeTab() === 'admins'"
-  (click)="setTab('admins')">
+  routerLink="/Analytics">
 
-  <span class="ad-nav-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="1.8" stroke-linecap="round" width="18" height="18">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-    </svg>
-  </span>
+  <!-- Analytics Icon -->
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <path d="M4 20V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M10 20V4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M16 20V14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M22 20V8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>
 
-  <span class="ad-nav-label">Treatment Analytics</span>
+  Treatment Analytics
 </button>
 <button
   class="ad-nav-item"
-  routerLink="/PAnalytics"
-  [class.ad-nav-item--active]="activeTab() === 'admins'"
-  (click)="setTab('admins')">
+  routerLink="/PAnalytics">
 
-  <span class="ad-nav-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="1.8" stroke-linecap="round" width="18" height="18">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-    </svg>
-  </span>
+  <!-- Prescription Icon -->
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+    <rect x="6" y="3" width="12" height="18" rx="2"
+      stroke="currentColor" stroke-width="2"/>
+    <path d="M9 8H15" stroke="currentColor" stroke-width="2"/>
+    <path d="M9 12H15" stroke="currentColor" stroke-width="2"/>
+    <path d="M9 16H13" stroke="currentColor" stroke-width="2"/>
+  </svg>
 
-  <span class="ad-nav-label">Prescription Analytics</span>
+  Prescription Analytics
 </button>
     </nav>
   </aside>
